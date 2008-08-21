@@ -1,0 +1,35 @@
+Glista - A Super-simple to-do list manager
+=============================================================================
+Copyright (c) 2008 Shahar Evron, <shahar@prematureoptimization.org>
+
+Installation Instructions
+-------------------------
+Glista can be installed from source on most GNU/Linux systems easily, by
+running the following commands in the source base directory:
+
+$ ./configure
+$ make
+
+And then switching to 'root' (through 'su' or 'sudo') and running:
+# make install
+
+Glista could then be started by running 'glista'.
+
+It is recommended to add glista to your desktop startup programs. For example
+in GNOME this is done through 'Sessions' in the System -> Preferences menu.
+
+System Requirements
+-------------------
+Glista has been tested and is known to run well on several GNU/Linux 
+distributions, on i386 and x86-64 platforms, but will probably run well on
+other UNIX-like systems.
+
+In order to build glista as described above you will need the following 
+libraries installed:
+- glibc    >= 2.3
+- glib     >= 2.6
+- gtk+     >= 2.2
+- libxml   >= 2.6
+
+You will also need some build tools such as GNU gcc and gtk-builder-convert.
+
