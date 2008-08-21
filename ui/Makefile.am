@@ -8,3 +8,5 @@ EXTRA_DIST = $(ui_DATA)
 %.ui: %.glade 
 	$(GTKBLDRCONV) $< $@
 
+CLEANFILES = *.ui
+

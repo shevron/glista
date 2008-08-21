@@ -145,6 +145,7 @@ ui_DATA = glista.ui \
           glista-icon.svg
 
 EXTRA_DIST = $(ui_DATA)
+CLEANFILES = *.ui
 all: all-am
 
 .SUFFIXES:
@@ -251,6 +252,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
