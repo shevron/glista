@@ -290,6 +290,61 @@ glista_item_text_cell_data_func(GtkTreeViewColumn *column,
 }
 
 /**
+ * glista_list_sort_func:
+ * @model:     Model being sorted
+ * @row_a:     First row to compare
+ * @row_b:     Second row to compare
+ * @user_data: User data passed at connect time
+ *
+ * Callback sorting function for the list of items. Will put pending items 
+ * first, and done items at the bottom. Secondary sorting is done 
+ * alphabetically. 
+ *
+ * Returns: negative if row_a sorts higher, 0 if both are equal, or positive if
+ * row_b sorts first.
+ *
+ * See gtk_tree_sortable_set_sort_func() for more info.
+ */
+gint
+glista_list_sort_func(GtkTreeModel *model, GtkTreeIter *row_a, 
+                      GtkTreeIter *row_b, gpointer user_data)
+{
+	gboolean done_a, done_b; 
+	gint     ret;
+	
+	// First, compare done / not done
+	gtk_tree_model_get(model, row_a, GL_COLUMN_DONE, &done_a, -1);
+	gtk_tree_model_get(model, row_b, GL_COLUMN_DONE, &done_b, -1);
+	
+	// If they are equal, go on to comparing the text
+	if (done_a == done_b) {
+		gchar *text_a, *text_b;
+	
+		gtk_tree_model_get(model, row_a, GL_COLUMN_TEXT, &text_a, -1);
+		gtk_tree_model_get(model, row_b, GL_COLUMN_TEXT, &text_b, -1);
+		
+		if (text_a == NULL || text_b == NULL) {
+			if (text_a == NULL && text_b == NULL) {
+				ret = 0;
+			} else {
+				ret = (text_a == NULL) ? -1 : 1;
+			}
+		} else {
+			ret = g_utf8_collate(text_a, text_b);
+		}
+		
+		g_free(text_a);
+		g_free(text_b);
+
+	// If they are not equal, order the pending tasks on top
+	} else {
+		ret = (done_a ? 1 : 0) - (done_b ? 1 : 0);
+	}
+	
+	return ret;
+}
+
+/**
  * glista_init_list:
  *
  * Initialize the list of items and the view layer to display it.
@@ -327,7 +382,11 @@ void glista_init_list()
 	gtk_tree_view_append_column(treeview, text_column);
 	gtk_tree_view_set_model(treeview, GTK_TREE_MODEL(gl_globs->itemstore));
 	
-	// Set sort column
+	// Set sort function and column
+	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(gl_globs->itemstore), 
+	                                GL_COLUMN_DONE, glista_list_sort_func,
+	                                NULL, NULL);
+	                                
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(gl_globs->itemstore),
 	                                     GL_COLUMN_DONE, GTK_SORT_ASCENDING);
 	                                     
