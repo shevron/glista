@@ -259,6 +259,37 @@ glista_item_free(GlistaItem *item)
 }
 
 /**
+ * glista_item_text_cell_data_func:
+ * @column: Column to be rendered
+ * @cell:   Cell to be rendered
+ * @model:  Related data model
+ * @iter:   Tree iterator
+ * @data:   User data passed at connect time
+ *
+ * Callback function called whenever an item's text cell needs to be rendered. 
+ * Will define the foreground color of the text - gray if the item is done (by
+ * default at least), and black if it is pending.
+ *
+ * See gtk_tree_view_column_set_cell_data_func() for more info.
+ */
+void
+glista_item_text_cell_data_func(GtkTreeViewColumn *column, 
+                                GtkCellRenderer *cell, GtkTreeModel *model,
+                                GtkTreeIter *iter, gpointer data)
+{
+	gboolean done; 
+
+	gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), iter, 
+		               GL_COLUMN_DONE, &done, -1);
+		                   
+	if (done == TRUE) {
+		g_object_set(cell, "foreground", GLISTA_COLOR_DONE, NULL);
+	} else {
+		g_object_set(cell, "foreground", GLISTA_COLOR_PENDING, NULL);
+	}
+}
+
+/**
  * glista_init_list:
  *
  * Initialize the list of items and the view layer to display it.
@@ -287,7 +318,11 @@ void glista_init_list()
 		"active", GL_COLUMN_DONE, NULL);	
 	text_column = gtk_tree_view_column_new_with_attributes("Item", text_ren, 
 		"text", GL_COLUMN_TEXT, "strikethrough", GL_COLUMN_DONE, NULL);
-		
+	
+	gtk_tree_view_column_set_cell_data_func(text_column, text_ren, 
+	                                        glista_item_text_cell_data_func,
+	                                        NULL, NULL);
+	
 	gtk_tree_view_append_column(treeview, done_column);	
 	gtk_tree_view_append_column(treeview, text_column);
 	gtk_tree_view_set_model(treeview, GTK_TREE_MODEL(gl_globs->itemstore));

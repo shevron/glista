@@ -39,6 +39,15 @@
 #define GLISTA_SAVE_TIMEOUT 3000
 #endif
 
+// Text colors
+#ifndef GLISTA_COLOR_PENDING
+#define GLISTA_COLOR_PENDING "#000000"
+#endif
+
+#ifndef GLISTA_COLOR_DONE
+#define GLISTA_COLOR_DONE "#a0a0a0"
+#endif
+
 // Some useful macros
 #define glista_get_widget(w) gtk_builder_get_object(gl_globs->uibuilder, w)
 
