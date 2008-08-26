@@ -15,6 +15,9 @@ PKG_CHECK_MODULES(DEPS, gtk+-2.0 >= 2.2 glib-2.0 >= 2.6 libxml-2.0 >= 2.6)
 AC_SUBST(DEPS_CFLAGS)
 AC_SUBST(DEPS_LIBS)
 
+dnl Checks for header files.
+AC_CHECK_HEADERS([string.h])
+
 dnl Check for gtk-builder-convert
 AC_CHECK_PROGS([GTKBLDRCONV], [gtk-builder-convert], [:])
 if test "$GTKBLDRCONV" = :; then
