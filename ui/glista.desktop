@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Glista
+Comment=A super-simple personal to-do list manager
+Exec=glista
+Icon=glista-icon
+Categories=Office;
