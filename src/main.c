@@ -645,9 +645,10 @@ glista_save_configuration()
 int 
 main(int argc, char *argv[])
 {
-	GtkWidget     *window;
-	GtkStatusIcon *sysicon;
-	GlistaConfig  *config;
+	GtkWidget      *window;
+	GtkAboutDialog *about;
+	GtkStatusIcon  *sysicon;
+	GlistaConfig   *config;
 		
 	gtk_init(&argc, &argv);
 
@@ -677,6 +678,12 @@ main(int argc, char *argv[])
 	g_signal_connect(window, "destroy", 
 					 G_CALLBACK(on_glista_main_window_destroy), NULL);
 	
+	// Set the version number in the about dialog
+#ifdef PACKAGE_VERSION
+	about = GTK_ABOUT_DIALOG(glista_get_widget("glista_about_dialog"));
+	gtk_about_dialog_set_version(about, PACKAGE_VERSION);
+#endif
+
 	// Initialize the item list
 	glista_init_list();
 	
