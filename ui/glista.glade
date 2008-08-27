@@ -7,7 +7,7 @@
     <property name="window_position">GTK_WIN_POS_CENTER</property>
     <property name="default_width">250</property>
     <property name="default_height">350</property>
-    <property name="icon">glista-icon.svg</property>
+    <property name="icon">glista-icon.png</property>
     <signal name="delete_event" handler="gtk_widget_hide_on_delete"/>
     <child>
       <widget class="GtkVBox" id="vbox1">
@@ -793,7 +793,7 @@ an absolute waiver of all civil liability in connection with the
 Program, unless a warranty or assumption of liability accompanies a
 copy of the Program in return for a fee.
 </property>
-    <property name="logo">glista-icon.svg</property>
+    <property name="logo">glista-icon.png</property>
     <child internal-child="vbox">
       <widget class="GtkVBox" id="dialog-vbox1">
         <property name="visible">True</property>

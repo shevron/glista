@@ -142,7 +142,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 uidir = $(datadir)/glista
 ui_DATA = glista.ui \
-          glista-icon.svg
+          glista-icon.png
 
 EXTRA_DIST = $(ui_DATA)
 all: all-am

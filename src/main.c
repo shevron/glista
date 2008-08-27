@@ -688,7 +688,7 @@ main(int argc, char *argv[])
 	glista_init_list();
 	
 	// Set up the status icon and connect the left-click and right-click signals
-	sysicon = gtk_status_icon_new_from_file(GLISTA_UI_DIR "/glista-icon.svg");
+	sysicon = gtk_status_icon_new_from_file(GLISTA_UI_DIR "/glista-icon.png");
 	g_signal_connect(sysicon, "activate", 
 					 G_CALLBACK(on_sysicon_activate), window);
 	g_signal_connect(sysicon, "popup-menu", 

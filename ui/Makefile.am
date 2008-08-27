@@ -1,7 +1,7 @@
 uidir = $(datadir)/glista
 
 ui_DATA = glista.ui \
-          glista-icon.svg
+          glista-icon.png
 
 EXTRA_DIST = $(ui_DATA)
 
