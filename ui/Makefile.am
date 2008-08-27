@@ -1,4 +1,4 @@
-uidir = $(datadir)/ui
+uidir = $(datadir)/glista
 
 ui_DATA = glista.ui \
           glista-icon.svg

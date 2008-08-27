@@ -7,5 +7,5 @@ AM_CFLAGS = $(DEPOS_CFLAGS) \
             -export-dynamic
 
 AM_CPPFLAGS = $(DEPS_CFLAGS) \
-              -DGLISTA_UI_DIR=\""$(datadir)/ui"\"
+              -DGLISTA_UI_DIR=\""$(datadir)/glista"\"
 
