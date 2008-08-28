@@ -51,20 +51,23 @@
 // Some useful macros
 #define glista_get_widget(w) gtk_builder_get_object(gl_globs->uibuilder, w)
 
+// Glista configuration data struct
+typedef struct _glista_config_struct {
+	gint     xpos;
+	gint     ypos;
+	gint     width;
+	gint     height;
+	gboolean visible;
+} GlistaConfig;
+
 // Glista globals container struct
 typedef struct  _glista_globals_struct {
 	GtkListStore  *itemstore;  // GtkListStore for the list of items
 	GtkBuilder    *uibuilder;  // UI Builder
 	gchar         *configdir;  // Configuration directory path
+	GlistaConfig  *config;     // Configuration Data
 	guint          save_tag;   // Data save timeout tag - see g_timeout_add()
 } GlistaGlobals;
-
-// Glista configuration data struct
-typedef struct _glista_config_struct {
-	gint     xpos;
-	gint     ypos;
-	gboolean visible;
-} GlistaConfig;
 
 // Glista item data structure
 typedef struct _glista_data_struct {
@@ -85,6 +88,8 @@ void        glista_toggle_main_window_visible();
 GlistaItem *glista_item_new(const gchar *text);
 void        glista_item_free(GlistaItem *item);
 void        glista_save_list_timeout();
+void        glista_store_window_geomerty(gint x, gint y, 
+										 gint width, gint height);
 
 // Column names & order ENUM
 typedef enum {

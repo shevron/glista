@@ -29,6 +29,36 @@
  * Glista main program functions
  */
 
+/**
+ * glista_main_window_present:
+ *
+ * Show the main window, positioning and resizing it according to configuration
+ * data
+ */
+static void 
+glista_main_window_present()
+{
+	GtkWindow *window;
+		
+	window = GTK_WINDOW(glista_get_widget("glista_main_window"));
+	
+	gtk_window_present(window);
+	gl_globs->config->visible = TRUE;
+	
+	/**
+	 * TODO: Check window limits are not exceeded
+	 */
+	if (gl_globs->config->xpos > -1 && gl_globs->config->ypos > -1) {
+		gtk_window_move(window, gl_globs->config->xpos, 
+						gl_globs->config->ypos);
+	}
+	
+	if (gl_globs->config->width > 0 && gl_globs->config->height > 0) {
+		gtk_window_resize(window, gl_globs->config->width, 
+						  gl_globs->config->height);
+	}
+}
+
 static int errno = 0;
 
 /**
@@ -206,8 +236,9 @@ glista_toggle_main_window_visible()
 	// If hidden - show, if visible - hide
 	if (current) {
 		gtk_widget_hide(window);
+		gl_globs->config->visible = FALSE;
 	} else {
-		gtk_widget_show_all(window);
+		glista_main_window_present();
 	}
 }
 
@@ -532,13 +563,32 @@ glista_verify_config_dir()
 }
 
 /**
+ * glista_store_window_geomerty:
+ * @x      Window X position
+ * @y      Window Y position
+ * @width  Window width
+ * @height Window height
+ *
+ * Save the current geometry (position and size) of the window in memory 
+ */
+void
+glista_store_window_geomerty(gint x, gint y, gint width, gint height)
+{
+	// Set position
+	if (x != -1) gl_globs->config->xpos = x;
+	if (y != -1) gl_globs->config->ypos = y;
+
+	// Set size
+	if (width != -1) gl_globs->config->width = width;
+	if (height != -1) gl_globs->config->height = height;
+}
+
+/**
  * glista_init_load_configuration:
  * 
  * Initialize and load the program's configuration data from file
- * 
- * Return: configuration data in a newly allocated GlistaConfig struct
  */
-static GlistaConfig*
+void
 glista_init_load_configuration()
 {
 	gchar        *cfgfile;
@@ -547,10 +597,12 @@ glista_init_load_configuration()
 	GError       *error = NULL;
 	
 	// Initialize configuration stuct
-	config = g_malloc(sizeof(GlistaConfig));
-	config->xpos    = 0;
-	config->ypos    = 0;
-	config->visible = TRUE;
+	gl_globs->config = g_malloc(sizeof(GlistaConfig));
+	gl_globs->config->xpos    = -1;
+	gl_globs->config->ypos    = -1;
+	gl_globs->config->width   = -1;
+	gl_globs->config->height  = -1;
+	gl_globs->config->visible = TRUE;
 	
 	cfgfile = g_build_filename(gl_globs->configdir, "glista.conf", NULL);
 	
@@ -559,13 +611,16 @@ glista_init_load_configuration()
 	// Load configuration data from file
 	keyfile = g_key_file_new();
 	if (g_key_file_load_from_file(keyfile, cfgfile, G_KEY_FILE_NONE, &error)) {
-		config->visible = g_key_file_get_boolean(keyfile, 
+		gl_globs->config->visible = g_key_file_get_boolean(keyfile, 
 		                                      "glistaui", "visible", NULL);
-        config->xpos = g_key_file_get_integer(keyfile, 
+        gl_globs->config->xpos = g_key_file_get_integer(keyfile, 
                                               "glistaui", "xpos", NULL);
-    	config->ypos = g_key_file_get_integer(keyfile, 
+    	gl_globs->config->ypos = g_key_file_get_integer(keyfile, 
     	                                      "glistaui", "ypos", NULL);
-		
+		gl_globs->config->width = g_key_file_get_integer(keyfile, 
+    	                                      "glistaui", "width", NULL);
+		gl_globs->config->height = g_key_file_get_integer(keyfile, 
+    	                                      "glistaui", "height", NULL);
 	} else {
 		if (error != NULL) {
 			fprintf(stderr, "Error loading config file: [%d] %s\n"
@@ -578,8 +633,6 @@ glista_init_load_configuration()
 	
 	g_key_file_free(keyfile);
 	g_free(cfgfile);
-	
-	return config;
 }
 
 /**
@@ -593,29 +646,23 @@ glista_save_configuration()
 	gchar     *cfgfile, *cfgdata;
 	gsize      cfgdatalen;
 	GKeyFile  *keyfile;
-	GtkWindow *window;
-	gboolean   visible;
-	gint       xpos, ypos;
 	GError    *error = NULL;
 
-	window = GTK_WINDOW(glista_get_widget("glista_main_window"));
+	//window = GTK_WINDOW(glista_get_widget("glista_main_window"));
 	cfgfile = g_build_filename(gl_globs->configdir, "glista.conf", NULL);
 	keyfile = g_key_file_new();
 	
-	// Set window visibility
-	g_object_get(window, "visible", &visible, NULL);
-	g_key_file_set_boolean(keyfile, "glistaui", "visible", visible);
-	
-	// If window is invisible, show it so we can get the position 
-	// (this is the only way I could get it to work...)
-	if (! visible) {
-		gtk_widget_show(GTK_WIDGET(window));
-	}
-	
-	// Set window position
-	gtk_window_get_position(window, &xpos, &ypos);
-	g_key_file_set_integer(keyfile, "glistaui", "xpos", xpos);
-	g_key_file_set_integer(keyfile, "glistaui", "ypos", ypos);	
+	// Set window position and width
+	g_key_file_set_integer(keyfile, "glistaui", "xpos", 
+						   gl_globs->config->xpos);
+	g_key_file_set_integer(keyfile, "glistaui", "ypos", 
+						   gl_globs->config->ypos);	
+	g_key_file_set_integer(keyfile, "glistaui", "width", 
+						   gl_globs->config->width);
+	g_key_file_set_integer(keyfile, "glistaui", "height", 
+						   gl_globs->config->height);
+	g_key_file_set_boolean(keyfile, "glistaui", "visible", 
+						   gl_globs->config->visible);
 	
 	glista_verify_config_dir();
 		
@@ -648,7 +695,6 @@ main(int argc, char *argv[])
 	GtkWidget      *window;
 	GtkAboutDialog *about;
 	GtkStatusIcon  *sysicon;
-	GlistaConfig   *config;
 		
 	gtk_init(&argc, &argv);
 
@@ -660,6 +706,7 @@ main(int argc, char *argv[])
 	gl_globs->save_tag  = 0;
 	gl_globs->itemstore = gtk_list_store_new(2, G_TYPE_BOOLEAN, G_TYPE_STRING);
 	gl_globs->uibuilder = gtk_builder_new();
+	gl_globs->config    = NULL;
 	gl_globs->configdir = g_build_filename(g_get_user_config_dir(),
 	                                       GLISTA_CONFIG_DIR,
 	                                       NULL);
@@ -695,19 +742,8 @@ main(int argc, char *argv[])
 					 G_CALLBACK(on_sysicon_popup_menu), NULL);
 
 	// Load configuration
-	config = glista_init_load_configuration();
+	glista_init_load_configuration();
 	
-	// Set configuration on main window
-	gtk_widget_show_all(window);
-	if (config->xpos > 0 && config->ypos > 0) {
-		gtk_window_move(GTK_WINDOW(window), config->xpos, config->ypos);
-	}
-	if (! config->visible) {
-		gtk_widget_hide(window);
-	}
-
-	g_free(config);
-
 	// Hook up model change signals to the data save handler
 	g_signal_connect(gl_globs->itemstore, "row-changed", 
 		G_CALLBACK(on_itemstore_row_changed), NULL);
@@ -715,6 +751,16 @@ main(int argc, char *argv[])
 		G_CALLBACK(on_itemstore_row_deleted), NULL);
 	g_signal_connect(gl_globs->itemstore, "row-inserted", 
 		G_CALLBACK(on_itemstore_row_inserted), NULL);
+	
+	// Show the main window if needed
+	if (gl_globs->config->visible) {
+		glista_main_window_present();
+	}
+	
+	// Connect configure event of main window to save geometry modifications
+	gtk_widget_add_events (window, GDK_CONFIGURE);
+	g_signal_connect(G_OBJECT(window), "configure-event", 
+					 G_CALLBACK(on_main_window_configure_event), NULL);
 
 	// Run main loop
 	gtk_main();
@@ -727,6 +773,7 @@ main(int argc, char *argv[])
 
 	// Free globals
 	g_free(gl_globs->configdir);
+	g_free(gl_globs->config);
 	g_free(gl_globs);
 
 	// Normal termination
