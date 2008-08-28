@@ -23,14 +23,14 @@ if test -n "$PKG_CONFIG" && \
 m4_ifvaln([$3], [else
   $3])dnl
 fi])
-m4trace:/usr/share/aclocal/pkg.m4:82: -1- AC_DEFUN([_PKG_SHORT_ERRORS_SUPPORTED], [AC_REQUIRE([PKG_PROG_PKG_CONFIG])
+m4trace:/usr/share/aclocal/pkg.m4:84: -1- AC_DEFUN([_PKG_SHORT_ERRORS_SUPPORTED], [AC_REQUIRE([PKG_PROG_PKG_CONFIG])
 if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
         _pkg_short_errors_supported=yes
 else
         _pkg_short_errors_supported=no
 fi[]dnl
 ])
-m4trace:/usr/share/aclocal/pkg.m4:102: -1- AC_DEFUN([PKG_CHECK_MODULES], [AC_REQUIRE([PKG_PROG_PKG_CONFIG])dnl
+m4trace:/usr/share/aclocal/pkg.m4:104: -1- AC_DEFUN([PKG_CHECK_MODULES], [AC_REQUIRE([PKG_PROG_PKG_CONFIG])dnl
 AC_ARG_VAR([$1][_CFLAGS], [C compiler flags for $1, overriding pkg-config])dnl
 AC_ARG_VAR([$1][_LIBS], [linker flags for $1, overriding pkg-config])dnl
 
@@ -47,9 +47,9 @@ See the pkg-config man page for more details.])
 if test $pkg_failed = yes; then
         _PKG_SHORT_ERRORS_SUPPORTED
         if test $_pkg_short_errors_supported = yes; then
-	        $1[]_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "$2" 2>&1`
+	        $1[]_PKG_ERRORS=`$PKG_CONFIG --short-errors --errors-to-stdout --print-errors "$2"`
         else 
-	        $1[]_PKG_ERRORS=`$PKG_CONFIG --print-errors "$2" 2>&1`
+	        $1[]_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "$2"`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$$1[]_PKG_ERRORS" >&AS_MESSAGE_LOG_FD
@@ -628,7 +628,7 @@ m4trace:configure.ac:8: -1- AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 m4trace:configure.ac:8: -1- m4_pattern_allow([^AM_[A-Z]+FLAGS$])
 m4trace:configure.ac:8: -1- AM_SET_CURRENT_AUTOMAKE_VERSION
 m4trace:configure.ac:8: -1- AM_AUTOMAKE_VERSION([1.10.1])
-m4trace:configure.ac:8: -1- _AM_AUTOCONF_VERSION([2.62])
+m4trace:configure.ac:8: -1- _AM_AUTOCONF_VERSION([2.61])
 m4trace:configure.ac:8: -1- m4_pattern_allow([^INSTALL_PROGRAM$])
 m4trace:configure.ac:8: -1- m4_pattern_allow([^INSTALL_SCRIPT$])
 m4trace:configure.ac:8: -1- m4_pattern_allow([^INSTALL_DATA$])
@@ -673,7 +673,6 @@ m4trace:configure.ac:8: -1- AM_PROG_INSTALL_STRIP
 m4trace:configure.ac:8: -1- m4_pattern_allow([^STRIP$])
 m4trace:configure.ac:8: -1- m4_pattern_allow([^INSTALL_STRIP_PROGRAM$])
 m4trace:configure.ac:8: -1- AM_PROG_MKDIR_P
-m4trace:configure.ac:8: -1- m4_pattern_allow([^MKDIR_P$])
 m4trace:configure.ac:8: -1- m4_pattern_allow([^mkdir_p$])
 m4trace:configure.ac:8: -1- m4_pattern_allow([^AWK$])
 m4trace:configure.ac:8: -1- m4_pattern_allow([^SET_MAKE$])
@@ -745,6 +744,8 @@ m4trace:configure.ac:11: -1- m4_pattern_allow([^CPP$])
 m4trace:configure.ac:11: -1- m4_pattern_allow([^CPPFLAGS$])
 m4trace:configure.ac:11: -1- m4_pattern_allow([^CPP$])
 m4trace:configure.ac:11: -1- m4_pattern_allow([^GREP$])
+m4trace:configure.ac:11: -1- m4_pattern_allow([^GREP$])
+m4trace:configure.ac:11: -1- m4_pattern_allow([^EGREP$])
 m4trace:configure.ac:11: -1- m4_pattern_allow([^EGREP$])
 m4trace:configure.ac:11: -1- m4_pattern_allow([^STDC_HEADERS$])
 m4trace:configure.ac:12: -1- m4_pattern_allow([^INSTALL_PROGRAM$])
@@ -774,5 +775,5 @@ m4trace:configure.ac:22: -1- m4_pattern_allow([^LIBXML_LIBS$])
 m4trace:configure.ac:25: -1- m4_pattern_allow([^GTKBLDRCONV$])
 m4trace:configure.ac:32: -1- m4_pattern_allow([^LIB@&t@OBJS$])
 m4trace:configure.ac:32: -1- m4_pattern_allow([^LTLIBOBJS$])
-m4trace:configure.ac:32: -1- _AC_AM_CONFIG_HEADER_HOOK(["$ac_file"])
+m4trace:configure.ac:32: -1- _AC_AM_CONFIG_HEADER_HOOK([$ac_file])
 m4trace:configure.ac:32: -1- _AM_OUTPUT_DEPENDENCY_COMMANDS

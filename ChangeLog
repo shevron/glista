@@ -1,5 +1,120 @@
-2008-08-21 Shahar Evron <shahar@prematureoptimization.org>
+2008-08-27 20:52  shahar.evron
 
-	* Project created - added README, COPYING, etc.
-	* Initial code release
+	* Makefile.in, autom4te.cache/output.0, autom4te.cache/output.1,
+	  autom4te.cache/requests, autom4te.cache/traces.0,
+	  autom4te.cache/traces.1, config.h.in, configure, configure.ac,
+	  src/Makefile.am, src/Makefile.in, ui/Makefile.in:
+	  
+	  Cleaning up some build files
+
+2008-08-27 19:34  shahar.evron
+
+	* autom4te.cache/requests, ui/Makefile.am, ui/Makefile.in,
+	  ui/glista.desktop:
+	  
+	  Adding .desktop file contributed by Dmitry "MAD" Artamonow,
+	  fixing issue #8
+
+2008-08-27 19:16  shahar.evron
+
+	* autom4te.cache/output.0, autom4te.cache/output.1,
+	  autom4te.cache/requests, autom4te.cache/traces.0,
+	  autom4te.cache/traces.1, config.h.in, configure, configure.ac,
+	  src/main.c, ui/Makefile.am, ui/Makefile.in, ui/glista-icon.png,
+	  ui/glista.glade, ui/glista.ui:
+	  
+	  Replacing SVG icon with PNG one to remove librsvg support. Fixes
+	  issue #6. SVG icon is still under ui/ for future use
+
+2008-08-27 19:07  shahar.evron
+
+	* src/main.c:
+	  
+	  About dialog version will now be set from build system
+
+2008-08-27 15:31  shahar.evron
+
+	* src/Makefile.am, src/Makefile.in, ui/Makefile.am, ui/Makefile.in:
+	  
+	  UI directory is now at /usr/share/glista as it should be, fixing
+	  issue #7
+
+2008-08-27 15:27  shahar.evron
+
+	* autom4te.cache/output.0, autom4te.cache/output.1,
+	  autom4te.cache/traces.0, configure, configure.ac:
+	  
+	  Updating minimum gtk+ version required in configure.ac to 2.12,
+	  fix issue #5
+
+2008-08-26 20:11  shahar.evron
+
+	* ui/Makefile.am, ui/Makefile.in, ui/glista.ui:
+	  
+	  Adding glista.ui pre-built to void the need for
+	  gtk-builder-convert
+
+2008-08-26 20:00  shahar.evron
+
+	* autom4te.cache/output.0, autom4te.cache/output.1,
+	  autom4te.cache/requests, autom4te.cache/traces.0,
+	  autom4te.cache/traces.1, config.h.in, configure, configure.ac:
+	  
+	  Minor improvements to build environment
+
+2008-08-26 08:37  shahar.evron
+
+	* build-aux/depcomp, build-aux/install-sh, build-aux/missing:
+	  
+	  Replacing symlinks to automake tools in build-aux with actual
+	  automake-1.10 scripts. Hopefully will remove dependancy of
+	  automake
+
+2008-08-24 20:43  shahar.evron
+
+	* src/main.c:
+	  
+	  Implemented sorting function: Will sort pending items first, then
+	  alphabetically
+
+2008-08-24 20:11  shahar.evron
+
+	* src/glista.h, src/main.c:
+	  
+	  Implemented color change to gray when item is done
+
+2008-08-21 09:16  shahar.evron
+
+	* Makefile.in, autom4te.cache/requests, ui/Makefile.am,
+	  ui/Makefile.in:
+	  
+	  Added *.ui to CLEANFILES in the ui/ dir. Generated ui files will
+	  now be cleaned on 'make clea'
+
+2008-08-21 09:10  shahar.evron
+
+	* COPYING, ChangeLog, INSTALL, Makefile.in, README, aclocal.m4,
+	  autom4te.cache, autom4te.cache/output.0, autom4te.cache/output.1,
+	  autom4te.cache/requests, autom4te.cache/traces.0,
+	  autom4te.cache/traces.1, build-aux, build-aux/depcomp,
+	  build-aux/install-sh, build-aux/missing, config.h.in, configure,
+	  src/Makefile.in, ui/Makefile.in:
+	  
+	  - Adding project description files: INSTALL, README, COPYING,
+	  ChangeLog
+	  - Adding GNU autotools generated files, source ready for building
+
+2008-08-21 08:36  shahar.evron
+
+	* Makefile.am, configure.ac, src, src/Makefile.am, src/glista.h,
+	  src/main.c, src/storage.c, src/ui-callbacks.c, ui,
+	  ui/Makefile.am, ui/glista-icon.svg, ui/glista.glade:
+	  
+	  Initial code import for 0.1
+
+2008-08-21 08:20  
+
+	* .:
+	  
+	  Initial directory structure.
 
