@@ -593,7 +593,6 @@ glista_init_load_configuration()
 {
 	gchar        *cfgfile;
 	GKeyFile     *keyfile;
-	GlistaConfig *config; 
 	GError       *error = NULL;
 	
 	// Initialize configuration stuct
