@@ -25,6 +25,9 @@
 #include "ui-callbacks.c"
 #include "storage.c"
 
+
+static int errno = 0;
+
 /**
  * Glista main program functions
  */
@@ -58,8 +61,6 @@ glista_main_window_present()
 						  gl_globs->config->height);
 	}
 }
-
-static int errno = 0;
 
 /**
  * glista_add_to_list:
@@ -217,6 +218,36 @@ glista_delete_selected_items()
 }
 
 /**
+ * glista_store_window_geometry:
+ * @window The main window
+ *
+ * Save the current geometry (position and size) of the window in memory if the
+ * window is visible
+ */
+static void
+glista_store_window_geometry(GtkWindow *window)
+{
+	gboolean visible;
+	gint     width, height;
+	gint     xpos,  ypos;
+	
+	// Get current window state
+	g_object_get(window, "visible", &visible, NULL);
+	
+	if (visible) {
+		// Store size
+		gtk_window_get_size(window, &width, &height);
+		gl_globs->config->width  = width;
+		gl_globs->config->height = height;
+		
+		// Store position
+		gtk_window_get_position(window, &xpos, &ypos);
+		gl_globs->config->xpos = xpos;
+		gl_globs->config->ypos = ypos;
+	}
+}
+
+/**
  * glista_toggle_main_window_visible:
  *
  * Toggle the visibility of the main window. This is normally called when the
@@ -235,6 +266,7 @@ glista_toggle_main_window_visible()
 	
 	// If hidden - show, if visible - hide
 	if (current) {
+		glista_store_window_geometry(GTK_WINDOW(window));
 		gtk_widget_hide(window);
 		gl_globs->config->visible = FALSE;
 	} else {
@@ -563,27 +595,6 @@ glista_verify_config_dir()
 }
 
 /**
- * glista_store_window_geomerty:
- * @x      Window X position
- * @y      Window Y position
- * @width  Window width
- * @height Window height
- *
- * Save the current geometry (position and size) of the window in memory 
- */
-void
-glista_store_window_geomerty(gint x, gint y, gint width, gint height)
-{
-	// Set position
-	if (x != -1) gl_globs->config->xpos = x;
-	if (y != -1) gl_globs->config->ypos = y;
-
-	// Set size
-	if (width != -1) gl_globs->config->width = width;
-	if (height != -1) gl_globs->config->height = height;
-}
-
-/**
  * glista_init_load_configuration:
  * 
  * Initialize and load the program's configuration data from file
@@ -755,11 +766,6 @@ main(int argc, char *argv[])
 	if (gl_globs->config->visible) {
 		glista_main_window_present();
 	}
-	
-	// Connect configure event of main window to save geometry modifications
-	gtk_widget_add_events (window, GDK_CONFIGURE);
-	g_signal_connect(G_OBJECT(window), "configure-event", 
-					 G_CALLBACK(on_main_window_configure_event), NULL);
 
 	// Run main loop
 	gtk_main();
@@ -768,6 +774,7 @@ main(int argc, char *argv[])
 	while (! glista_save_list());
 	
 	// Save configuration
+	glista_store_window_geometry(GTK_WINDOW(window));
 	glista_save_configuration();
 
 	// Free globals

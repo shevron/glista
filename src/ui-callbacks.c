@@ -272,23 +272,3 @@ on_itemstore_row_deleted(GtkTreeModel *model, GtkTreePath *path,
 	glista_save_list_timeout();
 }
 
-/**
- * on_main_window_configure_event:
- * @window: Window that was modified
- * @event:  The GDK event structure
- * @data:   User data bound at event signal connection
- *
- * Handle any main window geomerty change by storing the new position or size
- * in the configuration.
- */
-gboolean
-on_main_window_configure_event(GtkWindow *window, GdkEvent *event, 
-							   gpointer data) {
-	
-	glista_store_window_geomerty(event->configure.x,
-								 event->configure.y,
-								 event->configure.width,
-								 event->configure.height);
-	
-	return FALSE;
-}
