@@ -68,6 +68,7 @@ glista_get_category_iter(gchar *key)
 	GtkTreeRowReference *rowref;
 	GtkTreeIter          iter;
 	GtkTreePath         *path;
+	gchar               *key_c;
 	
 	rowref = g_hash_table_lookup(gl_globs->categories, key);
 	
@@ -86,7 +87,8 @@ glista_get_category_iter(gchar *key)
 		rowref = gtk_tree_row_reference_new(GTK_TREE_MODEL(gl_globs->itemstore),
 											path);
 		
-		g_hash_table_insert(gl_globs->categories, key, rowref);
+		key_c = g_strdup (key);
+		g_hash_table_insert(gl_globs->categories, key_c, rowref);
 		
 	} else { // Category already exists
 		path = gtk_tree_row_reference_get_path(rowref);
