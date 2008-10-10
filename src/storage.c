@@ -43,7 +43,7 @@ glista_storage_load_all_items(GList **list)
 {
 	GlistaItem       *item = NULL;
 	gchar            *storage_file;
-	xmlChar          *text, *done;
+	xmlChar          *text, *done, *parent;
 	xmlTextReaderPtr  xml;
 	int               ret;
 
@@ -59,12 +59,13 @@ glista_storage_load_all_items(GList **list)
 			
 			// Process items
 			while (xmlStrEqual(xmlTextReaderName(xml), BAD_CAST "item")) {
-				item = glista_item_new(NULL);
+				item = glista_item_new(NULL, NULL);
 				
 				// Process item properties
 				while (ret == 1) {
 					ret = xmlTextReaderRead(xml);
 										
+					// Read item text
 					if (xmlStrEqual(xmlTextReaderName(xml), BAD_CAST "text")) {
 						ret = xmlTextReaderRead(xml);
 						if (xmlTextReaderNodeType(xml) == 3) { // Text node
@@ -75,6 +76,7 @@ glista_storage_load_all_items(GList **list)
 							}
 						}
 						
+					// Read item status (done or not?)
 					} else if (xmlStrEqual(xmlTextReaderName(xml), 
 										   BAD_CAST "done")) {
 											   
@@ -89,6 +91,20 @@ glista_storage_load_all_items(GList **list)
 							}
 							xmlFree(done);
 						}
+					
+					// Read parent category name
+					} else if (xmlStrEqual(xmlTextReaderName(xml), 
+										   BAD_CAST "parent")) {
+						
+						ret = xmlTextReaderRead(xml);
+						if (xmlTextReaderNodeType(xml) == 3) { // Text Node
+							// Read the parent category name
+							parent = xmlTextReaderValue(xml);
+							if (strlen(g_strstrip((gchar *) parent)) > 0) {
+								item->parent = (gchar *) parent;
+							}
+						}
+						
 					} else if (xmlStrEqual(xmlTextReaderName(xml), 
 										   BAD_CAST "item")) {
 						break;
@@ -153,6 +169,12 @@ glista_storage_save_all_items(GList *all_items)
 				                            BAD_CAST item->text);
 			ret = xmlTextWriterWriteElement(xml, BAD_CAST "done", 
 			                                BAD_CAST &done_str);
+			
+			if (item->parent != NULL) {
+				ret = xmlTextWriterWriteElement(xml, BAD_CAST "parent", 
+												BAD_CAST item->parent);
+			}
+			
 			ret = xmlTextWriterEndElement(xml);
 			
 		} while ((all_items = all_items->next) != NULL);

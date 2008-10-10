@@ -39,6 +39,10 @@
 #define GLISTA_SAVE_TIMEOUT 3000
 #endif
 
+#ifndef GLISTA_CAT_DELIM
+#define GLISTA_CAT_DELIM ":"
+#endif
+
 // Text colors
 #ifndef GLISTA_COLOR_PENDING
 #define GLISTA_COLOR_PENDING "#000000"
@@ -62,7 +66,8 @@ typedef struct _glista_config_struct {
 
 // Glista globals container struct
 typedef struct  _glista_globals_struct {
-	GtkListStore  *itemstore;  // GtkListStore for the list of items
+	GtkTreeStore  *itemstore;  // Item storage
+	GHashTable    *categories; // HT containing pointers to item categories
 	GtkBuilder    *uibuilder;  // UI Builder
 	gchar         *configdir;  // Configuration directory path
 	GlistaConfig  *config;     // Configuration Data
@@ -73,6 +78,7 @@ typedef struct  _glista_globals_struct {
 typedef struct _glista_data_struct {
 	gboolean  done;
 	gchar    *text;
+	gchar    *parent;
 } GlistaItem;	
 
 // Globals container
@@ -85,7 +91,7 @@ void        glista_change_item_text(GtkTreePath *path, gchar *text);
 void        glista_clear_done_items();
 void        glista_delete_selected_items();
 void        glista_toggle_main_window_visible();
-GlistaItem *glista_item_new(const gchar *text);
+GlistaItem *glista_item_new(const gchar *text, const gchar *parent);
 void        glista_item_free(GlistaItem *item);
 void        glista_save_list_timeout();
 void        glista_store_window_geomerty(gint x, gint y, 

@@ -62,6 +62,37 @@ glista_main_window_present()
 	}
 }
 
+GtkTreePath*
+glista_get_category_iter(gchar *key)
+{
+	GtkTreeRowReference *rowref;
+	GtkTreeIter          iter;
+	GtkTreePath         *path;
+	
+	rowref = g_hash_table_lookup(gl_globs->categories, key);
+	
+	if (rowref == NULL) { // Category doesn't exist yet
+		// Add category
+		gtk_tree_store_append(gl_globs->itemstore, &iter, NULL);
+		gtk_tree_store_set(gl_globs->itemstore, &iter, 
+						   GL_COLUMN_TEXT, key, -1);
+		
+		// Add row reference to categories hash table
+		path = gtk_tree_model_get_path(GTK_TREE_MODEL(gl_globs->itemstore), 
+									   &iter);
+		
+		rowref = gtk_tree_row_reference_new(GTK_TREE_MODEL(gl_globs->itemstore),
+											path);
+		
+		g_hash_table_insert(gl_globs->categories, key, rowref);
+		
+	} else { // Category already exists
+		path = gtk_tree_row_reference_get_path(rowref);
+	}
+	
+	return path;
+}
+
 /**
  * glista_add_to_list:
  * @text: Item text
@@ -73,13 +104,24 @@ glista_main_window_present()
 void
 glista_add_to_list(GlistaItem *item)
 {
-	GtkTreeIter  iter;
+	GtkTreeIter  iter, parent_iter;
+	GtkTreePath *parent;
 	
-	gtk_list_store_append(gl_globs->itemstore, &iter);
-	gtk_list_store_set(gl_globs->itemstore, &iter, 
+	if (item->parent == NULL) {
+		gtk_tree_store_append(gl_globs->itemstore, &iter, NULL);
+		
+	} else {
+		parent = glista_get_category_iter(item->parent);		
+		gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
+								&parent_iter,
+								parent);
+		
+		gtk_tree_store_append(gl_globs->itemstore, &iter, &parent_iter);
+	}
+	
+	gtk_tree_store_set(gl_globs->itemstore, &iter, 
 	                   GL_COLUMN_DONE, item->done, 
 	                   GL_COLUMN_TEXT, item->text, -1);
-	                   
 }
 
 /**
@@ -102,7 +144,7 @@ glista_toggle_item_done(GtkTreePath *path)
 		gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
 		                   GL_COLUMN_DONE, &current, -1);
 		                   
-		gtk_list_store_set(gl_globs->itemstore, &iter, GL_COLUMN_DONE, 
+		gtk_tree_store_set(gl_globs->itemstore, &iter, GL_COLUMN_DONE, 
 		                   (! current), -1);
 	}
 }
@@ -131,7 +173,7 @@ glista_clear_done_items()
 		if (is_done) {
 			path = gtk_tree_model_get_path(GTK_TREE_MODEL(gl_globs->itemstore), 
 										   &iter);
-			status = gtk_list_store_remove(gl_globs->itemstore, &iter);
+			status = gtk_tree_store_remove(gl_globs->itemstore, &iter);
 			gtk_tree_model_row_deleted(GTK_TREE_MODEL(gl_globs->itemstore), 
 									   path);
 			gtk_tree_path_free(path);
@@ -205,7 +247,7 @@ glista_delete_selected_items()
 	        if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
 										&iter, path)) {
 											
-        		gtk_list_store_remove(gl_globs->itemstore, &iter);
+        		gtk_tree_store_remove(gl_globs->itemstore, &iter);
 			}
 
 			gtk_tree_path_free(path);
@@ -274,6 +316,13 @@ glista_toggle_main_window_visible()
 	}
 }
 
+/**
+ * glista_change_item_text:
+ * @path: The path of the item to change
+ * @text: The new text to set
+ *
+ * Change the text of one of the list items
+ */
 void
 glista_change_item_text(GtkTreePath *path, gchar *text)
 {
@@ -282,7 +331,7 @@ glista_change_item_text(GtkTreePath *path, gchar *text)
 	if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
 								&iter, path)) {
 									
-		gtk_list_store_set(gl_globs->itemstore, &iter, 
+		gtk_tree_store_set(gl_globs->itemstore, &iter, 
 		                   GL_COLUMN_TEXT, text, -1);
 	}
 }
@@ -298,13 +347,14 @@ glista_change_item_text(GtkTreePath *path, gchar *text)
  * Return: a newly created GlistaItem struct
  */
 GlistaItem*
-glista_item_new(const gchar *text)
+glista_item_new(const gchar *text, const gchar *parent)
 {
 	GlistaItem *item;
 	
 	item = g_malloc(sizeof(GlistaItem));
 	item->done = FALSE;
 	item->text = (gchar *) text;
+	item->parent = (gchar *) parent;
 	
 	return item;
 }
@@ -469,6 +519,53 @@ void glista_init_list()
 }
 
 /**
+ * glista_read_item_list:
+ * @item_list: GList to populate with item
+ * @parent:    The parent node, or NULL for root
+ *
+ * This function will iterate over the tree model, including child items, and
+ * will populate a hashtable with GlistaItem values from the model.
+ *
+ * Returns: The pointer to the first element of the list
+ */
+static GList*
+glista_read_item_list(GList *item_list, GtkTreeIter *parent)
+{
+	GtkTreeIter  iter;
+	GlistaItem  *item;
+	
+	if (gtk_tree_model_iter_children(GTK_TREE_MODEL(gl_globs->itemstore),
+									 &iter, parent)) {
+										 
+		do {
+			if (gtk_tree_model_iter_has_child(GTK_TREE_MODEL(gl_globs->itemstore),
+											  &iter)) {
+				glista_read_item_list(item_list, &iter);
+												  
+			} else {
+				item = glista_item_new(NULL, NULL);
+				
+				gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
+		                       GL_COLUMN_DONE, &item->done, 
+		                       GL_COLUMN_TEXT, &item->text, -1);
+				
+				if (parent != NULL) {
+					gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), 
+									   parent, 
+									   GL_COLUMN_TEXT, &item->parent, -1);
+				}
+				
+				item_list = g_list_append(item_list, item);
+			}
+							
+		} while (gtk_tree_model_iter_next(GTK_TREE_MODEL(gl_globs->itemstore), 
+    	                                  &iter));
+	}
+	
+	return item_list;
+}
+					  
+/**
  * glista_save_list:
  *
  * Tell the storage module to save the entire list of items. Implements a simple
@@ -481,40 +578,23 @@ static gboolean
 glista_save_list()
 {
 	GList           *all_items = NULL;
-	GtkTreeIter      iter;
-	GlistaItem      *item;
 	static gboolean  locked = FALSE;
-	
+		
 	if (locked) {
 		return FALSE;
 	}
 	
 	locked = TRUE;
 	
-	if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(gl_globs->itemstore), 
-	                                  &iter)) {
-	                                  
-		do {
-			item = glista_item_new(NULL);
-			
-			gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
-		                       GL_COLUMN_DONE, &item->done, 
-		                       GL_COLUMN_TEXT, &item->text, -1);
-		                       
-    		all_items = g_list_append(all_items, item);
-    		
-    	} while (gtk_tree_model_iter_next(GTK_TREE_MODEL(gl_globs->itemstore), 
-    	                                  &iter));
+	all_items = glista_read_item_list(all_items, NULL);
+	glista_storage_save_all_items(all_items);
     	
-    	glista_storage_save_all_items(all_items);
-    	
-    	// Free items list
-    	while (all_items != NULL) {
-    		glista_item_free(all_items->data);
-    		all_items = all_items->next;
-		}
-		g_list_free(all_items);
+   	// Free items list
+   	while (all_items != NULL) {
+   		glista_item_free(all_items->data);
+   		all_items = all_items->next;
 	}
+	g_list_free(all_items);
 	
 	locked = FALSE;
 	return TRUE;
@@ -526,7 +606,7 @@ glista_save_list()
  * 
  * Called by glista_save_list_timeout() after a timeout of X ms. Will try to 
  * save the list to storage by calling glista_save_list(). If save was not 
- * successful, will run again.
+ * successful, will run again.		return &iter;
  *
  * Returns: FALSE if no need to run again, TRUE otherwise.
  */
@@ -713,11 +793,12 @@ main(int argc, char *argv[])
 	
 	// Initialize globals
 	gl_globs = g_malloc(sizeof(GlistaGlobals));
-	gl_globs->save_tag  = 0;
-	gl_globs->itemstore = gtk_list_store_new(2, G_TYPE_BOOLEAN, G_TYPE_STRING);
-	gl_globs->uibuilder = gtk_builder_new();
-	gl_globs->config    = NULL;
-	gl_globs->configdir = g_build_filename(g_get_user_config_dir(),
+	gl_globs->save_tag   = 0;
+	gl_globs->itemstore  = gtk_tree_store_new(2, G_TYPE_BOOLEAN, G_TYPE_STRING);
+	gl_globs->categories = g_hash_table_new(g_str_hash, g_str_equal);
+	gl_globs->uibuilder  = gtk_builder_new();
+	gl_globs->config     = NULL;
+	gl_globs->configdir  = g_build_filename(g_get_user_config_dir(),
 	                                       GLISTA_CONFIG_DIR,
 	                                       NULL);
 
@@ -778,6 +859,7 @@ main(int argc, char *argv[])
 	glista_save_configuration();
 
 	// Free globals
+	g_hash_table_destroy(gl_globs->categories);
 	g_free(gl_globs->configdir);
 	g_free(gl_globs->config);
 	g_free(gl_globs);
