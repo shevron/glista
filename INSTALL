@@ -28,7 +28,7 @@ In order to build glista as described above you will need the following
 libraries installed:
 - glibc    >= 2.3
 - glib     >= 2.6
-- gtk+     >= 2.2
+- gtk+     >= 2.12
 - libxml   >= 2.6
 
 You will also need some build tools such as GNU gcc and gtk-builder-convert.
