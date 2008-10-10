@@ -101,7 +101,7 @@ void        glista_store_window_geomerty(gint x, gint y,
 typedef enum {
 	GL_COLUMN_DONE,
 	GL_COLUMN_TEXT,
-	GL_COLUMN_COLOR
+	GL_COLUMN_CATEGORY
 } GlistaColumn;
 
 #define _GLISTA_HEADER

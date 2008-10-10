@@ -75,7 +75,9 @@ glista_get_category_iter(gchar *key)
 		// Add category
 		gtk_tree_store_append(gl_globs->itemstore, &iter, NULL);
 		gtk_tree_store_set(gl_globs->itemstore, &iter, 
-						   GL_COLUMN_TEXT, key, -1);
+						   GL_COLUMN_TEXT, key, 
+						   GL_COLUMN_CATEGORY, TRUE, 
+						   -1);
 		
 		// Add row reference to categories hash table
 		path = gtk_tree_model_get_path(GTK_TREE_MODEL(gl_globs->itemstore), 
@@ -121,7 +123,9 @@ glista_add_to_list(GlistaItem *item)
 	
 	gtk_tree_store_set(gl_globs->itemstore, &iter, 
 	                   GL_COLUMN_DONE, item->done, 
-	                   GL_COLUMN_TEXT, item->text, -1);
+	                   GL_COLUMN_TEXT, item->text, 
+					   GL_COLUMN_CATEGORY, FALSE, 
+					   -1);
 }
 
 /**
@@ -390,16 +394,25 @@ glista_item_text_cell_data_func(GtkTreeViewColumn *column,
                                 GtkCellRenderer *cell, GtkTreeModel *model,
                                 GtkTreeIter *iter, gpointer data)
 {
-	gboolean done; 
+	gboolean done, category; 
 
-	gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), iter, 
-		               GL_COLUMN_DONE, &done, -1);
-		                   
+	gtk_tree_model_get(model, iter, GL_COLUMN_DONE, &done, 
+					   				GL_COLUMN_CATEGORY, &category,
+					   				-1);
+	
+	// Set color according to done / not done
 	if (done == TRUE) {
 		g_object_set(cell, "foreground", GLISTA_COLOR_DONE, NULL);
 	} else {
 		g_object_set(cell, "foreground", GLISTA_COLOR_PENDING, NULL);
 	}
+	
+	// Set weight to bold if this is a category
+	if (category == TRUE) {
+		g_object_set(cell, "weight", 800, NULL);
+	} else {
+		g_object_set(cell, "weight", 400, NULL);
+	}	
 }
 
 /**
@@ -422,36 +435,50 @@ gint
 glista_list_sort_func(GtkTreeModel *model, GtkTreeIter *row_a, 
                       GtkTreeIter *row_b, gpointer user_data)
 {
-	gboolean done_a, done_b; 
+	gboolean done_a, done_b, cat_a, cat_b; 
 	gint     ret;
 	
-	// First, compare done / not done
-	gtk_tree_model_get(model, row_a, GL_COLUMN_DONE, &done_a, -1);
-	gtk_tree_model_get(model, row_b, GL_COLUMN_DONE, &done_b, -1);
+	// Check if any of the items is a category
+	// Fetch done & category falgs for both rows
+	gtk_tree_model_get(model, row_a, GL_COLUMN_DONE, &done_a, 
+					                 GL_COLUMN_CATEGORY, &cat_a, 
+					                 -1);
+	gtk_tree_model_get(model, row_b, GL_COLUMN_DONE, &done_b, 
+					                 GL_COLUMN_CATEGORY, &cat_b, 
+					                 -1);
+		   
+	// Is one a category and the other is not?
+	if (cat_a == cat_b) {
 	
-	// If they are equal, go on to comparing the text
-	if (done_a == done_b) {
-		gchar *text_a, *text_b;
-	
-		gtk_tree_model_get(model, row_a, GL_COLUMN_TEXT, &text_a, -1);
-		gtk_tree_model_get(model, row_b, GL_COLUMN_TEXT, &text_b, -1);
+		// Is one done and the other is not?
+		if (done_a == done_b) {
+			
+			// Go on to comparing the text
+			gchar *text_a, *text_b;
 		
-		if (text_a == NULL || text_b == NULL) {
-			if (text_a == NULL && text_b == NULL) {
-				ret = 0;
+			gtk_tree_model_get(model, row_a, GL_COLUMN_TEXT, &text_a, -1);
+			gtk_tree_model_get(model, row_b, GL_COLUMN_TEXT, &text_b, -1);
+			
+			if (text_a == NULL || text_b == NULL) {
+				if (text_a == NULL && text_b == NULL) {
+					ret = 0;
+				} else {
+					ret = (text_a == NULL) ? -1 : 1;
+				}
 			} else {
-				ret = (text_a == NULL) ? -1 : 1;
+				ret = g_utf8_collate(text_a, text_b);
 			}
+			
+			g_free(text_a);
+			g_free(text_b);
+
+		// If they are not equal, order the pending tasks on top
 		} else {
-			ret = g_utf8_collate(text_a, text_b);
+			ret = (done_a ? 1 : -1);
 		}
 		
-		g_free(text_a);
-		g_free(text_b);
-
-	// If they are not equal, order the pending tasks on top
 	} else {
-		ret = (done_a ? 1 : 0) - (done_b ? 1 : 0);
+		ret = (cat_a ? -1 : 1);
 	}
 	
 	return ret;
@@ -794,7 +821,10 @@ main(int argc, char *argv[])
 	// Initialize globals
 	gl_globs = g_malloc(sizeof(GlistaGlobals));
 	gl_globs->save_tag   = 0;
-	gl_globs->itemstore  = gtk_tree_store_new(2, G_TYPE_BOOLEAN, G_TYPE_STRING);
+	gl_globs->itemstore  = gtk_tree_store_new(3, 
+											  G_TYPE_BOOLEAN, 
+											  G_TYPE_STRING, 
+											  G_TYPE_BOOLEAN);
 	gl_globs->categories = g_hash_table_new(g_str_hash, g_str_equal);
 	gl_globs->uibuilder  = gtk_builder_new();
 	gl_globs->config     = NULL;
