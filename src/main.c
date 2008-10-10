@@ -376,6 +376,17 @@ glista_item_free(GlistaItem *item)
 	g_free(item);
 }
 
+/**
+ * glista_get_category_cell_text:
+ * @model: The tree model 
+ * @iter:  The iterator pointing to the parent category
+ *
+ * Get the text to display next to a category name in the tree view. Will
+ * add the count of done tasks out of the total tasks in the category to the 
+ * category name
+ *
+ * Returns: the category string to display
+ */
 gchar *
 glista_get_category_cell_text(GtkTreeModel *model, GtkTreeIter *iter)
 {
@@ -459,6 +470,30 @@ glista_item_text_cell_data_func(GtkTreeViewColumn *column,
 	} else {
 		g_object_set(cell, "weight", 400, NULL);
 	}	
+}
+
+/**
+ * glista_item_done_cell_data_func:
+ * @column: Column to be rendered
+ * @cell:   Cell to be rendered
+ * @model:  Related data model
+ * @iter:   Tree iterator
+ * @data:   User data passed at connect time
+ *
+ * Callback function called whenever an item's "done" toggle cell needs to be 
+ * rendered. For now mostly hides the toggle for category rows.
+ *
+ * See gtk_tree_view_column_set_cell_data_func() for more info.
+ */
+void
+glista_item_done_cell_data_func(GtkTreeViewColumn *column, 
+                                GtkCellRenderer *cell, GtkTreeModel *model,
+                                GtkTreeIter *iter, gpointer data)
+{
+	gboolean is_cat;
+	
+	gtk_tree_model_get(model, iter, GL_COLUMN_CATEGORY, &is_cat, -1);
+	g_object_set(cell, "visible", ! is_cat, NULL);
 }
 
 /**
@@ -565,6 +600,10 @@ void glista_init_list()
 	
 	gtk_tree_view_column_set_cell_data_func(text_column, text_ren, 
 	                                        glista_item_text_cell_data_func,
+	                                        NULL, NULL);
+	
+	gtk_tree_view_column_set_cell_data_func(done_column, done_ren, 
+	                                        glista_item_done_cell_data_func,
 	                                        NULL, NULL);
 	
 	// Set the text column to expand
