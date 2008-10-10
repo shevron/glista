@@ -27,7 +27,28 @@ if test "$GTKBLDRCONV" = :; then
   AC_MSG_ERROR([gtk-builder-convert is required by this package])
 fi
 
+dnl Add option to modify the configuration directory. 
+dnl Default is defined in glista.h
+AC_MSG_CHECKING([for user configuration directory])
+AC_ARG_WITH([user-confdir], 
+  [AS_HELP_STRING([--with-user-confdir=DIR], 
+    [custom user configuration directory @<:@default=glista@:>@])],
+  [
+    if test "$withval" != "no"; then 
+      if test "$withval" = "yes"; then
+        AC_MSG_RESULT([default])
+      else 
+        AC_DEFINE_UNQUOTED(GLISTA_CONFIG_DIR, "$withval", 
+          [User configuration directory])
+        AC_MSG_RESULT($withval)
+      fi
+    else 
+      AC_MSG_RESULT([default])
+    fi
+  ],[
+    AC_MSG_RESULT([default])
+  ])
+
 AC_CONFIG_FILES([Makefile src/Makefile ui/Makefile])
 AC_CONFIG_COMMANDS([default],[[ echo timestamp > stamp-h ]],[[]])
 AC_OUTPUT
-

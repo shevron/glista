@@ -1258,6 +1258,11 @@ Optional Features:
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
 
+Optional Packages:
+  --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
+  --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-user-confdir=DIR custom user configuration directory [default=glista]
+
 Some influential environment variables:
   CC          C compiler command
   CFLAGS      C compiler flags
@@ -4328,6 +4333,38 @@ echo "$as_me: error: gtk-builder-convert is required by this package" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
+{ echo "$as_me:$LINENO: checking for user configuration directory" >&5
+echo $ECHO_N "checking for user configuration directory... $ECHO_C" >&6; }
+
+# Check whether --with-user-confdir was given.
+if test "${with_user_confdir+set}" = set; then
+  withval=$with_user_confdir;
+    if test "$withval" != "no"; then
+      if test "$withval" = "yes"; then
+        { echo "$as_me:$LINENO: result: default" >&5
+echo "${ECHO_T}default" >&6; }
+      else
+
+cat >>confdefs.h <<_ACEOF
+#define GLISTA_CONFIG_DIR "$withval"
+_ACEOF
+
+        { echo "$as_me:$LINENO: result: $withval" >&5
+echo "${ECHO_T}$withval" >&6; }
+      fi
+    else
+      { echo "$as_me:$LINENO: result: default" >&5
+echo "${ECHO_T}default" >&6; }
+    fi
+
+else
+
+    { echo "$as_me:$LINENO: result: default" >&5
+echo "${ECHO_T}default" >&6; }
+
+fi
+
+
 ac_config_files="$ac_config_files Makefile src/Makefile ui/Makefile"
 
 ac_config_commands="$ac_config_commands default"
@@ -5665,5 +5702,4 @@ if test "$no_create" != yes; then
   # would make configure fail if this is the last instruction.
   $ac_cs_success || { (exit 1); exit 1; }
 fi
-
 

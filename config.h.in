@@ -1,5 +1,8 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* User configuration directory */
+#undef GLISTA_CONFIG_DIR
+
 /* Name of package */
 #undef PACKAGE
 
