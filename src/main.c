@@ -569,8 +569,8 @@ glista_read_item_list(GList *item_list, GtkTreeIter *parent)
 		do {
 			if (gtk_tree_model_iter_has_child(GTK_TREE_MODEL(gl_globs->itemstore),
 											  &iter)) {
-				glista_read_item_list(item_list, &iter);
-												  
+				item_list = glista_read_item_list(item_list, &iter);
+				
 			} else {
 				item = glista_item_new(NULL, NULL);
 				
@@ -608,11 +608,10 @@ glista_save_list()
 {
 	GList           *all_items = NULL;
 	static gboolean  locked = FALSE;
-		
+
 	if (locked) {
 		return FALSE;
 	}
-	
 	locked = TRUE;
 	
 	all_items = glista_read_item_list(all_items, NULL);
