@@ -25,7 +25,6 @@
 #include "ui-callbacks.c"
 #include "storage.c"
 
-
 static int errno = 0;
 
 /**
@@ -377,6 +376,47 @@ glista_item_free(GlistaItem *item)
 	g_free(item);
 }
 
+gchar *
+glista_get_category_cell_text(GtkTreeModel *model, GtkTreeIter *iter)
+{
+	gboolean     is_cat, is_done;
+	gint         i, child_c, done_c;
+	gchar       *text, *newtext, *child_c_str, *done_c_str;
+	GtkTreeIter  child;
+	
+	// Get category name
+	gtk_tree_model_get(model, iter, GL_COLUMN_TEXT, &text, 
+					                GL_COLUMN_CATEGORY, &is_cat,
+					                -1);
+	
+	// If the row is not a category, just return the text
+	if (is_cat == FALSE) {
+		return text;
+	}
+	
+	// Get count / status
+	done_c = 0;
+	child_c = gtk_tree_model_iter_n_children(model, iter);
+	for (i = 0; i < child_c; i++) {
+		if (gtk_tree_model_iter_nth_child(model, &child, iter, i) == FALSE) {
+			break;
+		}
+		
+		gtk_tree_model_get(model, &child, GL_COLUMN_DONE, &is_done, -1);
+		if (is_done == TRUE) ++done_c;
+	}	
+	
+	child_c_str = g_strdup_printf ("%d", child_c);
+	done_c_str = g_strdup_printf("%d", done_c);
+	
+	newtext = g_strconcat (text, " (", done_c_str, "/", child_c_str, ")", NULL);
+	
+	g_free(child_c_str);
+	g_free(done_c_str);
+	
+	return newtext;
+}
+
 /**
  * glista_item_text_cell_data_func:
  * @column: Column to be rendered
@@ -396,7 +436,8 @@ glista_item_text_cell_data_func(GtkTreeViewColumn *column,
                                 GtkCellRenderer *cell, GtkTreeModel *model,
                                 GtkTreeIter *iter, gpointer data)
 {
-	gboolean done, category; 
+	gboolean  done, category;
+	gchar    *cat_text;
 
 	gtk_tree_model_get(model, iter, GL_COLUMN_DONE, &done, 
 					   				GL_COLUMN_CATEGORY, &category,
@@ -411,7 +452,10 @@ glista_item_text_cell_data_func(GtkTreeViewColumn *column,
 	
 	// Set weight to bold if this is a category
 	if (category == TRUE) {
-		g_object_set(cell, "weight", 800, NULL);
+		cat_text = glista_get_category_cell_text(model, iter);
+		g_object_set(cell, "weight", 800, "text", cat_text, NULL);
+		g_free(cat_text);
+		
 	} else {
 		g_object_set(cell, "weight", 400, NULL);
 	}	
@@ -504,7 +548,10 @@ void glista_init_list()
 	
 	text_ren = gtk_cell_renderer_text_new();
 	done_ren = gtk_cell_renderer_toggle_new();
+	
 	g_object_set(text_ren, "editable", TRUE, NULL);
+		
+	// Connect the edited signal of the text column
 	g_signal_connect(text_ren, "edited", G_CALLBACK(on_item_text_edited), NULL);
 
 	// Connect the toggled event of the "done" column to change the model
@@ -520,8 +567,12 @@ void glista_init_list()
 	                                        glista_item_text_cell_data_func,
 	                                        NULL, NULL);
 	
-	gtk_tree_view_append_column(treeview, done_column);	
+	// Set the text column to expand
+	g_object_set(text_column, "expand", TRUE, NULL);
+	g_object_set(done_ren, "xpad", 5, NULL);
+	
 	gtk_tree_view_append_column(treeview, text_column);
+	gtk_tree_view_append_column(treeview, done_column);	
 	gtk_tree_view_set_model(treeview, GTK_TREE_MODEL(gl_globs->itemstore));
 	
 	// Set sort function and column
