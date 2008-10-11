@@ -292,3 +292,28 @@ on_itemstore_row_deleted(GtkTreeModel *model, GtkTreePath *path,
 	glista_save_list_timeout();
 }
 
+void
+on_item_text_editing_started(GtkCellRenderer *renderer, 
+							 GtkCellEditable *editable, gchar *pathstr, 
+							 gpointer user_data)
+{
+	GtkTreeIter  iter;
+	GtkTreePath *path;
+	gchar       *text;
+	
+	if (GTK_IS_ENTRY(editable)) {
+		
+		if (((path = gtk_tree_path_new_from_string(pathstr)) != NULL) &&
+			gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
+									&iter, path)) {
+		
+			gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
+							   GL_COLUMN_TEXT, &text, -1);
+			
+			gtk_entry_set_text(GTK_ENTRY(editable), text);
+										
+			g_free(text);
+			gtk_tree_path_free(path);
+		}
+	}
+}

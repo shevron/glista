@@ -388,7 +388,7 @@ glista_item_free(GlistaItem *item)
  * Returns: the category string to display
  */
 gchar *
-glista_get_category_cell_text(GtkTreeModel *model, GtkTreeIter *iter)
+glista_get_item_display_text(GtkTreeModel *model, GtkTreeIter *iter)
 {
 	gboolean     is_cat, is_done;
 	gint         i, child_c, done_c;
@@ -448,7 +448,8 @@ glista_item_text_cell_data_func(GtkTreeViewColumn *column,
                                 GtkTreeIter *iter, gpointer data)
 {
 	gboolean  done, category;
-	gchar    *cat_text;
+	gchar    *text;
+	gint      weight;
 
 	gtk_tree_model_get(model, iter, GL_COLUMN_DONE, &done, 
 					   				GL_COLUMN_CATEGORY, &category,
@@ -461,15 +462,10 @@ glista_item_text_cell_data_func(GtkTreeViewColumn *column,
 		g_object_set(cell, "foreground", GLISTA_COLOR_PENDING, NULL);
 	}
 	
-	// Set weight to bold if this is a category
-	if (category == TRUE) {
-		cat_text = glista_get_category_cell_text(model, iter);
-		g_object_set(cell, "weight", 800, "text", cat_text, NULL);
-		g_free(cat_text);
-		
-	} else {
-		g_object_set(cell, "weight", 400, NULL);
-	}	
+	// Set weight and text depending on whether this is a category or not
+	text = glista_get_item_display_text(model, iter);
+	weight = (category ? 800 : 400);
+	g_object_set(cell, "weight", weight, "text", text, NULL);
 }
 
 /**
@@ -588,6 +584,8 @@ void glista_init_list()
 		
 	// Connect the edited signal of the text column
 	g_signal_connect(text_ren, "edited", G_CALLBACK(on_item_text_edited), NULL);
+	g_signal_connect(text_ren, "editing-started", 
+					 G_CALLBACK(on_item_text_editing_started), NULL);
 
 	// Connect the toggled event of the "done" column to change the model
 	g_signal_connect(done_ren, "toggled", 
@@ -596,7 +594,7 @@ void glista_init_list()
 	done_column = gtk_tree_view_column_new_with_attributes("Done", done_ren, 
 		"active", GL_COLUMN_DONE, NULL);	
 	text_column = gtk_tree_view_column_new_with_attributes("Item", text_ren, 
-		"text", GL_COLUMN_TEXT, "strikethrough", GL_COLUMN_DONE, NULL);
+		"strikethrough", GL_COLUMN_DONE, NULL);
 	
 	gtk_tree_view_column_set_cell_data_func(text_column, text_ren, 
 	                                        glista_item_text_cell_data_func,
