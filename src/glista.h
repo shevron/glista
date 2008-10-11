@@ -88,7 +88,7 @@ static GlistaGlobals *gl_globs;
 void        glista_add_to_list(GlistaItem *item);
 void        glista_toggle_item_done(GtkTreePath *path);
 void        glista_change_item_text(GtkTreePath *path, gchar *text);
-void        glista_clear_done_items();
+void        glista_clear_done_items(GtkTreeIter *parent);
 void        glista_delete_selected_items();
 void        glista_toggle_main_window_visible();
 GlistaItem *glista_item_new(const gchar *text, const gchar *parent);

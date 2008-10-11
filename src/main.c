@@ -161,32 +161,40 @@ glista_toggle_item_done(GtkTreePath *path)
  * called when the "Clear" button is activated.
  */
 void 
-glista_clear_done_items()
+glista_clear_done_items(GtkTreeIter *parent)
 {
 	GtkTreeIter  iter;
 	GtkTreePath *path;
-	gboolean     status, is_done;
+	gboolean     status, is_done, is_cat;
 	
 	// Get the iter set for first row
-	status = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(gl_globs->itemstore), 
-	                                       &iter);
+	status = gtk_tree_model_iter_children(GTK_TREE_MODEL(gl_globs->itemstore), 
+	                                      &iter, parent);
 	                                       
 	while (status) {
+											 
 		gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
-		                   GL_COLUMN_DONE, &is_done, -1);
+		                   GL_COLUMN_DONE, &is_done,
+						   GL_COLUMN_CATEGORY, &is_cat, 
+						   -1);
 		
-		if (is_done) {
+		if (is_cat) {
+			glista_clear_done_items (&iter);
+			status = gtk_tree_model_iter_next(
+				GTK_TREE_MODEL(gl_globs->itemstore), &iter);
+			
+		} else if (is_done) {
 			path = gtk_tree_model_get_path(GTK_TREE_MODEL(gl_globs->itemstore), 
 										   &iter);
 			status = gtk_tree_store_remove(gl_globs->itemstore, &iter);
 			gtk_tree_model_row_deleted(GTK_TREE_MODEL(gl_globs->itemstore), 
 									   path);
 			gtk_tree_path_free(path);
-			
+				
 		} else {
 			status = gtk_tree_model_iter_next(
 				GTK_TREE_MODEL(gl_globs->itemstore), &iter);
-		}
+		}	
 	}
 }
 
