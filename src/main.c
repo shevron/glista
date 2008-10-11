@@ -154,23 +154,26 @@ glista_add_new_item_from_text(gchar *text)
 	// Split the input into category: item 
 	tokens = g_strsplit(text, GLISTA_CAT_DELIM, 2);
 	
-	g_strstrip(tokens[0]);
+	// Did we get anything?
+	if (tokens[0] != NULL) {
+		g_strstrip(tokens[0]);
 	
-	if (tokens[1] != NULL) { 
-		g_strstrip(tokens[1]);
-		if (strlen(tokens[1]) > 0) {
-			item = glista_item_new(tokens[1], tokens[0]);
+		if (tokens[1] != NULL) { 
+			g_strstrip(tokens[1]);
+			if (strlen(tokens[1]) > 0) {
+				item = glista_item_new(tokens[1], tokens[0]);
+			}
+			
+		} else {
+			if (strlen(tokens[0]) > 0) {
+				item = glista_item_new(tokens[0], NULL);
+			}
 		}
 		
-	} else {
-		if (strlen(tokens[0]) > 0) {
-			item = glista_item_new(tokens[0], NULL);
+		if (item != NULL) {
+			glista_add_to_list(item);
+			glista_item_free(item);
 		}
-	}
-	
-	if (item != NULL) {
-		glista_add_to_list(item);
-		glista_item_free(item);
 	}
 	
 	g_strfreev(tokens);
