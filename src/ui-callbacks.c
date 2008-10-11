@@ -57,38 +57,10 @@ on_add_button_clicked(GtkObject *object, gpointer user_data)
 {
 	GtkEntry    *entry;
 	gchar       *text;
-	gchar      **tokens;
-	GlistaItem  *item = NULL;
-
+	
 	entry = GTK_ENTRY(glista_get_widget("add-entry"));
-	
-	// Read the text entry
 	text  = (gchar *) gtk_entry_get_text(entry);
-	
-	// Split the input into category: item 
-	tokens = g_strsplit(text, GLISTA_CAT_DELIM, 2);
-	
-	g_strstrip(tokens[0]);
-	
-	if (tokens[1] != NULL) { 
-		g_strstrip(tokens[1]);
-		if (strlen(tokens[1]) > 0) {
-			item = glista_item_new(tokens[1], tokens[0]);
-		}
-		
-	} else {
-		if (strlen(tokens[0]) > 0) {
-			item = glista_item_new(tokens[0], NULL);
-		}
-	}
-	
-	if (item != NULL) {
-		glista_add_to_list(item);
-		glista_item_free(item);
-	}
-	
-	g_strfreev(tokens);
-	
+	glista_add_new_item_from_text (text);
 	gtk_entry_set_text(entry, "");
 }
 

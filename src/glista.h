@@ -94,6 +94,7 @@ void        glista_toggle_main_window_visible();
 GlistaItem *glista_item_new(const gchar *text, const gchar *parent);
 void        glista_item_free(GlistaItem *item);
 void        glista_save_list_timeout();
+void        glista_add_new_item_from_text(gchar *text);
 void        glista_store_window_geomerty(gint x, gint y, 
 										 gint width, gint height);
 
