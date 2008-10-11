@@ -224,6 +224,70 @@ glista_populate_reflist_cb(GtkTreeModel *model, GtkTreePath *path,
 }
 
 /**
+ * glista_delete_category:
+ * @category: The GtkTreeIter of the category row to remove 
+ *
+ * deletes a gategory, including all it's child items, from the tree model and
+ * from the categories hash table
+ */
+void 
+glista_delete_category(GtkTreeIter *category)
+{
+	gchar               *cat_name;
+	GtkTreeRowReference *rowref;
+	
+	// Get the name of the category we are deleting
+	gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), category, 
+					   GL_COLUMN_TEXT, &cat_name, -1);
+	
+	// Remove category from categories hashtable
+	if ((rowref = g_hash_table_lookup(gl_globs->categories, cat_name)) != NULL) {
+		gtk_tree_row_reference_free (rowref);
+		g_hash_table_remove(gl_globs->categories, cat_name);
+	}	
+	
+	// Remove category from model
+	gtk_tree_store_remove(gl_globs->itemstore, category);
+}
+
+void
+glista_confirm_delete_category(GtkTreeIter *category) 
+{
+	gchar            *cat_name;
+	gint              response;
+	GtkMessageDialog *dialog;
+	
+	if (gtk_tree_model_iter_n_children(GTK_TREE_MODEL(gl_globs->itemstore), 
+									   category) > 0) {
+										   
+		// If category has children, show confirmation dialog
+		gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), category, 
+						   GL_COLUMN_TEXT, &cat_name, -1);
+		
+		dialog = gtk_message_dialog_new(
+			GTK_WINDOW(glista_get_widget("glista_main_window")),
+			GTK_DIALOG_DESTROY_WITH_PARENT,
+			GTK_MESSAGE_WARNING,
+			GTK_BUTTONS_OK_CANCEL,
+			"Are you sure you want to delete the category \"%s\" and "
+			"all the items in it?",
+			cat_name);
+		
+		response = gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(GTK_WIDGET(dialog));
+		
+		// Delete category only if confirmed
+		if (response == GTK_RESPONSE_OK) {
+			glista_delete_category (category);
+		}
+										
+	} else {
+		// If it has no children, just delete it
+		glista_delete_category (category);	
+	}	
+}
+
+/**
  * glista_delete_selected_items:
  *
  * Delete all selected items from the list.
@@ -255,12 +319,35 @@ glista_delete_selected_items()
 		);
 		
         if (path) {
-        	GtkTreeIter  iter;
+        	GtkTreeIter iter, parent;
+			gboolean    has_parent, is_cat;
 
 	        if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
 										&iter, path)) {
-											
-        		gtk_tree_store_remove(gl_globs->itemstore, &iter);
+				
+				// Check if this is a category we are deleting
+				gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
+								   GL_COLUMN_CATEGORY, &is_cat, -1);
+				if (is_cat) {
+					// Show the confirm dialog before deleting any categories
+					glista_confirm_delete_category(&iter);
+					
+				} else {	
+					// Check if this item has a parent category
+					has_parent = gtk_tree_model_iter_parent(
+						GTK_TREE_MODEL(gl_globs->itemstore), &parent, &iter);
+					
+					// Remove item
+					gtk_tree_store_remove(gl_globs->itemstore, &iter);
+												
+					// Check if parent is now empty
+					if (has_parent && gtk_tree_model_iter_n_children(
+						GTK_TREE_MODEL(gl_globs->itemstore), &parent) < 1) {
+						
+						// Delete parent as well
+						glista_delete_category(&parent);
+					}
+				}	
 			}
 
 			gtk_tree_path_free(path);
