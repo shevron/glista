@@ -292,6 +292,18 @@ on_itemstore_row_deleted(GtkTreeModel *model, GtkTreePath *path,
 	glista_save_list_timeout();
 }
 
+/**
+ * on_item_text_editing_started:
+ * @renderer  The cell renderer of the edited cell
+ * @editable  The GtkEntry created when the cell is edited
+ * @pathstr   The path of the cell being edited as string
+ * @user_data Data passed in at bind time
+ *
+ * Called when the user starts editing a cell. Will make sure that the user 
+ * edits the text in the model and not the text displayed by the view - this 
+ * is important because category names are displayed differently than they are
+ * stored in the model. 
+ */
 void
 on_item_text_editing_started(GtkCellRenderer *renderer, 
 							 GtkCellEditable *editable, gchar *pathstr, 
