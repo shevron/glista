@@ -61,8 +61,17 @@ glista_main_window_present()
 	}
 }
 
+/**
+ * glista_get_category_iter:
+ * @key The category key to look for
+ *
+ * Get the category path for a category name. If category does not exist, will 
+ * create it
+ *
+ * Returns: The path to the requested category
+ */
 GtkTreePath*
-glista_get_category_iter(gchar *key)
+glista_get_category_path(gchar *key)
 {
 	GtkTreeRowReference *rowref;
 	GtkTreeIter          iter;
@@ -114,7 +123,7 @@ glista_add_to_list(GlistaItem *item)
 		gtk_tree_store_append(gl_globs->itemstore, &iter, NULL);
 		
 	} else {
-		parent = glista_get_category_iter(item->parent);		
+		parent = glista_get_category_path(item->parent);		
 		gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
 								&parent_iter,
 								parent);
