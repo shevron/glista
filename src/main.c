@@ -78,7 +78,9 @@ glista_get_category_path(gchar *key)
 	GtkTreePath         *path;
 	gchar               *key_c;
 	
-	rowref = g_hash_table_lookup(gl_globs->categories, key);
+	key_c = g_utf8_strdown (key, -1);
+	rowref = g_hash_table_lookup(gl_globs->categories, key_c);
+
 	
 	if (rowref == NULL) { // Category doesn't exist yet
 		// Add category
@@ -95,11 +97,11 @@ glista_get_category_path(gchar *key)
 		rowref = gtk_tree_row_reference_new(GTK_TREE_MODEL(gl_globs->itemstore),
 											path);
 		
-		key_c = g_strdup (key);
 		g_hash_table_insert(gl_globs->categories, key_c, rowref);
 		
 	} else { // Category already exists
 		path = gtk_tree_row_reference_get_path(rowref);
+		g_free(key_c);
 	}
 	
 	return path;
@@ -227,7 +229,6 @@ glista_delete_category(GtkTreeIter *category)
 	
 	// Remove category from categories hashtable
 	if ((rowref = g_hash_table_lookup(gl_globs->categories, cat_name)) != NULL) {
-		gtk_tree_row_reference_free (rowref);
 		g_hash_table_remove(gl_globs->categories, cat_name);
 	}	
 	
@@ -570,6 +571,8 @@ glista_item_new(const gchar *text, const gchar *parent)
 	GlistaItem *item;
 	
 	item = g_malloc(sizeof(GlistaItem));
+	g_assert(item != NULL);
+	
 	item->done = FALSE;
 	item->text = (gchar *) text;
 	item->parent = (gchar *) parent;
@@ -1122,22 +1125,26 @@ main(int argc, char *argv[])
 	
 	// Initialize globals
 	gl_globs = g_malloc(sizeof(GlistaGlobals));
+	gl_globs->uibuilder  = gtk_builder_new();
+	gl_globs->config     = NULL;
 	gl_globs->save_tag   = 0;
+	
+	// Initialize item storage model
 	gl_globs->itemstore  = gtk_tree_store_new(3, 
 											  G_TYPE_BOOLEAN, 
 											  G_TYPE_STRING, 
-											  G_TYPE_BOOLEAN);
-	gl_globs->categories = g_hash_table_new(g_str_hash, g_str_equal);
-	gl_globs->uibuilder  = gtk_builder_new();
-	gl_globs->config     = NULL;
+											  G_TYPE_BOOLEAN);	
+	// Set configuration directory name
 	gl_globs->configdir  = g_build_filename(g_get_user_config_dir(),
 	                                       GLISTA_CONFIG_DIR,
 	                                       NULL);
+	// Initialize categories hashtable
+	gl_globs->categories = g_hash_table_new_full(g_str_hash, g_str_equal,
+		(GDestroyNotify) g_free, (GDestroyNotify) gtk_tree_row_reference_free);
 
 	// Load UI file
 	if (gtk_builder_add_from_file(gl_globs->uibuilder, 
 								  GLISTA_UI_DIR "/glista.ui", NULL) == 0) {
-									  
 		g_printerr("Unable to read UI file: %s\n", GLISTA_UI_DIR "/glista.ui");
 		return 1;
 	}
@@ -1199,4 +1206,3 @@ main(int argc, char *argv[])
 	// Normal termination
 	return 0;
 }
-
