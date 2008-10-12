@@ -209,75 +209,6 @@ glista_toggle_item_done(GtkTreePath *path)
 }
 
 /**
- * glista_delete_done_items:
- * 
- * Clear off all the items marked as "done" from the list. Normally this is 
- * called when the "Clear" button is activated.
- */
-void 
-glista_delete_done_items(GtkTreeIter *parent)
-{
-	GtkTreeIter  iter;
-	GtkTreePath *path;
-	gboolean     status, is_done, is_cat;
-	
-	// Get the iter set for first row
-	status = gtk_tree_model_iter_children(GTK_TREE_MODEL(gl_globs->itemstore), 
-	                                      &iter, parent);
-	                                       
-	while (status) {
-											 
-		gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
-		                   GL_COLUMN_DONE, &is_done,
-						   GL_COLUMN_CATEGORY, &is_cat, 
-						   -1);
-		
-		if (is_cat) {
-			glista_delete_done_items (&iter);
-			status = gtk_tree_model_iter_next(
-				GTK_TREE_MODEL(gl_globs->itemstore), &iter);
-			
-		} else if (is_done) {
-			path = gtk_tree_model_get_path(GTK_TREE_MODEL(gl_globs->itemstore), 
-										   &iter);
-			status = gtk_tree_store_remove(gl_globs->itemstore, &iter);
-			gtk_tree_model_row_deleted(GTK_TREE_MODEL(gl_globs->itemstore), 
-									   path);
-			gtk_tree_path_free(path);
-				
-		} else {
-			status = gtk_tree_model_iter_next(
-				GTK_TREE_MODEL(gl_globs->itemstore), &iter);
-		}	
-	}
-}
-
-/**
- * glista_populate_reflist_cb:
- * @model:    Tree model to iterate on
- * @path:     Current path in tree
- * @iter:     Current iter in tree
- * @ref_list: List to populate with row references
- *
- * Callback function for gtk_tree_selection_selected_foreach(). Populates a list
- * of references to all selected rows in the list. 
- *
- * This function is called from glista_delete_selected_items() in order to build
- * a list of references to rows to delete, because rows cannot be deleted 
- * directly.
- */
-static void 
-glista_populate_reflist_cb(GtkTreeModel *model, GtkTreePath *path,
-                           GtkTreeIter *iter, GList **ref_list)
-{
-	GtkTreeRowReference *ref;
-	
-	g_assert(ref_list != NULL);
-	ref = gtk_tree_row_reference_new(model, path);
-	*ref_list = g_list_append(*ref_list, ref);
-}
-
-/**
  * glista_delete_category:
  * @category: The GtkTreeIter of the category row to remove 
  *
@@ -349,29 +280,21 @@ glista_confirm_delete_category(GtkTreeIter *category)
 }
 
 /**
- * glista_delete_selected_items:
+ * glista_delete_reference_list:
+ * @ref_list: A linked list of items to delete
  *
- * Delete all selected items from the list.
+ * Delete all items passed in in a linked list. This function is called from 
+ * other deletion functions to clear out selected or done items. It does not 
+ * free the list of items for now. 
+ * 
+ * If the list contains a category that still has items in it, it will confirm
+ * with the user first before deleting.
  */
-void 
-glista_delete_selected_items()
+static void 
+glista_delete_reference_list(GList *ref_list)
 {
-	GtkTreeView      *treeview;
-	GtkTreeSelection *selection;
-	GList            *ref_list, *node;
+	GList *node;
 	
-	treeview = GTK_TREE_VIEW(glista_get_widget("glista_item_list"));
-	selection = gtk_tree_view_get_selection(treeview);
-	
-	// Populate list of row references to delete
-	ref_list = NULL;
-	gtk_tree_selection_selected_foreach(
-		selection, 
-	    (GtkTreeSelectionForeachFunc) glista_populate_reflist_cb,
-	    &ref_list
-    );
-
-	// Iterate over reference list, deleting all rows in it
 	for (node = ref_list; node != NULL; node = node->next) {
 	    GtkTreePath *path;
 
@@ -400,7 +323,7 @@ glista_delete_selected_items()
 					
 					// Remove item
 					gtk_tree_store_remove(gl_globs->itemstore, &iter);
-												
+					
 					// Check if parent is now empty
 					if (has_parent && gtk_tree_model_iter_n_children(
 						GTK_TREE_MODEL(gl_globs->itemstore), &parent) < 1) {
@@ -408,12 +331,146 @@ glista_delete_selected_items()
 						// Delete parent as well
 						glista_delete_category(&parent);
 					}
-				}	
+				}
 			}
 
 			gtk_tree_path_free(path);
         }
 	}
+}
+
+/**
+ * glista_populate_selected_reflist:
+ * @model:    Tree model to iterate on
+ * @path:     Current path in tree
+ * @iter:     Current iter in tree
+ * @ref_list: List to populate with row references
+ *
+ * Callback function for gtk_tree_selection_selected_foreach(). Populates a list
+ * of references to all selected rows in the list. 
+ *
+ * This function is called from glista_delete_selected_items() in order to build
+ * a list of references to rows to delete, because rows cannot be deleted 
+ * directly.
+ */
+static void 
+glista_populate_selected_reflist(GtkTreeModel *model, GtkTreePath *path,
+								 GtkTreeIter *iter, GList **ref_list)
+{
+	GtkTreeRowReference *ref;
+	
+	g_assert(ref_list != NULL);
+	ref = gtk_tree_row_reference_new(model, path);
+	*ref_list = g_list_append(*ref_list, ref);
+}
+
+/**
+ * glista_delete_selected_items:
+ *
+ * Delete all selected items from the list. Populates a list of all selected
+ * items (using glista_populate_selected_reflist() as a callback function) and
+ * passes it on to glista_delete_reference_list() to do the actual deletion.
+ */
+void 
+glista_delete_selected_items()
+{
+	GtkTreeView      *treeview;
+	GtkTreeSelection *selection;
+	GList            *ref_list;
+	
+	treeview = GTK_TREE_VIEW(glista_get_widget("glista_item_list"));
+	selection = gtk_tree_view_get_selection(treeview);
+	
+	// Populate list of row references to delete
+	ref_list = NULL;
+	gtk_tree_selection_selected_foreach(
+		selection, 
+	    (GtkTreeSelectionForeachFunc) glista_populate_selected_reflist,
+	    &ref_list
+    );
+	
+	// Delete items
+	glista_delete_reference_list(ref_list);
+
+	// Free reference list
+	g_list_foreach(ref_list, (GFunc) gtk_tree_row_reference_free, NULL);
+    g_list_free(ref_list);
+}
+
+/**
+ * glista_populate_done_reflist: 
+ * @ref_list a pointer-pointer to the GList to populate
+ * @parent   the parent iter when recursing into category children
+ *
+ * Populate a list of done items to be deleted. Called internally by 
+ * glista_delete_done_items(), which later on calles 
+ * glista_delete_reference_list() to do the actual deletion. 
+ */
+static void
+glista_populate_done_reflist(GList **ref_list, GtkTreeIter *parent)
+{
+	GtkTreeIter  iter;
+	
+	gboolean     status;
+	
+	// Get the iter set for first row
+	status = gtk_tree_model_iter_children(GTK_TREE_MODEL(gl_globs->itemstore), 
+	                                      &iter, parent);
+
+	// Iterate on all rows
+	while (status) {
+		GtkTreeRowReference *rowref;
+		GtkTreePath         *path;
+		gboolean             is_done, is_cat;				 
+		
+		gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
+		                   GL_COLUMN_DONE, &is_done,
+						   GL_COLUMN_CATEGORY, &is_cat, 
+						   -1);
+		
+		// If it is a category, look into it's child items
+		if (is_cat) {
+			glista_populate_done_reflist(ref_list, &iter);
+		
+		// If it is done, add it to the list of references
+		} else if (is_done) {
+			// Get a reference to the row
+			path = gtk_tree_model_get_path(GTK_TREE_MODEL(gl_globs->itemstore), 
+										   &iter);
+			rowref = gtk_tree_row_reference_new(
+				GTK_TREE_MODEL(gl_globs->itemstore), path);
+			
+			// Add reference to the linked list
+			*ref_list = g_list_append(*ref_list, rowref);
+			
+			// Free path
+			gtk_tree_path_free(path);
+		}
+		
+		// Advance to next row
+		status = gtk_tree_model_iter_next(GTK_TREE_MODEL(gl_globs->itemstore), 
+										  &iter);
+	}
+}
+
+
+/**
+ * glista_delete_done_items:
+ * 
+ * Clear off all the items marked as "done" from the list. Normally this is 
+ * called when the "Clear" button is activated.
+ */
+void 
+glista_delete_done_items()
+{
+	GList *ref_list;
+	
+	// Populate reference list
+	ref_list = NULL;
+	glista_populate_done_reflist(&ref_list, NULL);
+
+	// Delete items
+	glista_delete_reference_list(ref_list);
 
 	// Free reference list
 	g_list_foreach(ref_list, (GFunc) gtk_tree_row_reference_free, NULL);

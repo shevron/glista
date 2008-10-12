@@ -114,7 +114,7 @@ on_about_clicked(GtkObject *object, gpointer user_data)
 void 
 on_tb_clear_clicked(GtkObject *object, gpointer user_data)
 {
-	glista_delete_done_items(NULL);
+	glista_delete_done_items();
 }
 
 /**
