@@ -305,7 +305,7 @@ glista_confirm_delete_category(GtkTreeIter *category)
 {
 	gchar            *cat_name;
 	gint              response;
-	GtkMessageDialog *dialog;
+	GtkWidget        *dialog;
 	
 	if (gtk_tree_model_iter_n_children(GTK_TREE_MODEL(gl_globs->itemstore), 
 									   category) > 0) {
@@ -316,7 +316,7 @@ glista_confirm_delete_category(GtkTreeIter *category)
 		
 		dialog = gtk_message_dialog_new(
 			GTK_WINDOW(glista_get_widget("glista_main_window")),
-			GTK_DIALOG_DESTROY_WITH_PARENT,
+			GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
 			GTK_MESSAGE_WARNING,
 			GTK_BUTTONS_OK_CANCEL,
 			"Are you sure you want to delete the category \"%s\" and "
@@ -324,7 +324,7 @@ glista_confirm_delete_category(GtkTreeIter *category)
 			cat_name);
 		
 		response = gtk_dialog_run(GTK_DIALOG(dialog));
-		gtk_widget_destroy(GTK_WIDGET(dialog));
+		gtk_widget_destroy(dialog);
 		
 		// Delete category only if confirmed
 		if (response == GTK_RESPONSE_OK) {
