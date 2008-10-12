@@ -109,12 +109,12 @@ on_about_clicked(GtkObject *object, gpointer user_data)
  * @user_data: User data passed when the event was connected
  *
  * Called when the "Clear" button in the toolbar is clicked. Simply calls 
- * glista_clear_done_items().
+ * glista_delete_done_items().
  */
 void 
 on_tb_clear_clicked(GtkObject *object, gpointer user_data)
 {
-	glista_clear_done_items(NULL);
+	glista_delete_done_items(NULL);
 }
 
 /**

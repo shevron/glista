@@ -209,13 +209,13 @@ glista_toggle_item_done(GtkTreePath *path)
 }
 
 /**
- * glista_clear_done_items:
+ * glista_delete_done_items:
  * 
  * Clear off all the items marked as "done" from the list. Normally this is 
  * called when the "Clear" button is activated.
  */
 void 
-glista_clear_done_items(GtkTreeIter *parent)
+glista_delete_done_items(GtkTreeIter *parent)
 {
 	GtkTreeIter  iter;
 	GtkTreePath *path;
@@ -233,7 +233,7 @@ glista_clear_done_items(GtkTreeIter *parent)
 						   -1);
 		
 		if (is_cat) {
-			glista_clear_done_items (&iter);
+			glista_delete_done_items (&iter);
 			status = gtk_tree_model_iter_next(
 				GTK_TREE_MODEL(gl_globs->itemstore), &iter);
 			
@@ -304,6 +304,13 @@ glista_delete_category(GtkTreeIter *category)
 	gtk_tree_store_remove(gl_globs->itemstore, category);
 }
 
+/**
+ * glista_confirm_delete_category:
+ * @category: A GtkTreeIter pointing to the category to delete
+ *
+ * Show a message dialog confirming the deletion of a category with all it's
+ * child items. If the user approves, will call glista_delete_category().
+ */
 void
 glista_confirm_delete_category(GtkTreeIter *category) 
 {
