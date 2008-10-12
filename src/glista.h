@@ -85,7 +85,6 @@ typedef struct _glista_data_struct {
 static GlistaGlobals *gl_globs;
 
 // Function Prototypes
-void        glista_add_to_list(GlistaItem *item);
 void        glista_toggle_item_done(GtkTreePath *path);
 void        glista_change_item_text(GtkTreePath *path, gchar *text);
 void        glista_clear_done_items(GtkTreeIter *parent);

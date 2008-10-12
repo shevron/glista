@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sat Aug 30 17:02:36 2008 -->
+<!--Generated with glade3 3.4.5 on Sun Oct 12 18:25:47 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="glista_main_window">
     <property name="title" translatable="yes">Glista</property>
@@ -29,7 +29,7 @@
                     <signal name="clicked" handler="on_tb_delete_clicked"/>
                   </widget>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="homogeneous">True</property>
                   </packing>
                 </child>
                 <child>
@@ -40,7 +40,7 @@
                     <signal name="clicked" handler="on_tb_clear_clicked"/>
                   </widget>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="homogeneous">True</property>
                   </packing>
                 </child>
               </widget>
@@ -58,10 +58,6 @@
                     <property name="stock_id">gtk-about</property>
                     <signal name="clicked" handler="on_about_clicked"/>
                   </widget>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="homogeneous">False</property>
-                  </packing>
                 </child>
               </widget>
               <packing>
@@ -90,8 +86,8 @@
                 <property name="receives_default">True</property>
                 <property name="border_width">1</property>
                 <property name="headers_visible">False</property>
+                <property name="reorderable">True</property>
                 <property name="search_column">1</property>
-                <property name="enable_tree_lines">True</property>
                 <property name="tooltip_column">1</property>
               </widget>
             </child>

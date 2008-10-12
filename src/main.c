@@ -114,7 +114,7 @@ glista_get_category_path(gchar *key)
  * is stripped of leading and trailing spaces, and empty strings are ignored.
  */
 void
-glista_add_to_list(GlistaItem *item)
+glista_add_to_list(GlistaItem *item, gboolean expand)
 {
 	GtkTreeIter  iter, parent_iter;
 	GtkTreePath *parent;
@@ -129,6 +129,10 @@ glista_add_to_list(GlistaItem *item)
 								parent);
 		
 		gtk_tree_store_append(gl_globs->itemstore, &iter, &parent_iter);
+		
+		// Expand parent so that new child is visible
+		if (expand) gtk_tree_view_expand_row(
+			GTK_TREE_VIEW(glista_get_widget("glista_item_list")), parent, TRUE);
 	}
 	
 	gtk_tree_store_set(gl_globs->itemstore, &iter, 
@@ -171,7 +175,7 @@ glista_add_new_item_from_text(gchar *text)
 		}
 		
 		if (item != NULL) {
-			glista_add_to_list(item);
+			glista_add_to_list(item, TRUE);
 			glista_item_free(item);
 		}
 	}
@@ -751,10 +755,10 @@ void glista_init_list()
 	
 	// Set the text column to expand
 	g_object_set(text_column, "expand", TRUE, NULL);
-	g_object_set(done_ren, "xpad", 5, NULL);
 	
 	gtk_tree_view_append_column(treeview, text_column);
 	gtk_tree_view_append_column(treeview, done_column);	
+	
 	gtk_tree_view_set_model(treeview, GTK_TREE_MODEL(gl_globs->itemstore));
 	
 	// Set sort function and column
@@ -774,7 +778,7 @@ void glista_init_list()
 	// Load data
 	glista_storage_load_all_items(&all_items);
 	for (item = all_items; item != NULL; item = item->next) {
-		glista_add_to_list(item->data);
+		glista_add_to_list(item->data, FALSE);
 		glista_item_free(item->data);
 	}
 	g_list_free(all_items);
