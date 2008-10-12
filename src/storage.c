@@ -136,55 +136,51 @@ glista_storage_save_all_items(GList *all_items)
 	gchar            *storage_file;
 	gchar             done_str[2];
 	
-	// Make sure we actually have something to write	
-	if (all_items != NULL) {
+	// Build storage file path
+	storage_file = g_build_filename(gl_globs->configdir, 
+									GL_XML_FILENAME, NULL);
+	
+	// Start XML
+	xml = xmlNewTextWriterFilename(storage_file, 0);
+	g_free(storage_file);
+	
+	if (xml == NULL) {
+		fprintf(stderr, "Unable to write data to storage XML file\n");
+		return;
+	}
+	
+	xmlTextWriterSetIndent(xml, 1);
+	xmlTextWriterSetIndentString(xml, BAD_CAST "  ");
+	
+	ret = xmlTextWriterStartDocument(xml, NULL, GL_XML_ENCODING, "yes");
+	ret = xmlTextWriterStartElement(xml, BAD_CAST "glista");
 
-		// Build storage file path
-		storage_file = g_build_filename(gl_globs->configdir, 
-		                                GL_XML_FILENAME, NULL);
+	// Iterate over items, writing them to the XML file
+	while (all_items != NULL) {
+		item = all_items->data;
 		
-		// Start XML
-		xml = xmlNewTextWriterFilename(storage_file, 0);
-		g_free(storage_file);
+		g_snprintf((gchar *) &done_str, 2, "%d", item->done);
 		
-		if (xml == NULL) {
-			fprintf(stderr, "Unable to write data to storage XML file\n");
-			return;
+		ret = xmlTextWriterStartElement(xml, BAD_CAST "item");
+		ret = xmlTextWriterWriteElement(xml, BAD_CAST "text", 
+										BAD_CAST item->text);
+		ret = xmlTextWriterWriteElement(xml, BAD_CAST "done", 
+										BAD_CAST &done_str);
+		
+		if (item->parent != NULL) {
+			ret = xmlTextWriterWriteElement(xml, BAD_CAST "parent", 
+											BAD_CAST item->parent);
 		}
 		
-		xmlTextWriterSetIndent(xml, 1);
-		xmlTextWriterSetIndentString(xml, BAD_CAST "  ");
-		
-		ret = xmlTextWriterStartDocument(xml, NULL, GL_XML_ENCODING, "yes");
-		ret = xmlTextWriterStartElement(xml, BAD_CAST "glista");
-	
-		// Iterate over items, writing them to the XML file
-		do {
-			item = all_items->data;
-			
-			g_snprintf((gchar *) &done_str, 2, "%d", item->done);
-			
-			ret = xmlTextWriterStartElement(xml, BAD_CAST "item");
-			ret = xmlTextWriterWriteElement(xml, BAD_CAST "text", 
-				                            BAD_CAST item->text);
-			ret = xmlTextWriterWriteElement(xml, BAD_CAST "done", 
-			                                BAD_CAST &done_str);
-			
-			if (item->parent != NULL) {
-				ret = xmlTextWriterWriteElement(xml, BAD_CAST "parent", 
-												BAD_CAST item->parent);
-			}
-			
-			ret = xmlTextWriterEndElement(xml);
-			
-		} while ((all_items = all_items->next) != NULL);
-		
-		// End XML
 		ret = xmlTextWriterEndElement(xml);
-		ret = xmlTextWriterEndDocument(xml);
 		
-		xmlTextWriterFlush(xml);
-		xmlFreeTextWriter(xml);
+		all_items = all_items->next;
 	}
+	
+	// End XML
+	ret = xmlTextWriterEndElement(xml);
+	ret = xmlTextWriterEndDocument(xml);
+	
+	xmlTextWriterFlush(xml);
+	xmlFreeTextWriter(xml);
 }
-
