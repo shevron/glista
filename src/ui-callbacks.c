@@ -50,7 +50,7 @@ on_glista_main_window_destroy(GtkObject *object, gpointer user_data)
  * @user_data: User data passed when the event was connected
  *
  * Triggered when the user clicks the "add" button. Reads the text from the
- * "new item" text entry and sends it off to glista_add_to_list().
+ * "new item" text entry and sends it off to glista_item_create_from_text().
  */
 void 
 on_add_button_clicked(GtkObject *object, gpointer user_data)
@@ -60,7 +60,7 @@ on_add_button_clicked(GtkObject *object, gpointer user_data)
 	
 	entry = GTK_ENTRY(glista_get_widget("add-entry"));
 	text  = (gchar *) gtk_entry_get_text(entry);
-	glista_add_new_item_from_text (text);
+	glista_item_create_from_text(text);
 	gtk_entry_set_text(entry, "");
 }
 
@@ -71,7 +71,7 @@ on_add_button_clicked(GtkObject *object, gpointer user_data)
  * @user_data: User data passed when the event was connected
  *
  * Called when an item in the list is marked as done / not done. Calls 
- * glista_toggle_item_done().
+ * glista_item_toggle_done().
  */
 void 
 on_item_done_toggled(GtkCellRendererToggle *renderer, gchar *pathstr, 
@@ -80,7 +80,7 @@ on_item_done_toggled(GtkCellRendererToggle *renderer, gchar *pathstr,
 	GtkTreePath *path;
 	
 	path = gtk_tree_path_new_from_string(pathstr);	
-	glista_toggle_item_done(path);
+	glista_item_toggle_done(path);
 	
 	gtk_tree_path_free(path);
 }
@@ -196,7 +196,7 @@ on_sysicon_popup_menu(GtkStatusIcon *icon, guint button, guint activate_time,
  * @text:      new text
  * @user_data: data passed during signal connect
  *
- * Called when the user edited item text. Will call glista_change_item_text(), 
+ * Called when the user edited item text. Will call glista_item_change_text(), 
  * or ignore if the new text is invalid (eg. empty).
  */
 void 
@@ -209,7 +209,7 @@ on_item_text_edited(GtkCellRendererText *renderer, gchar *pathstr,
 
 	if (strlen(text) > 0) {
 		path = gtk_tree_path_new_from_string(pathstr);	
-		glista_change_item_text(path, text);
+		glista_item_change_text(path, text);
 		gtk_tree_path_free(path);
 	}
 }

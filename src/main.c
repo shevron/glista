@@ -145,14 +145,14 @@ glista_add_to_list(GlistaItem *item, gboolean expand)
 }
 
 /**
- * glista_add_new_item_from_text:
+ * glista_item_create_from_text:
  * @text: Input text from user
  *
  * Create a new entry from user input. Will parse and break down the text,
  * create a new item and add it to the model.
  */
 void
-glista_add_new_item_from_text(gchar *text)
+glista_item_create_from_text(gchar *text)
 {
 	gchar      **tokens;
 	GlistaItem  *item = NULL;
@@ -186,7 +186,7 @@ glista_add_new_item_from_text(gchar *text)
 }
 
 /**
- * glista_toggle_item_done:
+ * glista_item_toggle_done:
  * @path: The path in the list to toggle
  *
  * Toggle the "done" flag on an item in the to-do list. This function only 
@@ -194,7 +194,7 @@ glista_add_new_item_from_text(gchar *text)
  * coloring, etc. is automatically handled in the GtkTreeView layer.
  */
 void 
-glista_toggle_item_done(GtkTreePath *path)
+glista_item_toggle_done(GtkTreePath *path)
 {
 	GtkTreeIter  iter;
 	gboolean     current; 
@@ -605,7 +605,7 @@ glista_category_rename(GtkTreePath *old_path, GtkTreeIter *old_iter,
 }
 
 /**
- * glista_change_item_text:
+ * glista_item_change_text:
  * @path: The path of the item to change
  * @text: The new text to set
  *
@@ -613,7 +613,7 @@ glista_category_rename(GtkTreePath *old_path, GtkTreeIter *old_iter,
  * renaming, call glista_category_rename().
  */
 void
-glista_change_item_text(GtkTreePath *path, gchar *text)
+glista_item_change_text(GtkTreePath *path, gchar *text)
 {
 	GtkTreeIter iter;
 	gboolean    is_cat;
