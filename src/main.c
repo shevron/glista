@@ -220,7 +220,7 @@ glista_toggle_item_done(GtkTreePath *path)
 void 
 glista_delete_category(GtkTreeIter *category)
 {
-	gchar               *cat_name;
+	gchar               *cat_name, *key;
 	GtkTreeRowReference *rowref;
 	
 	// Get the name of the category we are deleting
@@ -228,9 +228,11 @@ glista_delete_category(GtkTreeIter *category)
 					   GL_COLUMN_TEXT, &cat_name, -1);
 	
 	// Remove category from categories hashtable
-	if ((rowref = g_hash_table_lookup(gl_globs->categories, cat_name)) != NULL) {
-		g_hash_table_remove(gl_globs->categories, cat_name);
-	}	
+	key = g_utf8_strdown (cat_name, -1);
+	if ((rowref = g_hash_table_lookup(gl_globs->categories, key)) != NULL) {
+		g_hash_table_remove(gl_globs->categories, key);
+	}
+	g_free(key);
 	
 	// Remove category from model
 	gtk_tree_store_remove(gl_globs->itemstore, category);
@@ -536,22 +538,98 @@ glista_toggle_main_window_visible()
 }
 
 /**
+ * glista_category_rename: 
+ * @old_path: The path of the category to rename
+ * @old_iter: The iterator pointing to the category to rename
+ * @new_name: The new name to change to
+ *
+ * Rename / move a category. If category with the new name already exists, will
+ * merge the children of the old category into the new one. 
+ */
+static void 
+glista_category_rename(GtkTreePath *old_path, GtkTreeIter *old_iter, 
+					   gchar *new_name)
+{
+	GtkTreeIter  child_iter;
+	GtkTreePath *new_cat;
+	gchar       *old_name;
+	
+	// First of all make sure that the name is actually changing
+	gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), old_iter, 
+					   GL_COLUMN_TEXT, &old_name, -1);
+	if (g_strcmp0(old_name, new_name) != 0) {
+		
+		// Create a new category
+		new_cat = glista_get_category_path(new_name);
+		
+		// Move all child elements to the path of this category
+		if (gtk_tree_model_iter_children(GTK_TREE_MODEL(gl_globs->itemstore), 
+										 &child_iter, old_iter)) {
+			
+			do {
+				GlistaItem *item;
+				gchar      *item_text;
+				gboolean    item_done;
+				
+				gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), 
+								   &child_iter, 
+								   GL_COLUMN_TEXT, &item_text,
+								   GL_COLUMN_DONE, &item_done, -1);
+				
+				// Add new item to new parent
+				item = glista_item_new(item_text, new_name);
+				item->done = item_done;
+				glista_add_to_list(item, FALSE);
+				glista_item_free(item);
+
+			} while (gtk_tree_model_iter_next(
+				GTK_TREE_MODEL(gl_globs->itemstore), &child_iter));
+					
+			// If the old category was expanded, expand the new one
+			if (gtk_tree_view_row_expanded (
+				GTK_TREE_VIEW(glista_get_widget("glista_item_list")), 
+				old_path)) {
+					
+				gtk_tree_view_expand_row(
+					GTK_TREE_VIEW(glista_get_widget("glista_item_list")),
+					new_cat, FALSE);
+			}
+		}
+		
+		// Delete old category with it's children
+		glista_delete_category(old_iter);
+		
+		// Free the new category path
+		gtk_tree_path_free(new_cat);
+	}
+}
+
+/**
  * glista_change_item_text:
  * @path: The path of the item to change
  * @text: The new text to set
  *
- * Change the text of one of the list items
+ * Change the text of one of the list items. If it is a category we are 
+ * renaming, call glista_category_rename().
  */
 void
 glista_change_item_text(GtkTreePath *path, gchar *text)
 {
-	GtkTreeIter  iter;
-
+	GtkTreeIter iter;
+	gboolean    is_cat;
+	
 	if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
 								&iter, path)) {
 									
-		gtk_tree_store_set(gl_globs->itemstore, &iter, 
-		                   GL_COLUMN_TEXT, text, -1);
+		gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
+						   GL_COLUMN_CATEGORY, &is_cat, -1);
+		
+		if (is_cat) {
+			glista_category_rename (path, &iter, text);
+		} else {
+			gtk_tree_store_set(gl_globs->itemstore, &iter, 
+		    	               GL_COLUMN_TEXT, text, -1);
+		}
 	}
 }
 
