@@ -109,12 +109,12 @@ on_about_clicked(GtkObject *object, gpointer user_data)
  * @user_data: User data passed when the event was connected
  *
  * Called when the "Clear" button in the toolbar is clicked. Simply calls 
- * glista_delete_done_items().
+ * glista_list_delete_done().
  */
 void 
 on_tb_clear_clicked(GtkObject *object, gpointer user_data)
 {
-	glista_delete_done_items();
+	glista_list_delete_done();
 }
 
 /**
@@ -145,12 +145,12 @@ on_glista_item_list_selection_changed(GtkTreeSelection *selection,
  * @user_data: User data passed when the event was connected
  *
  * Called when the toolbar "Delete" button is clicked. Will simply call
- * glista_delete_selected_items().
+ * glista_list_delete_selected().
  */
 void 
 on_tb_delete_clicked(GtkObject *object, gpointer user_data)
 {
-	glista_delete_selected_items();
+	glista_list_delete_selected();
 }
 
 /**
@@ -159,12 +159,12 @@ on_tb_delete_clicked(GtkObject *object, gpointer user_data)
  * @user_data: User data passed when the event was connected
  *
  * Called when the system tray status icon is clicked. Simply calls
- * glista_toggle_main_window_visible().
+ * glista_ui_mainwindow_toggle().
  */
 void 
 on_sysicon_activate(GtkObject *object, GtkWindow *window)
 {
-	glista_toggle_main_window_visible();
+	glista_ui_mainwindow_toggle();
 }
 
 /**

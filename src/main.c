@@ -32,13 +32,13 @@ static int errno = 0;
  */
 
 /**
- * glista_main_window_present:
+ * glista_ui_mainwindow_show:
  *
  * Show the main window, positioning and resizing it according to configuration
  * data
  */
 static void 
-glista_main_window_present()
+glista_ui_mainwindow_show()
 {
 	GtkWindow *window;
 		
@@ -211,14 +211,14 @@ glista_item_toggle_done(GtkTreePath *path)
 }
 
 /**
- * glista_delete_category:
+ * glista_category_delete:
  * @category: The GtkTreeIter of the category row to remove 
  *
  * deletes a gategory, including all it's child items, from the tree model and
  * from the categories hash table
  */
 void 
-glista_delete_category(GtkTreeIter *category)
+glista_category_delete(GtkTreeIter *category)
 {
 	gchar               *cat_name, *key;
 	GtkTreeRowReference *rowref;
@@ -239,14 +239,14 @@ glista_delete_category(GtkTreeIter *category)
 }
 
 /**
- * glista_confirm_delete_category:
+ * glista_category_confirm_delete:
  * @category: A GtkTreeIter pointing to the category to delete
  *
  * Show a message dialog confirming the deletion of a category with all it's
- * child items. If the user approves, will call glista_delete_category().
+ * child items. If the user approves, will call glista_category_delete().
  */
 void
-glista_confirm_delete_category(GtkTreeIter *category) 
+glista_category_confirm_delete(GtkTreeIter *category) 
 {
 	gchar            *cat_name;
 	gint              response;
@@ -273,17 +273,17 @@ glista_confirm_delete_category(GtkTreeIter *category)
 		
 		// Delete category only if confirmed
 		if (response == GTK_RESPONSE_OK) {
-			glista_delete_category (category);
+			glista_category_delete (category);
 		}
 										
 	} else {
 		// If it has no children, just delete it
-		glista_delete_category (category);	
+		glista_category_delete (category);	
 	}	
 }
 
 /**
- * glista_delete_reference_list:
+ * glista_list_delete_reflist:
  * @ref_list: A linked list of items to delete
  *
  * Delete all items passed in in a linked list. This function is called from 
@@ -294,7 +294,7 @@ glista_confirm_delete_category(GtkTreeIter *category)
  * with the user first before deleting.
  */
 static void 
-glista_delete_reference_list(GList *ref_list)
+glista_list_delete_reflist(GList *ref_list)
 {
 	GList *node;
 	
@@ -317,7 +317,7 @@ glista_delete_reference_list(GList *ref_list)
 								   GL_COLUMN_CATEGORY, &is_cat, -1);
 				if (is_cat) {
 					// Show the confirm dialog before deleting any categories
-					glista_confirm_delete_category(&iter);
+					glista_category_confirm_delete(&iter);
 					
 				} else {	
 					// Check if this item has a parent category
@@ -332,7 +332,7 @@ glista_delete_reference_list(GList *ref_list)
 						GTK_TREE_MODEL(gl_globs->itemstore), &parent) < 1) {
 						
 						// Delete parent as well
-						glista_delete_category(&parent);
+						glista_category_delete(&parent);
 					}
 				}
 			}
@@ -343,7 +343,7 @@ glista_delete_reference_list(GList *ref_list)
 }
 
 /**
- * glista_populate_selected_reflist:
+ * glista_list_get_selected_reflist:
  * @model:    Tree model to iterate on
  * @path:     Current path in tree
  * @iter:     Current iter in tree
@@ -352,12 +352,12 @@ glista_delete_reference_list(GList *ref_list)
  * Callback function for gtk_tree_selection_selected_foreach(). Populates a list
  * of references to all selected rows in the list. 
  *
- * This function is called from glista_delete_selected_items() in order to build
+ * This function is called from glista_list_delete_selected() in order to build
  * a list of references to rows to delete, because rows cannot be deleted 
  * directly.
  */
 static void 
-glista_populate_selected_reflist(GtkTreeModel *model, GtkTreePath *path,
+glista_list_get_selected_reflist(GtkTreeModel *model, GtkTreePath *path,
 								 GtkTreeIter *iter, GList **ref_list)
 {
 	GtkTreeRowReference *ref;
@@ -368,14 +368,14 @@ glista_populate_selected_reflist(GtkTreeModel *model, GtkTreePath *path,
 }
 
 /**
- * glista_delete_selected_items:
+ * glista_list_delete_selected:
  *
  * Delete all selected items from the list. Populates a list of all selected
- * items (using glista_populate_selected_reflist() as a callback function) and
- * passes it on to glista_delete_reference_list() to do the actual deletion.
+ * items (using glista_list_get_selected_reflist() as a callback function) and
+ * passes it on to glista_list_delete_reflist() to do the actual deletion.
  */
 void 
-glista_delete_selected_items()
+glista_list_delete_selected()
 {
 	GtkTreeView      *treeview;
 	GtkTreeSelection *selection;
@@ -388,12 +388,12 @@ glista_delete_selected_items()
 	ref_list = NULL;
 	gtk_tree_selection_selected_foreach(
 		selection, 
-	    (GtkTreeSelectionForeachFunc) glista_populate_selected_reflist,
+	    (GtkTreeSelectionForeachFunc) glista_list_get_selected_reflist,
 	    &ref_list
     );
 	
 	// Delete items
-	glista_delete_reference_list(ref_list);
+	glista_list_delete_reflist(ref_list);
 
 	// Free reference list
 	g_list_foreach(ref_list, (GFunc) gtk_tree_row_reference_free, NULL);
@@ -401,16 +401,16 @@ glista_delete_selected_items()
 }
 
 /**
- * glista_populate_done_reflist: 
+ * glista_list_get_done_reflist: 
  * @ref_list a pointer-pointer to the GList to populate
  * @parent   the parent iter when recursing into category children
  *
  * Populate a list of done items to be deleted. Called internally by 
- * glista_delete_done_items(), which later on calles 
- * glista_delete_reference_list() to do the actual deletion. 
+ * glista_list_delete_done(), which later on calles 
+ * glista_list_delete_reflist() to do the actual deletion. 
  */
 static void
-glista_populate_done_reflist(GList **ref_list, GtkTreeIter *parent)
+glista_list_get_done_reflist(GList **ref_list, GtkTreeIter *parent)
 {
 	GtkTreeIter  iter;
 	
@@ -433,7 +433,7 @@ glista_populate_done_reflist(GList **ref_list, GtkTreeIter *parent)
 		
 		// If it is a category, look into it's child items
 		if (is_cat) {
-			glista_populate_done_reflist(ref_list, &iter);
+			glista_list_get_done_reflist(ref_list, &iter);
 		
 		// If it is done, add it to the list of references
 		} else if (is_done) {
@@ -458,22 +458,22 @@ glista_populate_done_reflist(GList **ref_list, GtkTreeIter *parent)
 
 
 /**
- * glista_delete_done_items:
+ * glista_list_delete_done:
  * 
  * Clear off all the items marked as "done" from the list. Normally this is 
  * called when the "Clear" button is activated.
  */
 void 
-glista_delete_done_items()
+glista_list_delete_done()
 {
 	GList *ref_list;
 	
 	// Populate reference list
 	ref_list = NULL;
-	glista_populate_done_reflist(&ref_list, NULL);
+	glista_list_get_done_reflist(&ref_list, NULL);
 
 	// Delete items
-	glista_delete_reference_list(ref_list);
+	glista_list_delete_reflist(ref_list);
 
 	// Free reference list
 	g_list_foreach(ref_list, (GFunc) gtk_tree_row_reference_free, NULL);
@@ -481,14 +481,14 @@ glista_delete_done_items()
 }
 
 /**
- * glista_store_window_geometry:
+ * glista_ui_mainwindow_store_geo:
  * @window The main window
  *
  * Save the current geometry (position and size) of the window in memory if the
  * window is visible
  */
 static void
-glista_store_window_geometry(GtkWindow *window)
+glista_ui_mainwindow_store_geo(GtkWindow *window)
 {
 	gboolean visible;
 	gint     width, height;
@@ -511,13 +511,13 @@ glista_store_window_geometry(GtkWindow *window)
 }
 
 /**
- * glista_toggle_main_window_visible:
+ * glista_ui_mainwindow_toggle:
  *
  * Toggle the visibility of the main window. This is normally called when the
  * user left-clicks the status icon in the system tray.
  */
 void 
-glista_toggle_main_window_visible()
+glista_ui_mainwindow_toggle()
 {
 	gboolean   current;
 	GtkWidget *window;
@@ -529,11 +529,11 @@ glista_toggle_main_window_visible()
 	
 	// If hidden - show, if visible - hide
 	if (current) {
-		glista_store_window_geometry(GTK_WINDOW(window));
+		glista_ui_mainwindow_store_geo(GTK_WINDOW(window));
 		gtk_widget_hide(window);
 		gl_globs->config->visible = FALSE;
 	} else {
-		glista_main_window_present();
+		glista_ui_mainwindow_show();
 	}
 }
 
@@ -597,7 +597,7 @@ glista_category_rename(GtkTreePath *old_path, GtkTreeIter *old_iter,
 		}
 		
 		// Delete old category with it's children
-		glista_delete_category(old_iter);
+		glista_category_delete(old_iter);
 		
 		// Free the new category path
 		gtk_tree_path_free(new_cat);
@@ -675,14 +675,14 @@ glista_item_free(GlistaItem *item)
  * @model: The tree model 
  * @iter:  The iterator pointing to the parent category
  *
- * Get the text to display next to a category name in the tree view. Will
+ * Get the text to display next to an item or a category in the tree view. Will
  * add the count of done tasks out of the total tasks in the category to the 
  * category name
  *
  * Returns: the category string to display
  */
-gchar *
-glista_get_item_display_text(GtkTreeModel *model, GtkTreeIter *iter)
+static gchar *
+glista_item_get_display_text(GtkTreeModel *model, GtkTreeIter *iter)
 {
 	gboolean     is_cat, is_done;
 	gint         i, child_c, done_c;
@@ -757,7 +757,7 @@ glista_item_text_cell_data_func(GtkTreeViewColumn *column,
 	}
 	
 	// Set weight and text depending on whether this is a category or not
-	text = glista_get_item_display_text(model, iter);
+	text = glista_item_get_display_text(model, iter);
 	weight = (category ? 800 : 400);
 	g_object_set(cell, "weight", weight, "text", text, NULL);
 }
@@ -930,7 +930,7 @@ void glista_list_init()
 }
 
 /**
- * glista_read_item_list:
+ * glista_list_get_all_items:
  * @item_list: GList to populate with item
  * @parent:    The parent node, or NULL for root
  *
@@ -940,7 +940,7 @@ void glista_list_init()
  * Returns: The pointer to the first element of the list
  */
 static GList*
-glista_read_item_list(GList *item_list, GtkTreeIter *parent)
+glista_list_get_all_items(GList *item_list, GtkTreeIter *parent)
 {
 	GtkTreeIter  iter;
 	GlistaItem  *item;
@@ -951,7 +951,7 @@ glista_read_item_list(GList *item_list, GtkTreeIter *parent)
 		do {
 			if (gtk_tree_model_iter_has_child(GTK_TREE_MODEL(gl_globs->itemstore),
 											  &iter)) {
-				item_list = glista_read_item_list(item_list, &iter);
+				item_list = glista_list_get_all_items(item_list, &iter);
 				
 			} else {
 				item = glista_item_new(NULL, NULL);
@@ -996,7 +996,7 @@ glista_list_save()
 	}
 	locked = TRUE;
 	
-	all_items = glista_read_item_list(all_items, NULL);
+	all_items = glista_list_get_all_items(all_items, NULL);
 	glista_storage_save_all_items(all_items);
     	
    	// Free items list
@@ -1051,14 +1051,14 @@ glista_list_save_timeout()
 }
 
 /**
- * glista_verify_config_dir:
+ * glista_cfg_check_dir:
  *
  * Make sure the configuration directory exists. 
  * Returns: TRUE if directory exists or was successfuly created, or FALSE if 
  * there was an error creating it.
  */
 static gboolean
-glista_verify_config_dir()
+glista_cfg_check_dir()
 {
 	if (! g_file_test(gl_globs->configdir, G_FILE_TEST_IS_DIR)) {
 		if (! g_file_test(gl_globs->configdir, G_FILE_TEST_EXISTS)) {
@@ -1085,12 +1085,12 @@ glista_verify_config_dir()
 }
 
 /**
- * glista_init_load_configuration:
+ * glista_cfg_init_load:
  * 
  * Initialize and load the program's configuration data from file
  */
 void
-glista_init_load_configuration()
+glista_cfg_init_load()
 {
 	gchar        *cfgfile;
 	GKeyFile     *keyfile;
@@ -1106,7 +1106,7 @@ glista_init_load_configuration()
 	
 	cfgfile = g_build_filename(gl_globs->configdir, "glista.conf", NULL);
 	
-	glista_verify_config_dir();
+	glista_cfg_check_dir();
 
 	// Load configuration data from file
 	keyfile = g_key_file_new();
@@ -1136,12 +1136,12 @@ glista_init_load_configuration()
 }
 
 /**
- * glista_save_configuration:
+ * glista_cfg_save:
  *
  * Save the configuration data to file
  */
 static void
-glista_save_configuration()
+glista_cfg_save()
 {
 	gchar     *cfgfile, *cfgdata;
 	gsize      cfgdatalen;
@@ -1164,7 +1164,7 @@ glista_save_configuration()
 	g_key_file_set_boolean(keyfile, "glistaui", "visible", 
 						   gl_globs->config->visible);
 	
-	glista_verify_config_dir();
+	glista_cfg_check_dir();
 		
 	// Save configuration file
 	cfgdata = g_key_file_to_data(keyfile, &cfgdatalen, NULL);
@@ -1250,7 +1250,7 @@ main(int argc, char *argv[])
 					 G_CALLBACK(on_sysicon_popup_menu), NULL);
 
 	// Load configuration
-	glista_init_load_configuration();
+	glista_cfg_init_load();
 	
 	// Hook up model change signals to the data save handler
 	g_signal_connect(gl_globs->itemstore, "row-changed", 
@@ -1262,7 +1262,7 @@ main(int argc, char *argv[])
 	
 	// Show the main window if needed
 	if (gl_globs->config->visible) {
-		glista_main_window_present();
+		glista_ui_mainwindow_show();
 	}
 
 	// Run main loop
@@ -1272,8 +1272,8 @@ main(int argc, char *argv[])
 	while (! glista_list_save());
 	
 	// Save configuration
-	glista_store_window_geometry(GTK_WINDOW(window));
-	glista_save_configuration();
+	glista_ui_mainwindow_store_geo(GTK_WINDOW(window));
+	glista_cfg_save();
 
 	// Free globals
 	g_hash_table_destroy(gl_globs->categories);
