@@ -71,7 +71,7 @@ glista_main_window_present()
  * Returns: The path to the requested category
  */
 GtkTreePath*
-glista_get_category_path(gchar *key)
+glista_category_get_path(gchar *key)
 {
 	GtkTreeRowReference *rowref;
 	GtkTreeIter          iter;
@@ -108,7 +108,7 @@ glista_get_category_path(gchar *key)
 }
 
 /**
- * glista_add_to_list:
+ * glista_list_add:
  * @text: Item text
  *
  * Adds an additional to-do item to the list. The item text must be provided, 
@@ -116,7 +116,7 @@ glista_get_category_path(gchar *key)
  * is stripped of leading and trailing spaces, and empty strings are ignored.
  */
 void
-glista_add_to_list(GlistaItem *item, gboolean expand)
+glista_list_add(GlistaItem *item, gboolean expand)
 {
 	GtkTreeIter  iter, parent_iter;
 	GtkTreePath *parent;
@@ -125,7 +125,7 @@ glista_add_to_list(GlistaItem *item, gboolean expand)
 		gtk_tree_store_append(gl_globs->itemstore, &iter, NULL);
 		
 	} else {
-		parent = glista_get_category_path(item->parent);		
+		parent = glista_category_get_path(item->parent);		
 		gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
 								&parent_iter,
 								parent);
@@ -177,7 +177,7 @@ glista_item_create_from_text(gchar *text)
 		}
 		
 		if (item != NULL) {
-			glista_add_to_list(item, TRUE);
+			glista_list_add(item, TRUE);
 			glista_item_free(item);
 		}
 	}
@@ -560,7 +560,7 @@ glista_category_rename(GtkTreePath *old_path, GtkTreeIter *old_iter,
 	if (g_strcmp0(old_name, new_name) != 0) {
 		
 		// Create a new category
-		new_cat = glista_get_category_path(new_name);
+		new_cat = glista_category_get_path(new_name);
 		
 		// Move all child elements to the path of this category
 		if (gtk_tree_model_iter_children(GTK_TREE_MODEL(gl_globs->itemstore), 
@@ -579,7 +579,7 @@ glista_category_rename(GtkTreePath *old_path, GtkTreeIter *old_iter,
 				// Add new item to new parent
 				item = glista_item_new(item_text, new_name);
 				item->done = item_done;
-				glista_add_to_list(item, FALSE);
+				glista_list_add(item, FALSE);
 				glista_item_free(item);
 
 			} while (gtk_tree_model_iter_next(
@@ -856,12 +856,12 @@ glista_list_sort_func(GtkTreeModel *model, GtkTreeIter *row_a,
 }
 
 /**
- * glista_init_list:
+ * glista_list_init:
  *
  * Initialize the list of items and the view layer to display it.
  */
 static 
-void glista_init_list()
+void glista_list_init()
 {
 	GtkCellRenderer   *text_ren, *done_ren;
 	GtkTreeViewColumn *text_column, *done_column;
@@ -923,7 +923,7 @@ void glista_init_list()
 	// Load data
 	glista_storage_load_all_items(&all_items);
 	for (item = all_items; item != NULL; item = item->next) {
-		glista_add_to_list(item->data, FALSE);
+		glista_list_add(item->data, FALSE);
 		glista_item_free(item->data);
 	}
 	g_list_free(all_items);
@@ -977,7 +977,7 @@ glista_read_item_list(GList *item_list, GtkTreeIter *parent)
 }
 					  
 /**
- * glista_save_list:
+ * glista_list_save:
  *
  * Tell the storage module to save the entire list of items. Implements a simple
  * locking mechanism. 
@@ -986,7 +986,7 @@ glista_read_item_list(GList *item_list, GtkTreeIter *parent)
  * (meaning another save is in progress).
  */
 static gboolean
-glista_save_list()
+glista_list_save()
 {
 	GList           *all_items = NULL;
 	static gboolean  locked = FALSE;
@@ -1011,19 +1011,19 @@ glista_save_list()
 }
 
 /**
- * glista_save_list_timeout_cb: 
+ * glista_list_save_timeout_cb: 
  * @user_data: User data passed when timeout was created
  * 
- * Called by glista_save_list_timeout() after a timeout of X ms. Will try to 
- * save the list to storage by calling glista_save_list(). If save was not 
+ * Called by glista_list_save_timeout() after a timeout of X ms. Will try to 
+ * save the list to storage by calling glista_list_save(). If save was not 
  * successful, will run again.		return &iter;
  *
  * Returns: FALSE if no need to run again, TRUE otherwise.
  */
 static gboolean
-glista_save_list_timeout_cb(gpointer user_data)
+glista_list_save_timeout_cb(gpointer user_data)
 {
-	if (glista_save_list()) {
+	if (glista_list_save()) {
 		gl_globs->save_tag = 0;
 		return FALSE;
 	} else {
@@ -1032,7 +1032,7 @@ glista_save_list_timeout_cb(gpointer user_data)
 }
 
 /**
- * glista_save_list_timeout:
+ * glista_list_save_timeout:
  *
  * Called whenever the user changes something in the data model. Will schedule 
  * an X ms timeout and call the save procedure after that time. If additional
@@ -1040,14 +1040,14 @@ glista_save_list_timeout_cb(gpointer user_data)
  * X ms of idle time. 
  */
 void 
-glista_save_list_timeout()
+glista_list_save_timeout()
 {
 	if (gl_globs->save_tag != 0) {
 		g_source_remove(gl_globs->save_tag);
 	}
 	
 	gl_globs->save_tag = g_timeout_add(GLISTA_SAVE_TIMEOUT, 
-	                                   glista_save_list_timeout_cb, NULL);
+	                                   glista_list_save_timeout_cb, NULL);
 }
 
 /**
@@ -1240,7 +1240,7 @@ main(int argc, char *argv[])
 #endif
 
 	// Initialize the item list
-	glista_init_list();
+	glista_list_init();
 	
 	// Set up the status icon and connect the left-click and right-click signals
 	sysicon = gtk_status_icon_new_from_file(GLISTA_UI_DIR "/glista-icon.png");
@@ -1269,7 +1269,7 @@ main(int argc, char *argv[])
 	gtk_main();
 	
 	// Save list
-	while (! glista_save_list());
+	while (! glista_list_save());
 	
 	// Save configuration
 	glista_store_window_geometry(GTK_WINDOW(window));

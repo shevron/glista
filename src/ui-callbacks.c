@@ -222,13 +222,13 @@ on_item_text_edited(GtkCellRendererText *renderer, gchar *pathstr,
  * @user_data: User data
  *
  * Called when the data in a row has changed. Will schedule a data save timeout
- * by calling glista_save_list_timeout()
+ * by calling glista_list_save_timeout()
  */
 void 
 on_itemstore_row_changed(GtkTreeModel *model, GtkTreePath *path, 
                          GtkTreeIter *iter, gpointer user_data)
 {
-	glista_save_list_timeout();
+	glista_list_save_timeout();
 }
 
 /**
@@ -239,13 +239,13 @@ on_itemstore_row_changed(GtkTreeModel *model, GtkTreePath *path,
  * @user_data: User data
  *
  * Called when a new row is inserted to the model. Will schedule a data save 
- * timeout by calling glista_save_list_timeout()
+ * timeout by calling glista_list_save_timeout()
  */
 void 
 on_itemstore_row_inserted(GtkTreeModel *model, GtkTreePath *path, 
                           GtkTreeIter *iter, gpointer user_data)
 {
-	glista_save_list_timeout();
+	glista_list_save_timeout();
 }
 
 /**
@@ -255,13 +255,13 @@ on_itemstore_row_inserted(GtkTreeModel *model, GtkTreePath *path,
  * @user_data: User data
  *
  * Called when a row in the model is deleted. Will schedule a data save timeout
- * by calling glista_save_list_timeout()
+ * by calling glista_list_save_timeout()
  */
 void 
 on_itemstore_row_deleted(GtkTreeModel *model, GtkTreePath *path, 
                          gpointer user_data)
 {
-	glista_save_list_timeout();
+	glista_list_save_timeout();
 }
 
 /**

@@ -90,11 +90,10 @@ void        glista_item_create_from_text(gchar *text);
 void        glista_item_toggle_done(GtkTreePath *path);
 void        glista_item_change_text(GtkTreePath *path, gchar *text);
 void        glista_item_free(GlistaItem *item);
+void        glista_list_save_timeout();
 void        glista_delete_done_items();
 void        glista_delete_selected_items();
 void        glista_toggle_main_window_visible();
-void        glista_save_list_timeout();
-
 void        glista_store_window_geomerty(gint x, gint y, 
 										 gint width, gint height);
 
