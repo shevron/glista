@@ -87,7 +87,7 @@ glista_category_get_path(gchar *key)
 		gtk_tree_store_append(gl_globs->itemstore, &iter, NULL);
 		gtk_tree_store_set(gl_globs->itemstore, &iter, 
 						   GL_COLUMN_TEXT, key, 
-						   GL_COLUMN_CATEGORY, TRUE, 
+						   GL_COLUMN_CATEGORY, TRUE,
 						   -1);
 		
 		// Add row reference to categories hash table
@@ -140,7 +140,6 @@ glista_list_add(GlistaItem *item, gboolean expand)
 	gtk_tree_store_set(gl_globs->itemstore, &iter, 
 	                   GL_COLUMN_DONE, item->done, 
 	                   GL_COLUMN_TEXT, item->text, 
-					   GL_COLUMN_CATEGORY, FALSE, 
 					   -1);
 }
 
@@ -207,6 +206,34 @@ glista_item_toggle_done(GtkTreePath *path)
 		                   
 		gtk_tree_store_set(gl_globs->itemstore, &iter, GL_COLUMN_DONE, 
 		                   (! current), -1);
+	}
+}
+
+/**
+ * glista_item_redraw_parent: 
+ * @child_iter: Iterator pointing to the child element
+ *
+ * Takes in a pointer to a modified row, and if it has a parent, will trigger
+ * a redraw of the parent by calling gtk_tree_model_row_changed() on the parent.
+ */
+void
+glista_item_redraw_parent(GtkTreeIter *child_iter)
+{
+	GtkTreeIter  parent_iter;
+	GtkTreePath *parent_path;
+	
+	// Check if item has a parent
+	if (gtk_tree_model_iter_parent(GTK_TREE_MODEL(gl_globs->itemstore), 
+								   &parent_iter, child_iter)) {
+		
+		parent_path = gtk_tree_model_get_path(
+			GTK_TREE_MODEL(gl_globs->itemstore), &parent_iter);
+		
+		// Trigger a "row-changed" signal on tha prent as well
+		gtk_tree_model_row_changed(GTK_TREE_MODEL(gl_globs->itemstore), 
+								   parent_path, &parent_iter);
+									   
+		gtk_tree_path_free (parent_path);
 	}
 }
 
@@ -709,12 +736,12 @@ glista_item_get_display_text(GtkTreeModel *model, GtkTreeIter *iter)
 		
 		gtk_tree_model_get(model, &child, GL_COLUMN_DONE, &is_done, -1);
 		if (is_done == TRUE) ++done_c;
-	}	
+	}
 	
-	child_c_str = g_strdup_printf ("%d", child_c);
+	child_c_str = g_strdup_printf("%d", child_c);
 	done_c_str = g_strdup_printf("%d", done_c);
 	
-	newtext = g_strconcat (text, " (", done_c_str, "/", child_c_str, ")", NULL);
+	newtext = g_strconcat(text, " (", done_c_str, "/", child_c_str, ")", NULL);
 	
 	g_free(child_c_str);
 	g_free(done_c_str);
@@ -949,8 +976,9 @@ glista_list_get_all_items(GList *item_list, GtkTreeIter *parent)
 									 &iter, parent)) {
 										 
 		do {
-			if (gtk_tree_model_iter_has_child(GTK_TREE_MODEL(gl_globs->itemstore),
-											  &iter)) {
+			if (gtk_tree_model_iter_has_child(
+					GTK_TREE_MODEL(gl_globs->itemstore), &iter)) {
+						
 				item_list = glista_list_get_all_items(item_list, &iter);
 				
 			} else {
@@ -1211,7 +1239,8 @@ main(int argc, char *argv[])
 	gl_globs->itemstore  = gtk_tree_store_new(3, 
 											  G_TYPE_BOOLEAN, 
 											  G_TYPE_STRING, 
-											  G_TYPE_BOOLEAN);	
+											  G_TYPE_BOOLEAN);
+	
 	// Set configuration directory name
 	gl_globs->configdir  = g_build_filename(g_get_user_config_dir(),
 	                                       GLISTA_CONFIG_DIR,

@@ -228,6 +228,7 @@ void
 on_itemstore_row_changed(GtkTreeModel *model, GtkTreePath *path, 
                          GtkTreeIter *iter, gpointer user_data)
 {
+	glista_item_redraw_parent(iter);
 	glista_list_save_timeout();
 }
 

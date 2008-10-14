@@ -89,6 +89,7 @@ GlistaItem *glista_item_new(const gchar *text, const gchar *parent);
 void        glista_item_create_from_text(gchar *text);
 void        glista_item_toggle_done(GtkTreePath *path);
 void        glista_item_change_text(GtkTreePath *path, gchar *text);
+void        glista_item_redraw_parent(GtkTreeIter *child_iter);
 void        glista_item_free(GlistaItem *item);
 void        glista_list_save_timeout();
 void        glista_list_delete_done();
