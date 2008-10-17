@@ -27,6 +27,10 @@
 
 static int errno = 0;
 
+static gboolean (*glista_dnd_old_drag_data_received)(
+	GtkTreeDragDest *drag_dest, GtkTreePath *dest, 
+	GtkSelectionData *selection_data);
+
 /**
  * Glista main program functions
  */
@@ -310,6 +314,35 @@ glista_category_confirm_delete(GtkTreeIter *category)
 }
 
 /**
+ * glista_item_delete: 
+ * @iter: Iterator pointing to the item to delete
+ *
+ * Delete an item (not a category) from the list. If item is in a category and
+ * the category becomes empty, the parent category will also be deleted. 
+ */
+void
+glista_item_delete(GtkTreeIter *iter)
+{
+	gboolean    has_parent;
+	GtkTreeIter parent;
+	
+	// Check if this item has a parent category
+	has_parent = gtk_tree_model_iter_parent(
+		GTK_TREE_MODEL(gl_globs->itemstore), &parent, iter);
+	
+	// Remove item
+	gtk_tree_store_remove(gl_globs->itemstore, iter);
+	
+	// Check if parent is now empty
+	if (has_parent && gtk_tree_model_iter_n_children(
+		GTK_TREE_MODEL(gl_globs->itemstore), &parent) < 1) {
+		
+		// Delete parent as well
+		glista_category_delete(&parent);
+	}
+}
+				   
+/**
  * glista_list_delete_reflist:
  * @ref_list: A linked list of items to delete
  *
@@ -333,8 +366,8 @@ glista_list_delete_reflist(GList *ref_list)
 		);
 		
         if (path) {
-        	GtkTreeIter iter, parent;
-			gboolean    has_parent, is_cat;
+        	GtkTreeIter iter;
+			gboolean    is_cat;
 
 	        if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
 										&iter, path)) {
@@ -347,20 +380,7 @@ glista_list_delete_reflist(GList *ref_list)
 					glista_category_confirm_delete(&iter);
 					
 				} else {	
-					// Check if this item has a parent category
-					has_parent = gtk_tree_model_iter_parent(
-						GTK_TREE_MODEL(gl_globs->itemstore), &parent, &iter);
-					
-					// Remove item
-					gtk_tree_store_remove(gl_globs->itemstore, &iter);
-					
-					// Check if parent is now empty
-					if (has_parent && gtk_tree_model_iter_n_children(
-						GTK_TREE_MODEL(gl_globs->itemstore), &parent) < 1) {
-						
-						// Delete parent as well
-						glista_category_delete(&parent);
-					}
+					glista_item_delete(&iter);
 				}
 			}
 
@@ -440,7 +460,6 @@ static void
 glista_list_get_done_reflist(GList **ref_list, GtkTreeIter *parent)
 {
 	GtkTreeIter  iter;
-	
 	gboolean     status;
 	
 	// Get the iter set for first row
@@ -843,8 +862,8 @@ glista_list_sort_func(GtkTreeModel *model, GtkTreeIter *row_a,
 					                 -1);
 	gtk_tree_model_get(model, row_b, GL_COLUMN_DONE, &done_b, 
 					                 GL_COLUMN_CATEGORY, &cat_b, 
-					                 -1);
-		   
+					   -1);
+		
 	// Is one a category and the other is not?
 	if (cat_a == cat_b) {
 	
@@ -883,6 +902,127 @@ glista_list_sort_func(GtkTreeModel *model, GtkTreeIter *row_a,
 }
 
 /**
+ * glista_dnd_is_draggable:
+ * @drag_source The drag source
+ * @oath        The path in the tree of the dragged row
+ *
+ * Tells whether or not a row can be dragged. A row can be dragged if it is
+ * not a category. If row no longer exists will return FALSE.
+ *
+ * Returns: TRUE if row can be dragged, FALSE otherwise
+ */
+static gboolean
+glista_dnd_is_draggable(GtkTreeDragSource *drag_source, GtkTreePath *path)
+{
+	GtkTreeIter iter;
+	gboolean    is_cat;
+	
+	if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
+								&iter, path)) {
+		gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter,
+						   GL_COLUMN_CATEGORY, &is_cat, -1);
+		return (! is_cat);
+	} else {
+		return FALSE;
+	}
+}
+
+/**
+ * glista_dnd_drop_possible:
+ * @drag_dest:     The drag destination
+ * @path:          The path in the tree to check
+ * @selection_data The selected data
+ *
+ * Tells whether a drop is possible before @path, on the same level. In our
+ * case, drops are always possible. 
+ *
+ * Returns: TRUE
+ */
+static gboolean 
+glista_dnd_drop_possible(GtkTreeDragDest *drag_dest, GtkTreePath *path, 
+						 GtkSelectionData *selection_data)
+{
+	GtkTreePath *parent;
+	GtkTreeIter  iter;
+	gboolean     can_drop = TRUE;
+	
+	// If there is no parent, we can drop
+	if (gtk_tree_path_get_depth(path) > 1) {
+		parent = gtk_tree_path_copy (path);
+
+		if (gtk_tree_path_up(parent)) {
+			if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
+										&iter, parent)) {
+				gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter,
+								   GL_COLUMN_CATEGORY, &can_drop, -1);
+			}
+		}
+		gtk_tree_path_free(parent);
+	}
+	
+	return can_drop;
+}
+
+/**
+ * glista_dnd_delete_row:
+ * @drag_source: The source of the drag operation
+ * @path:        The path to delete
+ *
+ * Deletes a row after it has been dragged to a new location. Will call 
+ * glista_item_delete() to make sure the empty parent category is also deleted. 
+ *
+ * Returns: TRUE if the deletion succeeded, FALSE otherwise. 
+ */
+static gboolean
+glista_dnd_delete_row(GtkTreeDragSource *drag_source, GtkTreePath *path)
+{
+	GtkTreeIter iter;
+	
+	if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
+								path)) {
+
+		glista_item_delete(&iter);
+		return TRUE;
+	
+	} else {
+		return FALSE;
+	}
+}
+
+/**
+ * glista_dnd_drag_data_received:
+ * @drag_dest:      The drag destination
+ * @path:           The path being dragged
+ * @selection_data: The selection data
+ *
+ * Wrap the orignal drop handler, triggering a sort of the tree after a drop
+ * is made. 
+ */
+static gboolean
+glista_dnd_drag_data_received(GtkTreeDragDest *drag_dest, GtkTreePath *path,
+							  GtkSelectionData *selection_data)
+{
+	gboolean    res;
+
+	res = glista_dnd_old_drag_data_received(drag_dest, path, selection_data);
+	if (res) {
+		
+		// FIXME / HACK: The only way I found to trigger a sort is to change 
+		// the sort column and revert it back.
+		
+		gtk_tree_sortable_set_sort_column_id(
+			GTK_TREE_SORTABLE(gl_globs->itemstore), GL_COLUMN_CATEGORY, 
+			GTK_SORT_ASCENDING);
+		
+		gtk_tree_sortable_set_sort_column_id(
+			GTK_TREE_SORTABLE(gl_globs->itemstore), GL_COLUMN_DONE, 
+			GTK_SORT_ASCENDING);
+	}
+	
+	return res;
+}
+
+/**
  * glista_list_init:
  *
  * Initialize the list of items and the view layer to display it.
@@ -890,11 +1030,13 @@ glista_list_sort_func(GtkTreeModel *model, GtkTreeIter *row_a,
 static 
 void glista_list_init()
 {
-	GtkCellRenderer   *text_ren, *done_ren;
-	GtkTreeViewColumn *text_column, *done_column;
-	GtkTreeView       *treeview;
-	GtkTreeSelection  *selection;
-	GList             *item, *all_items = NULL;
+	GtkCellRenderer        *text_ren, *done_ren;
+	GtkTreeViewColumn      *text_column, *done_column;
+	GtkTreeView            *treeview;
+	GtkTreeSelection       *selection;
+	GtkTreeDragSourceIface *dnd_siface;
+	GtkTreeDragDestIface   *dnd_diface;
+	GList                  *item, *all_items = NULL;
 	
 	treeview = GTK_TREE_VIEW(glista_get_widget("glista_item_list"));
 	
@@ -931,11 +1073,14 @@ void glista_list_init()
 	gtk_tree_view_append_column(treeview, text_column);
 	gtk_tree_view_append_column(treeview, done_column);	
 	
+	gtk_tree_view_set_reorderable (treeview, TRUE);
+	
 	gtk_tree_view_set_model(treeview, GTK_TREE_MODEL(gl_globs->itemstore));
+	
 	
 	// Set sort function and column
 	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(gl_globs->itemstore), 
-	                                GL_COLUMN_DONE, glista_list_sort_func,
+				  GL_COLUMN_DONE, glista_list_sort_func,
 	                                NULL, NULL);
 	                                
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(gl_globs->itemstore),
@@ -946,6 +1091,20 @@ void glista_list_init()
 	gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);
 	g_signal_connect(selection, "changed", 
 	                 G_CALLBACK(on_glista_item_list_selection_changed), NULL);
+	
+	// Set drag-and-drop interface functions
+	dnd_siface = GTK_TREE_DRAG_SOURCE_GET_IFACE(GTK_TREE_MODEL(
+		gl_globs->itemstore));
+	dnd_diface = GTK_TREE_DRAG_DEST_GET_IFACE(GTK_TREE_MODEL(
+		gl_globs->itemstore));
+	
+	dnd_siface->row_draggable = glista_dnd_is_draggable;
+	dnd_siface->drag_data_delete = glista_dnd_delete_row;
+	dnd_diface->row_drop_possible = glista_dnd_drop_possible;
+	
+	// Hook into the old drop handler 
+	glista_dnd_old_drag_data_received = dnd_diface->drag_data_received;
+	dnd_diface->drag_data_received = glista_dnd_drag_data_received;
 	
 	// Load data
 	glista_storage_load_all_items(&all_items);
