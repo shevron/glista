@@ -944,21 +944,31 @@ glista_dnd_drop_possible(GtkTreeDragDest *drag_dest, GtkTreePath *path,
 {
 	GtkTreePath *parent;
 	GtkTreeIter  iter;
+	gint         depth;
 	gboolean     can_drop = TRUE;
 	
-	// If there is no parent, we can drop
-	if (gtk_tree_path_get_depth(path) > 1) {
-		parent = gtk_tree_path_copy (path);
-
-		if (gtk_tree_path_up(parent)) {
-			if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
-										&iter, parent)) {
-				gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter,
-								   GL_COLUMN_CATEGORY, &can_drop, -1);
-			}
-		}
-		gtk_tree_path_free(parent);
+	depth = gtk_tree_path_get_depth(path);
+	
+	// Can't create 3rd level or more
+	if (depth > 2) {
+		return FALSE;
 	}
+	
+	// Can always drop on root level
+	if (depth < 2) {
+		return TRUE;
+	}
+	
+	// If level is 2, we have to check that the parent is a category
+	parent = gtk_tree_path_copy (path);
+	if (gtk_tree_path_up(parent)) {
+		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
+									&iter, parent)) {
+			gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter,
+							   GL_COLUMN_CATEGORY, &can_drop, -1);
+		}
+	}
+	gtk_tree_path_free(parent);
 	
 	return can_drop;
 }
