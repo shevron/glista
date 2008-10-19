@@ -17,6 +17,7 @@
  */
 
 #include <string.h>
+#include <errno.h>
 #include <glib.h>
 #include <glib-object.h>
 #include <gtk/gtk.h>
@@ -24,8 +25,6 @@
 #include "glista.h"
 #include "ui-callbacks.c"
 #include "storage.c"
-
-static int errno = 0;
 
 static gboolean (*glista_dnd_old_drag_data_received)(
 	GtkTreeDragDest *drag_dest, GtkTreePath *dest, 
@@ -1261,11 +1260,10 @@ glista_cfg_check_dir()
 		if (! g_file_test(gl_globs->configdir, G_FILE_TEST_EXISTS)) {
 			
 			// Create the directory
-			errno = 0;
 			if (g_mkdir_with_parents(gl_globs->configdir, 0700) != 0) {
 				// We have an error!
-				g_printerr("Error creating configuration directory: %d\n",
-				            errno);
+				g_printerr("Error creating configuration directory: %s\n",
+				            strerror(errno));
 				
 				return FALSE;
 	        }
