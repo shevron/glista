@@ -44,7 +44,8 @@ static void
 glista_ui_mainwindow_show()
 {
 	GtkWindow *window;
-		
+	GtkWidget *entry;
+	
 	window = GTK_WINDOW(glista_get_widget("glista_main_window"));
 	
 	gtk_window_present(window);
@@ -62,6 +63,10 @@ glista_ui_mainwindow_show()
 		gtk_window_resize(window, gl_globs->config->width, 
 						  gl_globs->config->height);
 	}
+	
+	// Set the focus to the new item GtkEntry
+	entry = GTK_WIDGET(glista_get_widget("add-entry"));
+	gtk_widget_grab_focus (entry);
 }
 
 /**
