@@ -43,6 +43,12 @@
 #define GLISTA_CAT_DELIM ":"
 #endif
 
+#ifdef PACKAGE_NAME
+#define GLISTA_PROGNAME PACKAGE_NAME
+#else
+#define GLISTA_PROGNAME "glista"
+#endif
+
 // Text colors
 #ifndef GLISTA_COLOR_PENDING
 #define GLISTA_COLOR_PENDING "#000000"

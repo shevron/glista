@@ -1393,6 +1393,7 @@ main(int argc, char *argv[])
 		
 	gtk_init(&argc, &argv);
 
+	g_set_prgname(GLISTA_PROGNAME);
 	g_type_init();
 	g_thread_init(NULL);
 	
