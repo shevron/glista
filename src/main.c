@@ -23,8 +23,8 @@
 #include <gtk/gtk.h>
 #include <gtk/gtkmain.h>
 #include "glista.h"
-#include "ui-callbacks.c"
-#include "storage.c"
+#include "glista-ui-callbacks.c"
+#include "glista-storage.c"
 
 #ifdef HAVE_UNIQUE
 #include "glista-unique.c"
