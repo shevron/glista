@@ -663,6 +663,10 @@ GTK_LIBS
 LIBXML_CFLAGS
 LIBXML_LIBS
 GTKBLDRCONV
+Unique_CFLAGS
+Unique_LIBS
+UNIQUE_CFLAGS
+UNIQUE_LIBS
 LIBOBJS
 LTLIBOBJS'
 ac_subst_files=''
@@ -679,7 +683,9 @@ PKG_CONFIG
 GTK_CFLAGS
 GTK_LIBS
 LIBXML_CFLAGS
-LIBXML_LIBS'
+LIBXML_LIBS
+Unique_CFLAGS
+Unique_LIBS'
 
 
 # Initialize some variables set by options.
@@ -1261,6 +1267,7 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-unique=DIR       enable Unique support [default=yes]
   --with-user-confdir=DIR custom user configuration directory [default=glista]
 
 Some influential environment variables:
@@ -1278,6 +1285,9 @@ Some influential environment variables:
   LIBXML_CFLAGS
               C compiler flags for LIBXML, overriding pkg-config
   LIBXML_LIBS linker flags for LIBXML, overriding pkg-config
+  Unique_CFLAGS
+              C compiler flags for Unique, overriding pkg-config
+  Unique_LIBS linker flags for Unique, overriding pkg-config
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -4333,6 +4343,124 @@ echo "$as_me: error: gtk-builder-convert is required by this package" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
+
+# Check whether --with-unique was given.
+if test "${with_unique+set}" = set; then
+  withval=$with_unique;
+    if test "x$withval" = "xno"; then
+      check_unique=""
+    else
+      check_unique=$withval
+      if test "x$withval" != "xyes"; then
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${withval}/pkgconfig"
+      fi
+    fi
+
+else
+
+    check_unique="yes"
+
+fi
+
+
+if test -n "$check_unique"; then
+
+pkg_failed=no
+{ echo "$as_me:$LINENO: checking for Unique" >&5
+echo $ECHO_N "checking for Unique... $ECHO_C" >&6; }
+
+if test -n "$PKG_CONFIG"; then
+    if test -n "$Unique_CFLAGS"; then
+        pkg_cv_Unique_CFLAGS="$Unique_CFLAGS"
+    else
+        if test -n "$PKG_CONFIG" && \
+    { (echo "$as_me:$LINENO: \$PKG_CONFIG --exists --print-errors \"unique-1.0 >= 1.0\"") >&5
+  ($PKG_CONFIG --exists --print-errors "unique-1.0 >= 1.0") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; then
+  pkg_cv_Unique_CFLAGS=`$PKG_CONFIG --cflags "unique-1.0 >= 1.0" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+    fi
+else
+	pkg_failed=untried
+fi
+if test -n "$PKG_CONFIG"; then
+    if test -n "$Unique_LIBS"; then
+        pkg_cv_Unique_LIBS="$Unique_LIBS"
+    else
+        if test -n "$PKG_CONFIG" && \
+    { (echo "$as_me:$LINENO: \$PKG_CONFIG --exists --print-errors \"unique-1.0 >= 1.0\"") >&5
+  ($PKG_CONFIG --exists --print-errors "unique-1.0 >= 1.0") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; then
+  pkg_cv_Unique_LIBS=`$PKG_CONFIG --libs "unique-1.0 >= 1.0" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+    fi
+else
+	pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        Unique_PKG_ERRORS=`$PKG_CONFIG --short-errors --errors-to-stdout --print-errors "unique-1.0 >= 1.0"`
+        else
+	        Unique_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "unique-1.0 >= 1.0"`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$Unique_PKG_ERRORS" >&5
+
+	{ echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+
+    { echo "$as_me:$LINENO: WARNING: Single instance detection will be disabled" >&5
+echo "$as_me: WARNING: Single instance detection will be disabled" >&2;}
+
+elif test $pkg_failed = untried; then
+
+    { echo "$as_me:$LINENO: WARNING: Single instance detection will be disabled" >&5
+echo "$as_me: WARNING: Single instance detection will be disabled" >&2;}
+
+else
+	Unique_CFLAGS=$pkg_cv_Unique_CFLAGS
+	Unique_LIBS=$pkg_cv_Unique_LIBS
+        { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+
+    UNIQUE_CFLAGS=$Unique_CFLAGS
+    UNIQUE_LIBS=$Unique_LIBS
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_UNIQUE 1
+_ACEOF
+
+
+fi
+else
+  { echo "$as_me:$LINENO: checking for Unique" >&5
+echo $ECHO_N "checking for Unique... $ECHO_C" >&6; }
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+  { echo "$as_me:$LINENO: WARNING: Single instance detection will be disabled" >&5
+echo "$as_me: WARNING: Single instance detection will be disabled" >&2;}
+fi
+
+
+
+
 { echo "$as_me:$LINENO: checking for user configuration directory" >&5
 echo $ECHO_N "checking for user configuration directory... $ECHO_C" >&6; }
 
@@ -5099,11 +5227,15 @@ GTK_LIBS!$GTK_LIBS$ac_delim
 LIBXML_CFLAGS!$LIBXML_CFLAGS$ac_delim
 LIBXML_LIBS!$LIBXML_LIBS$ac_delim
 GTKBLDRCONV!$GTKBLDRCONV$ac_delim
+Unique_CFLAGS!$Unique_CFLAGS$ac_delim
+Unique_LIBS!$Unique_LIBS$ac_delim
+UNIQUE_CFLAGS!$UNIQUE_CFLAGS$ac_delim
+UNIQUE_LIBS!$UNIQUE_LIBS$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 86; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 90; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

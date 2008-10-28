@@ -27,6 +27,40 @@ if test "$GTKBLDRCONV" = :; then
   AC_MSG_ERROR([gtk-builder-convert is required by this package])
 fi
 
+dnl See if we have Unique available
+AC_ARG_WITH([unique],
+  [AS_HELP_STRING([--with-unique=DIR],
+    [enable Unique support @<:@default=yes@:>@])],
+  [
+    if test "x$withval" = "xno"; then
+      check_unique=""
+    else
+      check_unique=$withval
+      if test "x$withval" != "xyes"; then
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${withval}/pkgconfig"
+      fi
+    fi
+  ],[
+    check_unique="yes"
+  ])
+
+if test -n "$check_unique"; then
+  PKG_CHECK_MODULES([Unique], unique-1.0 >= 1.0, [
+    UNIQUE_CFLAGS=$Unique_CFLAGS
+    UNIQUE_LIBS=$Unique_LIBS
+    AC_DEFINE_UNQUOTED(HAVE_UNIQUE, [1], [Whether Unique is available])
+  ], [
+    AC_MSG_WARN([Single instance detection will be disabled])
+  ])
+else
+  AC_MSG_CHECKING([for Unique])
+  AC_MSG_RESULT([no])
+  AC_MSG_WARN([Single instance detection will be disabled])
+fi
+
+AC_SUBST(UNIQUE_CFLAGS)
+AC_SUBST(UNIQUE_LIBS)
+
 dnl Add option to modify the configuration directory. 
 dnl Default is defined in glista.h
 AC_MSG_CHECKING([for user configuration directory])

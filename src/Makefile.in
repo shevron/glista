@@ -46,7 +46,8 @@ PROGRAMS = $(bin_PROGRAMS)
 am_glista_OBJECTS = main.$(OBJEXT)
 glista_OBJECTS = $(am_glista_OBJECTS)
 am__DEPENDENCIES_1 =
-glista_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+glista_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__depfiles_maybe = depfiles
@@ -107,6 +108,10 @@ PKG_CONFIG = @PKG_CONFIG@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
+UNIQUE_CFLAGS = @UNIQUE_CFLAGS@
+UNIQUE_LIBS = @UNIQUE_LIBS@
+Unique_CFLAGS = @Unique_CFLAGS@
+Unique_LIBS = @Unique_LIBS@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
@@ -151,13 +156,15 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 glista_SOURCES = main.c
 glista_LDADD = $(GTK_LIBS) \
-               $(LIBXML_LIBS)
+               $(LIBXML_LIBS) \
+               $(UNIQUE_LIBS)
 
 AM_CFLAGS = $(DEPOS_CFLAGS) \
             -export-dynamic
 
 AM_CPPFLAGS = $(GTK_CFLAGS) \
               $(LIBXML_CFLAGS) \
+              $(UNIQUE_CFLAGS) \
               -DGLISTA_UI_DIR=\""$(datadir)/glista"\"
 
 all: all-am

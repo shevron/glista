@@ -26,6 +26,10 @@
 #include "ui-callbacks.c"
 #include "storage.c"
 
+#ifdef HAVE_UNIQUE
+#include "glista-unique.c"
+#endif
+
 static gboolean (*glista_dnd_old_drag_data_received)(
 	GtkTreeDragDest *drag_dest, GtkTreePath *dest, 
 	GtkSelectionData *selection_data);
@@ -40,7 +44,7 @@ static gboolean (*glista_dnd_old_drag_data_received)(
  * Show the main window, positioning and resizing it according to configuration
  * data
  */
-static void 
+void 
 glista_ui_mainwindow_show()
 {
 	GtkWindow *window;
@@ -1408,6 +1412,22 @@ main(int argc, char *argv[])
 	gl_globs->config     = NULL;
 	gl_globs->save_tag   = 0;
 	
+	// Load UI file
+	if (gtk_builder_add_from_file(gl_globs->uibuilder, 
+								  GLISTA_UI_DIR "/glista.ui", NULL) == 0) {
+		g_printerr("Unable to read UI file: %s\n", GLISTA_UI_DIR "/glista.ui");
+		return 1;
+	}
+
+#ifdef HAVE_UNIQUE
+	// Are we the single instance?
+	if (! glista_unique_is_single_inst()) {
+		// There is a Glista instance already running - shut down
+		g_print("Activating an already-running Glista instance.\n");
+		return 0;
+	}
+#endif
+
 	// Initialize item storage model
 	gl_globs->itemstore  = gtk_tree_store_new(3, 
 											  G_TYPE_BOOLEAN, 
@@ -1421,14 +1441,7 @@ main(int argc, char *argv[])
 	// Initialize categories hashtable
 	gl_globs->categories = g_hash_table_new_full(g_str_hash, g_str_equal,
 		(GDestroyNotify) g_free, (GDestroyNotify) gtk_tree_row_reference_free);
-
-	// Load UI file
-	if (gtk_builder_add_from_file(gl_globs->uibuilder, 
-								  GLISTA_UI_DIR "/glista.ui", NULL) == 0) {
-		g_printerr("Unable to read UI file: %s\n", GLISTA_UI_DIR "/glista.ui");
-		return 1;
-	}
-
+	
 	// Load main window and connect signals
 	window = GTK_WIDGET(glista_get_widget("glista_main_window"));
 	gtk_builder_connect_signals(gl_globs->uibuilder, NULL);
@@ -1466,7 +1479,7 @@ main(int argc, char *argv[])
 	if (gl_globs->config->visible) {
 		glista_ui_mainwindow_show();
 	}
-
+		
 	// Run main loop
 	gtk_main();
 	
@@ -1477,6 +1490,11 @@ main(int argc, char *argv[])
 	glista_ui_mainwindow_store_geo(GTK_WINDOW(window));
 	glista_cfg_save();
 
+#ifdef HAVE_UNIQUE
+	// Free the Unique app object
+	glista_unique_unref();
+#endif
+	
 	// Free globals
 	g_hash_table_destroy(gl_globs->categories);
 	g_free(gl_globs->configdir);

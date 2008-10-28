@@ -100,6 +100,7 @@ void        glista_item_free(GlistaItem *item);
 void        glista_list_save_timeout();
 void        glista_list_delete_done();
 void        glista_list_delete_selected();
+void        glista_ui_mainwindow_show();
 void        glista_ui_mainwindow_toggle();
 
 // Column names & order ENUM
