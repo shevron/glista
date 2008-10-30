@@ -28,20 +28,35 @@
  */
 
 /**
- * on_glista_main_window_destroy:
- * @object:    The object that triggered the event
- * @user_data: User data passed when the event was connected
+ * on_sysicon_quit_activate:
+ * @menuitem  Activating menu item
+ * @user_data User data bound at connect time
  *
- * Quit the program
- *
- * TODO: Rewrite this. The program no longer exists when the main window is 
- * closed, and this function is only called when the user selects "quit" in the
- * status icon context menu.
+ * Handle the "quit" menu item selected. Simply quit the program.
  */
 void 
-on_glista_main_window_destroy(GtkObject *object, gpointer user_data)
+on_sysicon_quit_activate(GtkMenuItem *menuitem, gpointer user_data)
 {
 	gtk_main_quit();
+}
+
+/**
+ * on_glista_main_window_delete_event: 
+ * @widget    The deleted widget (usually main window)
+ * @event     The triggered event object
+ * @user_data User data bound at connect time
+ *
+ * Handle a "delete-event" on the main window, that is the "X" to close the
+ * window was pressed. Will hide the window and return TRUE to stop the window
+ * from being destroyed.
+ */
+gboolean 
+on_glista_main_window_delete_event(GtkWidget *widget, GdkEvent *event, 
+								   gpointer user_data)
+{
+	glista_ui_mainwindow_hide();
+	
+	return TRUE;
 }
 
 /**

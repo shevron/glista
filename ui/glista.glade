@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sun Oct 12 18:25:47 2008 -->
+<!--Generated with glade3 3.4.5 on Thu Oct 30 23:35:43 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="glista_main_window">
     <property name="title" translatable="yes">Glista</property>
@@ -8,7 +8,7 @@
     <property name="default_width">250</property>
     <property name="default_height">350</property>
     <property name="icon">glista-icon.png</property>
-    <signal name="delete_event" handler="gtk_widget_hide_on_delete"/>
+    <signal name="delete_event" handler="on_glista_main_window_delete_event"/>
     <child>
       <widget class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -58,6 +58,9 @@
                     <property name="stock_id">gtk-about</property>
                     <signal name="clicked" handler="on_about_clicked"/>
                   </widget>
+                  <packing>
+                    <property name="homogeneous">True</property>
+                  </packing>
                 </child>
               </widget>
               <packing>
@@ -834,7 +837,7 @@ copy of the Program in return for a fee.
         <property name="label" translatable="yes">gtk-quit</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_glista_main_window_destroy"/>
+        <signal name="activate" handler="on_sysicon_quit_activate"/>
       </widget>
     </child>
   </widget>

@@ -74,6 +74,78 @@ glista_ui_mainwindow_show()
 }
 
 /**
+ * glista_ui_mainwindow_store_geo:
+ * @window The main window
+ *
+ * Save the current geometry (position and size) of the window in memory if the
+ * window is visible
+ */
+static void
+glista_ui_mainwindow_store_geo(GtkWindow *window)
+{
+	gboolean visible;
+	gint     width, height;
+	gint     xpos,  ypos;
+	
+	// Get current window state
+	g_object_get(window, "visible", &visible, NULL);
+	
+	if (visible) {
+		// Store size
+		gtk_window_get_size(window, &width, &height);
+		gl_globs->config->width  = width;
+		gl_globs->config->height = height;
+		
+		// Store position
+		gtk_window_get_position(window, &xpos, &ypos);
+		gl_globs->config->xpos = xpos;
+		gl_globs->config->ypos = ypos;
+	}
+}
+
+/**
+ * glista_ui_mainwindow_hide:
+ *
+ * Hide the main window. Save the window position and geometry before hiding
+ * it.
+ */
+void
+glista_ui_mainwindow_hide()
+{
+	GtkWidget *window;
+	
+	window = GTK_WIDGET(glista_get_widget("glista_main_window"));
+	glista_ui_mainwindow_store_geo(GTK_WINDOW(window));
+	gtk_widget_hide(window);
+	gl_globs->config->visible = FALSE;
+}
+
+/**
+ * glista_ui_mainwindow_toggle:
+ *
+ * Toggle the visibility of the main window. This is normally called when the
+ * user left-clicks the status icon in the system tray.
+ */
+void 
+glista_ui_mainwindow_toggle()
+{
+	gboolean   current;
+	GtkWidget *window;
+	
+	window = GTK_WIDGET(glista_get_widget("glista_main_window"));
+	                                           
+	// Get current window state
+	g_object_get(window, "visible", &current, NULL);
+	
+	// If hidden - show, if visible - hide
+	if (current) {
+		glista_ui_mainwindow_hide();
+	} else {
+		glista_ui_mainwindow_show();
+	}
+}
+
+/**
  * glista_get_category_iter:
  * @key The category key to look for
  *
@@ -532,63 +604,6 @@ glista_list_delete_done()
 	// Free reference list
 	g_list_foreach(ref_list, (GFunc) gtk_tree_row_reference_free, NULL);
     g_list_free(ref_list);
-}
-
-/**
- * glista_ui_mainwindow_store_geo:
- * @window The main window
- *
- * Save the current geometry (position and size) of the window in memory if the
- * window is visible
- */
-static void
-glista_ui_mainwindow_store_geo(GtkWindow *window)
-{
-	gboolean visible;
-	gint     width, height;
-	gint     xpos,  ypos;
-	
-	// Get current window state
-	g_object_get(window, "visible", &visible, NULL);
-	
-	if (visible) {
-		// Store size
-		gtk_window_get_size(window, &width, &height);
-		gl_globs->config->width  = width;
-		gl_globs->config->height = height;
-		
-		// Store position
-		gtk_window_get_position(window, &xpos, &ypos);
-		gl_globs->config->xpos = xpos;
-		gl_globs->config->ypos = ypos;
-	}
-}
-
-/**
- * glista_ui_mainwindow_toggle:
- *
- * Toggle the visibility of the main window. This is normally called when the
- * user left-clicks the status icon in the system tray.
- */
-void 
-glista_ui_mainwindow_toggle()
-{
-	gboolean   current;
-	GtkWidget *window;
-	
-	window = GTK_WIDGET(glista_get_widget("glista_main_window"));
-	                                           
-	// Get current window state
-	g_object_get(window, "visible", &current, NULL);
-	
-	// If hidden - show, if visible - hide
-	if (current) {
-		glista_ui_mainwindow_store_geo(GTK_WINDOW(window));
-		gtk_widget_hide(window);
-		gl_globs->config->visible = FALSE;
-	} else {
-		glista_ui_mainwindow_show();
-	}
 }
 
 /**
@@ -1445,8 +1460,6 @@ main(int argc, char *argv[])
 	// Load main window and connect signals
 	window = GTK_WIDGET(glista_get_widget("glista_main_window"));
 	gtk_builder_connect_signals(gl_globs->uibuilder, NULL);
-	g_signal_connect(window, "destroy", 
-					 G_CALLBACK(on_glista_main_window_destroy), NULL);
 	
 	// Set the version number in the about dialog
 #ifdef PACKAGE_VERSION
