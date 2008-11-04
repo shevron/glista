@@ -79,6 +79,7 @@ ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+GLISTA_DATA_DIR = @GLISTA_DATA_DIR@
 GREP = @GREP@
 GTKBLDRCONV = @GTKBLDRCONV@
 GTKSPELL_CFLAGS = @GTKSPELL_CFLAGS@
@@ -170,8 +171,7 @@ AM_CFLAGS = $(DEPOS_CFLAGS) \
 AM_CPPFLAGS = $(GTK_CFLAGS) \
               $(LIBXML_CFLAGS) \
               $(UNIQUE_CFLAGS) \
-              $(GTKSPELL_CFLAGS) \
-              -DGLISTA_UI_DIR=\""$(datadir)/glista"\"
+              $(GTKSPELL_CFLAGS)
 
 all: all-am
 

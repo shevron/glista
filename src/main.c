@@ -1716,7 +1716,7 @@ main(int argc, char *argv[])
 		
 	gtk_init(&argc, &argv);
 
-	g_set_prgname(GLISTA_PROGNAME);
+	g_set_prgname(PACKAGE_NAME);
 	g_type_init();
 	g_thread_init(NULL);
 	
@@ -1729,8 +1729,10 @@ main(int argc, char *argv[])
 	
 	// Load UI file
 	if (gtk_builder_add_from_file(gl_globs->uibuilder, 
-								  GLISTA_UI_DIR "/glista.ui", NULL) == 0) {
-		g_printerr("Unable to read UI file: %s\n", GLISTA_UI_DIR "/glista.ui");
+								  GLISTA_DATA_DIR "/glista.ui", NULL) == 0) {
+		g_printerr("Unable to read UI file: %s\n", 
+		           GLISTA_DATA_DIR "/glista.ui");
+		           
 		return 1;
 	}
 
@@ -1762,7 +1764,7 @@ main(int argc, char *argv[])
 	window = GTK_WIDGET(glista_get_widget("glista_main_window"));
 	gtk_builder_connect_signals(gl_globs->uibuilder, NULL);
 	
-	// Set the version number in the about dialog
+	// Set the version number and icon in the about dialog
 #ifdef PACKAGE_VERSION
 	about = GTK_ABOUT_DIALOG(glista_get_widget("glista_about_dialog"));
 	gtk_about_dialog_set_version(about, PACKAGE_VERSION);
@@ -1772,12 +1774,12 @@ main(int argc, char *argv[])
 	glista_list_init();
 	
 	// Set up the status icon and connect the left-click and right-click signals
-	sysicon = gtk_status_icon_new_from_file(GLISTA_UI_DIR "/glista-icon.png");
+	sysicon = gtk_status_icon_new_from_file(GLISTA_DATA_DIR "/glista-icon.png");
 	g_signal_connect(sysicon, "activate", 
 					 G_CALLBACK(on_sysicon_activate), window);
 	g_signal_connect(sysicon, "popup-menu", 
 					 G_CALLBACK(on_sysicon_popup_menu), NULL);
-
+	
 	// Load configuration
 	glista_cfg_init_load();
 	

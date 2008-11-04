@@ -47,12 +47,10 @@ am__vpath_adj = case $$p in \
     *) f=$$p;; \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(desktopdir)" "$(DESTDIR)$(pixmapdir)" \
-	"$(DESTDIR)$(uidir)"
+am__installdirs = "$(DESTDIR)$(desktopdir)" "$(DESTDIR)$(uidir)"
 desktopDATA_INSTALL = $(INSTALL_DATA)
-pixmapDATA_INSTALL = $(INSTALL_DATA)
 uiDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(desktop_DATA) $(pixmap_DATA) $(ui_DATA)
+DATA = $(desktop_DATA) $(ui_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -73,6 +71,7 @@ ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+GLISTA_DATA_DIR = @GLISTA_DATA_DIR@
 GREP = @GREP@
 GTKBLDRCONV = @GTKBLDRCONV@
 GTKSPELL_CFLAGS = @GTKSPELL_CFLAGS@
@@ -153,14 +152,16 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 uidir = $(datadir)/glista
-ui_DATA = glista.ui \
-          glista-icon.png
+ui_DATA = glista.ui glista-icon.png
+EXTRA_DIST = \
+	$(ui_DATA) \
+	glista.desktop.in
 
-EXTRA_DIST = $(ui_DATA)
 desktopdir = $(datadir)/applications
 desktop_DATA = glista.desktop
-pixmapdir = $(datadir)/pixmaps
-pixmap_DATA = glista-icon.png
+CLEANFILES = \
+	glista.desktop
+
 all: all-am
 
 .SUFFIXES:
@@ -209,23 +210,6 @@ uninstall-desktopDATA:
 	  f=$(am__strip_dir) \
 	  echo " rm -f '$(DESTDIR)$(desktopdir)/$$f'"; \
 	  rm -f "$(DESTDIR)$(desktopdir)/$$f"; \
-	done
-install-pixmapDATA: $(pixmap_DATA)
-	@$(NORMAL_INSTALL)
-	test -z "$(pixmapdir)" || $(MKDIR_P) "$(DESTDIR)$(pixmapdir)"
-	@list='$(pixmap_DATA)'; for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  f=$(am__strip_dir) \
-	  echo " $(pixmapDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(pixmapdir)/$$f'"; \
-	  $(pixmapDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(pixmapdir)/$$f"; \
-	done
-
-uninstall-pixmapDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(pixmap_DATA)'; for p in $$list; do \
-	  f=$(am__strip_dir) \
-	  echo " rm -f '$(DESTDIR)$(pixmapdir)/$$f'"; \
-	  rm -f "$(DESTDIR)$(pixmapdir)/$$f"; \
 	done
 install-uiDATA: $(ui_DATA)
 	@$(NORMAL_INSTALL)
@@ -281,7 +265,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(desktopdir)" "$(DESTDIR)$(pixmapdir)" "$(DESTDIR)$(uidir)"; do \
+	for dir in "$(DESTDIR)$(desktopdir)" "$(DESTDIR)$(uidir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -301,6 +285,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -326,7 +311,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-desktopDATA install-pixmapDATA install-uiDATA
+install-data-am: install-desktopDATA install-uiDATA
 
 install-dvi: install-dvi-am
 
@@ -360,8 +345,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-desktopDATA uninstall-pixmapDATA \
-	uninstall-uiDATA
+uninstall-am: uninstall-desktopDATA uninstall-uiDATA
 
 .MAKE: install-am install-strip
 
@@ -371,12 +355,16 @@ uninstall-am: uninstall-desktopDATA uninstall-pixmapDATA \
 	install-desktopDATA install-dvi install-dvi-am install-exec \
 	install-exec-am install-html install-html-am install-info \
 	install-info-am install-man install-pdf install-pdf-am \
-	install-pixmapDATA install-ps install-ps-am install-strip \
-	install-uiDATA installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic pdf pdf-am ps ps-am uninstall uninstall-am \
-	uninstall-desktopDATA uninstall-pixmapDATA uninstall-uiDATA
+	install-ps install-ps-am install-strip install-uiDATA \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
+	pdf-am ps ps-am uninstall uninstall-am uninstall-desktopDATA \
+	uninstall-uiDATA
 
+
+glista.desktop:
+	cat $@.in > $@
+	echo "Icon=$(uidir)/glista-icon.png" >> $@
 
 %.ui: %.glade 
 	$(GTKBLDRCONV) $< $@

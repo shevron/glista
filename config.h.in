@@ -3,6 +3,9 @@
 /* User configuration directory */
 #undef GLISTA_CONFIG_DIR
 
+/* Glista system-wide shared data files */
+#undef GLISTA_DATA_DIR
+
 /* Whether GtkSpell is available */
 #undef HAVE_GTKSPELL
 

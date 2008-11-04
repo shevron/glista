@@ -707,6 +707,7 @@ GtkSpell_CFLAGS
 GtkSpell_LIBS
 GTKSPELL_CFLAGS
 GTKSPELL_LIBS
+GLISTA_DATA_DIR
 LIBOBJS
 LTLIBOBJS'
 ac_subst_files=''
@@ -2252,6 +2253,9 @@ am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
 
 
 
+
+
+# Define some macros
 
 
 # Checks for programs.
@@ -5076,6 +5080,24 @@ echo "${ECHO_T}default" >&6; }
 fi
 
 
+# Set some paths
+
+  prefix_NONE=
+  exec_prefix_NONE=
+  test "x$prefix" = xNONE && prefix_NONE=yes && prefix=$ac_default_prefix
+  test "x$exec_prefix" = xNONE && exec_prefix_NONE=yes && exec_prefix=$prefix
+  eval ac_define_dir="\"${datadir}/glista\""
+  eval ac_define_dir="\"$ac_define_dir\""
+  GLISTA_DATA_DIR="$ac_define_dir"
+
+
+cat >>confdefs.h <<_ACEOF
+#define GLISTA_DATA_DIR "$ac_define_dir"
+_ACEOF
+
+  test "$prefix_NONE" && prefix=NONE
+  test "$exec_prefix_NONE" && exec_prefix=NONE
+
 
 ac_config_files="$ac_config_files Makefile src/Makefile ui/Makefile"
 
@@ -5821,11 +5843,12 @@ GtkSpell_CFLAGS!$GtkSpell_CFLAGS$ac_delim
 GtkSpell_LIBS!$GtkSpell_LIBS$ac_delim
 GTKSPELL_CFLAGS!$GTKSPELL_CFLAGS$ac_delim
 GTKSPELL_LIBS!$GTKSPELL_LIBS$ac_delim
+GLISTA_DATA_DIR!$GLISTA_DATA_DIR$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 94; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 95; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

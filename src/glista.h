@@ -31,8 +31,8 @@
 
 #define _XOPEN_SOURCE
 
-#ifndef GLISTA_UI_DIR 
-#define GLISTA_UI_DIR "."
+#ifndef GLISTA_DATA_DIR 
+#define GLISTA_DATA_DIR "."
 #endif
 
 #ifndef GLISTA_CONFIG_DIR
@@ -47,10 +47,8 @@
 #define GLISTA_CAT_DELIM ":"
 #endif
 
-#ifdef PACKAGE_NAME
-#define GLISTA_PROGNAME PACKAGE_NAME
-#else
-#define GLISTA_PROGNAME "glista"
+#ifndef PACKAGE_NAME
+#deinfe PACKAGE_NAME "glista"
 #endif
 
 // Text colors
