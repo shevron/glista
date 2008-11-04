@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 # Initialize autotools
 AC_PREREQ(2.61)
-AC_INIT([glista], [0.3.1-dev], [shahar@prematureoptimization.org])
+AC_INIT([glista], [0.4-dev], [shahar@prematureoptimization.org])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build-aux])
