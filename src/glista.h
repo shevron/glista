@@ -16,14 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
  
-#include <gtk/gtk.h>
-#include <config.h>
-
 /**
  * Glista main header file
  */
 
-#ifndef _GLISTA_HEADER
+#ifndef __GLISTA_H
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif 
+
+#include <glib.h>
+#include <gtk/gtk.h>
 
 #define _XOPEN_SOURCE
 
@@ -91,7 +95,7 @@ typedef struct _glista_data_struct {
 } GlistaItem;	
 
 // Globals container
-static GlistaGlobals *gl_globs;
+GlistaGlobals *gl_globs;
 
 // Function Prototypes
 GlistaItem  *glista_item_new(const gchar *text, const gchar *parent);
@@ -120,6 +124,5 @@ typedef enum {
 	GL_COLUMN_NOTE
 } GlistaColumn;
 
-#define _GLISTA_HEADER
+#define __GLISTA_H
 #endif
-

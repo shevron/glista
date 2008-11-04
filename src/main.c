@@ -23,8 +23,8 @@
 #include <gtk/gtk.h>
 #include <gtk/gtkmain.h>
 #include "glista.h"
+#include "glista-storage.h"
 #include "glista-ui-callbacks.c"
-#include "glista-storage.c"
 
 #ifdef HAVE_GTKSPELL
 #include <gtkspell/gtkspell.h>

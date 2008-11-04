@@ -16,8 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <glib.h>
 #include <libxml/xmlreader.h>
 #include <libxml/xmlwriter.h>
+#include <string.h>
+
+#include "glista-storage.h"
 #include "glista.h"
 
 /**
@@ -27,9 +31,6 @@
  * data on disk - but in the future might offer more than one storage module 
  * (yeah right ;) )
  */
-
-#define GL_XML_ENCODING "UTF-8"
-#define GL_XML_FILENAME "itemstore.xml"
 
 /**
  * glista_storage_get_all_items:

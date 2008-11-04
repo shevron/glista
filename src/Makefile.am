@@ -1,6 +1,7 @@
 bin_PROGRAMS = glista
 
-glista_SOURCES = main.c
+glista_SOURCES = main.c glista-storage.c
+
 glista_LDADD = $(GTK_LIBS) \
                $(LIBXML_LIBS) \
                $(UNIQUE_LIBS) \
