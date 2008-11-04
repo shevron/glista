@@ -26,6 +26,10 @@
 #include "glista-ui-callbacks.c"
 #include "glista-storage.c"
 
+#ifdef HAVE_GTKSPELL
+#include <gtkspell/gtkspell.h>
+#endif
+
 #ifdef HAVE_UNIQUE
 #include "glista-unique.c"
 #endif
@@ -133,7 +137,7 @@ glista_ui_mainwindow_toggle()
 	GtkWidget *window;
 	
 	window = GTK_WIDGET(glista_get_widget("glista_main_window"));
-	                                           
+	
 	// Get current window state
 	g_object_get(window, "visible", &current, NULL);
 	
@@ -142,6 +146,258 @@ glista_ui_mainwindow_toggle()
 		glista_ui_mainwindow_hide();
 	} else {
 		glista_ui_mainwindow_show();
+	}
+}
+
+/**
+ * glista_note_open:
+ * @iter Iterator pointing to the item to add note to
+ * 
+ * Open the item note pane, and set a pointer to an iterator pointing to the
+ * item who's note is being set
+ */
+static void
+glista_note_open(GtkTreeIter *iter)
+{
+	GtkWidget     *note_textview, *note_container;
+	GtkTextBuffer *note_buffer;
+	gchar         *note_text;
+	gboolean       is_cat;
+	
+	// Check that this is not a category
+	gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), iter, 
+	                   GL_COLUMN_NOTE,     &note_text, 
+	                   GL_COLUMN_CATEGORY, &is_cat, -1);
+	                   
+	if (is_cat == FALSE) {
+		// Create new buffer
+		gl_globs->open_note = gtk_tree_iter_copy(iter);
+		note_buffer = gtk_text_buffer_new(NULL);
+		
+		// Set buffer text
+		if (note_text != NULL) {
+			gtk_text_buffer_set_text(note_buffer, note_text, -1);
+		}
+		
+		// Set buffer on view
+		note_textview = GTK_WIDGET(glista_get_widget("note_textview"));
+		gtk_text_view_set_buffer(GTK_TEXT_VIEW(note_textview), note_buffer);
+		
+#ifdef HAVE_GTKSPELL
+		// Attach a GtkSpell object to the note editor if available
+		if (gtkspell_get_from_text_view(GTK_TEXT_VIEW(note_textview)) == NULL) {
+			GError      *gtkspell_err = NULL;
+			if (! gtkspell_new_attach(GTK_TEXT_VIEW(note_textview), NULL, 
+									  &gtkspell_err)) {
+										
+				g_warning("Unable to initialize GtkSpell: [%d] %s\n", 
+						  gtkspell_err->code,
+						  gtkspell_err->message);
+				
+				g_error_free(gtkspell_err);
+			}
+		}
+#endif
+
+		// Show parent container and all it's children
+		note_container = GTK_WIDGET(glista_get_widget("note_container"));
+		gtk_widget_show_all(note_container);
+		
+		// Grab focus
+		gtk_widget_grab_focus(note_textview);
+	}
+}
+
+/**
+ * glista_item_get_single_selected:
+ * @selection Current tree selection
+ * 
+ * If the current selection is a single item (not a category, not more or less
+ * than one item) will return a GtkTreeIter pointing to this item. If not, will
+ * return NULL.
+ * 
+ * Returns: A pointer to a GtkTreeIter referring to the single selected item or
+ *          NULL if not exists.
+ */
+GtkTreeIter*
+glista_item_get_single_selected(GtkTreeSelection *selection)
+{
+	gint         selected_c;
+	GtkTreeIter *ret = NULL;
+	
+	selected_c = gtk_tree_selection_count_selected_rows(selection);
+	
+	// Only continue checking if we only have 1 selected item
+	if (selected_c == 1) {
+		GList       *list;
+		GtkTreeIter  iter;
+		gboolean     is_cat;
+		
+		list = gtk_tree_selection_get_selected_rows(selection, NULL);
+		g_assert(g_list_length(list) == 1);
+	
+		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
+		                            (GtkTreePath *) list->data)) {
+			gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
+			                   GL_COLUMN_CATEGORY, &is_cat, -1);
+			if (! is_cat) {
+				ret = gtk_tree_iter_copy(&iter);
+			}
+		}
+		
+		g_list_foreach(list, (GFunc) gtk_tree_path_free, NULL);
+		g_list_free(list);
+	}
+	
+	return ret;
+}
+
+/**
+ * glista_note_open_if_visible:
+ * @iter Iterator pointing to the currently selected item
+ *
+ * If note pane is already opened, will set the contents of the pane to the
+ * newly selected item's note. 
+ */
+void
+glista_note_open_if_visible(GtkTreeIter *iter)
+{
+	GtkWidget *note_container;
+	gboolean   visible;
+	
+	note_container = GTK_WIDGET(glista_get_widget("note_container"));
+	g_object_get(note_container, "visible", &visible, NULL);
+	
+	if (visible) {
+		glista_note_close();
+		glista_note_open(iter);
+	}
+}
+
+/**
+ * glista_note_store_in_model:
+ * 
+ * Store the currently open note in the item store model in memory. This
+ * does not guarantee that the data will be saved to disk.
+ */
+static void
+glista_note_store_in_model()
+{
+	GtkTextView   *note_view;
+	GtkTextBuffer *buffer;
+	gchar         *note;
+	
+	// Get the view and it's buffer
+	note_view = GTK_TEXT_VIEW(glista_get_widget("note_textview"));
+	buffer = gtk_text_view_get_buffer(note_view);
+	
+	if (GTK_IS_TEXT_BUFFER(buffer)) {
+		g_object_get(buffer, "text", &note, NULL);	
+		
+		if (gl_globs->open_note != NULL) {
+			note = g_strstrip(note);
+			
+			if (strlen(note) == 0) {
+				gtk_tree_store_set(gl_globs->itemstore, gl_globs->open_note, 
+								   GL_COLUMN_NOTE, NULL, -1);
+			} else {
+				gtk_tree_store_set(gl_globs->itemstore, gl_globs->open_note, 
+								   GL_COLUMN_NOTE, note, -1);
+			}        
+			
+			gtk_tree_iter_free(gl_globs->open_note);
+			gl_globs->open_note = NULL;
+		}
+		
+		g_free(note);
+	}
+}
+
+/**
+ * glista_note_close:
+ * 
+ * Close the item note pane and save the item note text according to the
+ * saved iterator pointing to the item that was edited.
+ */ 
+void
+glista_note_close()
+{
+	GtkWidget     *note_container;
+	
+#ifdef HAVE_GTKSPELL
+	// Detach the GtkSpell object from the note view
+	GtkTextView   *note_view;
+	GtkSpell      *gtkspell;
+	
+	note_view = GTK_TEXT_VIEW(glista_get_widget("note_textview"));
+	if ((gtkspell = gtkspell_get_from_text_view(note_view)) != NULL) {
+		gtkspell_detach(gtkspell);
+	}
+#endif
+	
+	glista_note_store_in_model();
+	
+	// Hide the note panel
+	note_container = GTK_WIDGET(glista_get_widget("note_container"));
+	gtk_widget_hide(note_container);
+}
+
+/**
+ * glista_note_toggle:
+ * @iter Iterator pointing to the currently activated item
+ * 
+ * Toggle between open and closed note panel
+ */
+void
+glista_note_toggle(GtkTreeIter *iter)
+{
+	GtkWidget   *note_container;
+	gboolean     visible;
+	
+	note_container = GTK_WIDGET(glista_get_widget("note_container"));
+	g_object_get(note_container, "visible", &visible, NULL);
+	
+	if (visible) {
+		glista_note_close();
+	} else {
+		glista_note_open(iter);
+	}
+}
+
+/**
+ * glista_note_toggle_selected:
+ * @selection Currently selected items
+ * 
+ * Toggle the note panel open / close status.
+ */
+void
+glista_note_toggle_selected(GtkTreeSelection *selection)
+{
+	GtkWidget   *note_container;
+	gboolean     visible;
+	
+	note_container = GTK_WIDGET(glista_get_widget("note_container"));
+	g_object_get(note_container, "visible", &visible, NULL);
+	
+	if (visible) {
+		glista_note_close();
+		
+	} else {
+		GList       *list;
+		GtkTreeIter  iter;
+	
+		list = gtk_tree_selection_get_selected_rows(selection, NULL);
+		if (g_list_length(list) == 1) {
+			if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore),
+		    	                        &iter, (GtkTreePath *) list->data)) {
+		
+				glista_note_open(&iter);
+			}
+		}
+	
+		// Free the selection list
+		g_list_foreach(list, (GFunc) gtk_tree_path_free, NULL);
+		g_list_free (list);
 	}
 }
 
@@ -224,6 +480,7 @@ glista_list_add(GlistaItem *item, gboolean expand)
 	gtk_tree_store_set(gl_globs->itemstore, &iter, 
 	                   GL_COLUMN_DONE, item->done, 
 	                   GL_COLUMN_TEXT, item->text, 
+	                   GL_COLUMN_NOTE, item->note,
 					   -1);
 }
 
@@ -637,17 +894,19 @@ glista_category_rename(GtkTreePath *old_path, GtkTreeIter *old_iter,
 			
 			do {
 				GlistaItem *item;
-				gchar      *item_text;
+				gchar      *item_text, *item_note;
 				gboolean    item_done;
 				
 				gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), 
 								   &child_iter, 
 								   GL_COLUMN_TEXT, &item_text,
+								   GL_COLUMN_NOTE, &item_note,
 								   GL_COLUMN_DONE, &item_done, -1);
 				
 				// Add new item to new parent
 				item = glista_item_new(item_text, new_name);
 				item->done = item_done;
+				item->note = item_note; 
 				glista_list_add(item, FALSE);
 				glista_item_free(item);
 
@@ -655,7 +914,7 @@ glista_category_rename(GtkTreePath *old_path, GtkTreeIter *old_iter,
 				GTK_TREE_MODEL(gl_globs->itemstore), &child_iter));
 					
 			// If the old category was expanded, expand the new one
-			if (gtk_tree_view_row_expanded (
+			if (gtk_tree_view_row_expanded(
 				GTK_TREE_VIEW(glista_get_widget("glista_item_list")), 
 				old_path)) {
 					
@@ -720,9 +979,10 @@ glista_item_new(const gchar *text, const gchar *parent)
 	item = g_malloc(sizeof(GlistaItem));
 	g_assert(item != NULL);
 	
-	item->done = FALSE;
-	item->text = (gchar *) text;
+	item->done   = FALSE;
+	item->text   = (gchar *) text;
 	item->parent = (gchar *) parent;
+	item->note   = NULL;
 	
 	return item;
 }
@@ -853,6 +1113,36 @@ glista_item_done_cell_data_func(GtkTreeViewColumn *column,
 	
 	gtk_tree_model_get(model, iter, GL_COLUMN_CATEGORY, &is_cat, -1);
 	g_object_set(cell, "visible", ! is_cat, NULL);
+}
+
+/**
+ * glista_item_note_cell_data_func:
+ * @column: Column to be rendered
+ * @cell:   Cell to be rendered
+ * @model:  Related data model
+ * @iter:   Tree iterator
+ * @data:   User data passed at connect time
+ *
+ * Callback function called whenever an item's "done" toggle cell needs to be 
+ * rendered. For now mostly hides the toggle for category rows.
+ *
+ * See gtk_tree_view_column_set_cell_data_func() for more info.
+ */
+void
+glista_item_note_cell_data_func(GtkTreeViewColumn *column, 
+                                GtkCellRenderer *cell, GtkTreeModel *model,
+                                GtkTreeIter *iter, gpointer data)
+{
+	gchar *note;
+	
+	gtk_tree_model_get(model, iter, GL_COLUMN_NOTE, &note, -1);
+	
+	if (note != NULL && strlen(note) > 0) {
+		// has note!
+		g_object_set(cell, "stock-id", GTK_STOCK_PASTE, NULL);
+	} else {
+		g_object_set(cell, "stock-id", NULL, NULL);
+	}
 }
 
 /**
@@ -1063,8 +1353,8 @@ glista_dnd_drag_data_received(GtkTreeDragDest *drag_dest, GtkTreePath *path,
 static 
 void glista_list_init()
 {
-	GtkCellRenderer        *text_ren, *done_ren;
-	GtkTreeViewColumn      *text_column, *done_column;
+	GtkCellRenderer        *text_ren, *done_ren, *note_ren;
+	GtkTreeViewColumn      *text_column, *done_column, *note_column;
 	GtkTreeView            *treeview;
 	GtkTreeSelection       *selection;
 	GtkTreeDragSourceIface *dnd_siface;
@@ -1075,6 +1365,7 @@ void glista_list_init()
 	
 	text_ren = gtk_cell_renderer_text_new();
 	done_ren = gtk_cell_renderer_toggle_new();
+	note_ren = gtk_cell_renderer_pixbuf_new();
 	
 	g_object_set(text_ren, "editable", TRUE, NULL);
 		
@@ -1091,6 +1382,8 @@ void glista_list_init()
 		"active", GL_COLUMN_DONE, NULL);	
 	text_column = gtk_tree_view_column_new_with_attributes("Item", text_ren, 
 		"strikethrough", GL_COLUMN_DONE, NULL);
+	note_column = gtk_tree_view_column_new_with_attributes("Note", note_ren, 
+		NULL);
 	
 	gtk_tree_view_column_set_cell_data_func(text_column, text_ren, 
 	                                        glista_item_text_cell_data_func,
@@ -1100,10 +1393,15 @@ void glista_list_init()
 	                                        glista_item_done_cell_data_func,
 	                                        NULL, NULL);
 	
+	gtk_tree_view_column_set_cell_data_func(note_column, note_ren, 
+	                                        glista_item_note_cell_data_func,
+	                                        NULL, NULL);
+	
 	// Set the text column to expand
 	g_object_set(text_column, "expand", TRUE, NULL);
 	
 	gtk_tree_view_append_column(treeview, text_column);
+	gtk_tree_view_append_column(treeview, note_column);
 	gtk_tree_view_append_column(treeview, done_column);	
 	
 	gtk_tree_view_set_reorderable (treeview, TRUE);
@@ -1178,7 +1476,8 @@ glista_list_get_all_items(GList *item_list, GtkTreeIter *parent)
 				
 				gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
 		                       GL_COLUMN_DONE, &item->done, 
-		                       GL_COLUMN_TEXT, &item->text, -1);
+		                       GL_COLUMN_TEXT, &item->text, 
+		                       GL_COLUMN_NOTE, &item->note, -1);
 				
 				if (parent != NULL) {
 					gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), 
@@ -1425,6 +1724,7 @@ main(int argc, char *argv[])
 	gl_globs = g_malloc(sizeof(GlistaGlobals));
 	gl_globs->uibuilder  = gtk_builder_new();
 	gl_globs->config     = NULL;
+	gl_globs->open_note  = NULL;
 	gl_globs->save_tag   = 0;
 	
 	// Load UI file
@@ -1444,10 +1744,11 @@ main(int argc, char *argv[])
 #endif
 
 	// Initialize item storage model
-	gl_globs->itemstore  = gtk_tree_store_new(3, 
-											  G_TYPE_BOOLEAN, 
-											  G_TYPE_STRING, 
-											  G_TYPE_BOOLEAN);
+	gl_globs->itemstore  = gtk_tree_store_new(4, 
+											  G_TYPE_BOOLEAN, // Done?
+											  G_TYPE_STRING,  // Text
+											  G_TYPE_BOOLEAN, // Category?
+											  G_TYPE_STRING); // Note
 	
 	// Set configuration directory name
 	gl_globs->configdir  = g_build_filename(g_get_user_config_dir(),
@@ -1495,6 +1796,9 @@ main(int argc, char *argv[])
 		
 	// Run main loop
 	gtk_main();
+	
+	// Store note if open
+	glista_note_store_in_model();
 	
 	// Save list
 	while (! glista_list_save());

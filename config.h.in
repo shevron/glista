@@ -3,6 +3,9 @@
 /* User configuration directory */
 #undef GLISTA_CONFIG_DIR
 
+/* Whether GtkSpell is available */
+#undef HAVE_GTKSPELL
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 

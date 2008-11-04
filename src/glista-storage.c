@@ -43,7 +43,7 @@ glista_storage_load_all_items(GList **list)
 {
 	GlistaItem       *item = NULL;
 	gchar            *storage_file;
-	xmlChar          *text, *done, *parent;
+	xmlChar          *text, *done, *parent, *note;
 	xmlTextReaderPtr  xml;
 	int               ret;
 
@@ -105,6 +105,19 @@ glista_storage_load_all_items(GList **list)
 							}
 						}
 						
+					// Read parent category name
+					} else if (xmlStrEqual(xmlTextReaderName(xml), 
+										   BAD_CAST "note")) {
+						
+						ret = xmlTextReaderRead(xml);
+						if (xmlTextReaderNodeType(xml) == 3) { // Text Node
+							// Read the parent category name
+							note = xmlTextReaderValue(xml);
+							if (strlen(g_strstrip((gchar *) note)) > 0) {
+								item->note = (gchar *) note;
+							}
+						}
+					
 					} else if (xmlStrEqual(xmlTextReaderName(xml), 
 										   BAD_CAST "item")) {
 						break;
@@ -127,6 +140,12 @@ glista_storage_load_all_items(GList **list)
 	g_free(storage_file);
 }
 
+/**
+ * glista_storage_save_all_items: 
+ * @all_items: A linked list of all items to save
+ * 
+ * Save all items to the storage XML file
+ */
 void 
 glista_storage_save_all_items(GList *all_items)
 {
@@ -170,6 +189,11 @@ glista_storage_save_all_items(GList *all_items)
 		if (item->parent != NULL) {
 			ret = xmlTextWriterWriteElement(xml, BAD_CAST "parent", 
 											BAD_CAST item->parent);
+		}
+		
+		if (item->note != NULL) {
+			ret = xmlTextWriterWriteElement(xml, BAD_CAST "note", 
+			                                BAD_CAST item->note);
 		}
 		
 		ret = xmlTextWriterEndElement(xml);

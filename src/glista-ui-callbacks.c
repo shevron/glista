@@ -133,28 +133,6 @@ on_tb_clear_clicked(GtkObject *object, gpointer user_data)
 }
 
 /**
- * on_glista_item_list_selection_changed:
- * @selection: The tree's GtkTreeSelection object
- * @user_data: User data passed when the event was connected
- *
- * Called when the selection in the list was changed. The purpose is to know 
- * whether some buttons in need to be disabled when no items are selected.
- */
-void 
-on_glista_item_list_selection_changed(GtkTreeSelection *selection, 
-                                      gpointer user_data)
-{
-	GtkWidget *clear_btn;
-
-	clear_btn = GTK_WIDGET(glista_get_widget("tb_delete"));
-	if (gtk_tree_selection_count_selected_rows(selection) > 0) {
-		gtk_widget_set_sensitive(clear_btn, TRUE);
-	} else {
-		gtk_widget_set_sensitive(clear_btn, FALSE);
-	}
-}
-
-/**
  * on_tb_delete_clicked:
  * @object:    The object that triggered the event
  * @user_data: User data passed when the event was connected
@@ -166,6 +144,65 @@ void
 on_tb_delete_clicked(GtkObject *object, gpointer user_data)
 {
 	glista_list_delete_selected();
+}
+
+/**
+ * on_tb_note_clicked:
+ * @object:    The object that triggered the event
+ * @user_data: User data passed when the event was connected
+ *
+ * Called when the "Note" button in the toolbar is clicked. Will toggle
+ * the note panel for the currently selected item.
+ */
+void
+on_tb_note_clicked(GtkObject *object, gpointer user_data)
+{
+	GtkTreeSelection *selection;
+	
+	selection = gtk_tree_view_get_selection(
+		GTK_TREE_VIEW(glista_get_widget("glista_item_list")));
+		
+	glista_note_toggle_selected(selection);
+}
+
+/**
+ * on_glista_item_list_selection_changed:
+ * @selection: The tree's GtkTreeSelection object
+ * @user_data: User data passed when the event was connected
+ *
+ * Called when the selection in the list was changed. The purpose is to know 
+ * whether some buttons in need to be disabled when no items are selected.
+ */
+void 
+on_glista_item_list_selection_changed(GtkTreeSelection *selection, 
+                                      gpointer user_data)
+{
+	GtkWidget   *clear_btn, *note_btn;
+	GtkTreeIter *iter;
+
+	clear_btn = GTK_WIDGET(glista_get_widget("tb_delete"));
+	note_btn = GTK_WIDGET(glista_get_widget("tb_note"));
+	
+	if (gtk_tree_selection_count_selected_rows(selection) > 0) {
+		if ((iter = glista_item_get_single_selected(selection)) != NULL) {
+			gtk_widget_set_sensitive(note_btn, TRUE);
+			glista_note_open_if_visible(iter);
+			gtk_tree_iter_free(iter);
+			
+		} else {
+			gtk_widget_set_sensitive(note_btn, FALSE);
+			glista_note_close();
+		}
+		
+		gtk_widget_set_sensitive(clear_btn, TRUE);
+		
+	} else {
+		gtk_widget_set_sensitive(clear_btn, FALSE);
+		gtk_widget_set_sensitive(note_btn, FALSE);
+		glista_note_close();
+	}
+	
+	
 }
 
 /**
@@ -316,4 +353,39 @@ on_item_text_editing_started(GtkCellRenderer *renderer,
 			gtk_tree_path_free(path);
 		}
 	}
+}
+
+/**
+ * on_glista_item_list_row_activated:
+ * @view      the tree view
+ * @path      the path in the model
+ * @column    the column clicked
+ * @user_data data bound at connect time
+ * 
+ * Handle double-click on a row item, opening up the note panel
+ */
+void
+on_glista_item_list_row_activated(GtkTreeView *view, GtkTreePath *path, 
+								  GtkTreeViewColumn *column, gpointer user_data)
+{
+	GtkTreeIter iter;
+	
+	if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
+	                            &iter, path)) {
+	                            	
+		glista_note_toggle(&iter);
+	}
+}
+
+/**
+ * on_note_close_btn_clicked:
+ * @btn       Button clicked
+ * @user_data User data bound at signal connect time
+ * 
+ * Handle the note panel "close" button being clicked
+ */
+void
+on_note_close_btn_clicked(GtkButton *btn, gpointer user_data)
+{
+	glista_note_close();
 }

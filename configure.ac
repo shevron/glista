@@ -50,7 +50,7 @@ AC_ARG_WITH([unique],
     else
       check_unique=$withval
       if test "x$withval" != "xyes"; then
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${withval}/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${withval}/lib/pkgconfig"
       fi
     fi
   ],[
@@ -68,11 +68,43 @@ if test -n "$check_unique"; then
 else
   AC_MSG_CHECKING([for Unique])
   AC_MSG_RESULT([no])
-  AC_MSG_WARN([Single instance detection will be disabled])
 fi
 
 AC_SUBST(UNIQUE_CFLAGS)
 AC_SUBST(UNIQUE_LIBS)
+
+dnl Check for GtkSpell
+AC_ARG_WITH([gtkspell],
+  [AS_HELP_STRING([--with-gtkspell=DIR],
+    [enable spell checking support @<:@default=yes@:>@])],
+  [
+    if test "x$withval" = "xno"; then
+      check_gtkspell=""
+    else
+      check_gtkspell=$withval
+      if test "x$withval" != "xyes"; then
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${withval}/lib/pkgconfig"
+      fi
+    fi
+  ],[
+    check_gtkspell="yes"
+  ])
+
+if test -n "$check_gtkspell"; then
+  PKG_CHECK_MODULES([GtkSpell], gtkspell-2.0, [
+    GTKSPELL_CFLAGS=$GtkSpell_CFLAGS
+    GTKSPELL_LIBS=$GtkSpell_LIBS
+    AC_DEFINE_UNQUOTED(HAVE_GTKSPELL, [1], [Whether GtkSpell is available])
+  ], [
+    AC_MSG_WARN([Spell checking will be disabled])
+  ])
+else
+  AC_MSG_CHECKING([for GtkSpell])
+  AC_MSG_RESULT([no])
+fi
+
+AC_SUBST(GTKSPELL_CFLAGS)
+AC_SUBST(GTKSPELL_LIBS)
 
 dnl add option to modify the configuration directory. 
 dnl Default is defined in glista.h

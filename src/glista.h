@@ -68,6 +68,7 @@ typedef struct _glista_config_struct {
 	gint     width;
 	gint     height;
 	gboolean visible;
+	gboolean note_vpane_pos;
 } GlistaConfig;
 
 // Glista globals container struct
@@ -78,6 +79,7 @@ typedef struct  _glista_globals_struct {
 	gchar         *configdir;  // Configuration directory path
 	GlistaConfig  *config;     // Configuration Data
 	guint          save_tag;   // Data save timeout tag - see g_timeout_add()
+	GtkTreeIter   *open_note;  // Iterator pointing to the current open note
 } GlistaGlobals;
 
 // Glista item data structure
@@ -85,30 +87,37 @@ typedef struct _glista_data_struct {
 	gboolean  done;
 	gchar    *text;
 	gchar    *parent;
+	gchar    *note;
 } GlistaItem;	
 
 // Globals container
 static GlistaGlobals *gl_globs;
 
 // Function Prototypes
-GlistaItem *glista_item_new(const gchar *text, const gchar *parent);
-void        glista_item_create_from_text(gchar *text);
-void        glista_item_toggle_done(GtkTreePath *path);
-void        glista_item_change_text(GtkTreePath *path, gchar *text);
-void        glista_item_redraw_parent(GtkTreeIter *child_iter);
-void        glista_item_free(GlistaItem *item);
-void        glista_list_save_timeout();
-void        glista_list_delete_done();
-void        glista_list_delete_selected();
-void        glista_ui_mainwindow_show();
-void        glista_ui_mainwindow_hide();
-void        glista_ui_mainwindow_toggle();
+GlistaItem  *glista_item_new(const gchar *text, const gchar *parent);
+void         glista_item_create_from_text(gchar *text);
+void         glista_item_toggle_done(GtkTreePath *path);
+void         glista_item_change_text(GtkTreePath *path, gchar *text);
+void         glista_item_redraw_parent(GtkTreeIter *child_iter);
+void         glista_item_free(GlistaItem *item);
+GtkTreeIter *glista_item_get_single_selected(GtkTreeSelection *selection);
+void         glista_list_save_timeout();
+void         glista_list_delete_done();
+void         glista_list_delete_selected();
+void         glista_ui_mainwindow_show();
+void         glista_ui_mainwindow_hide();
+void         glista_ui_mainwindow_toggle();
+void         glista_note_toggle(GtkTreeIter *iter);
+void         glista_note_toggle_selected(GtkTreeSelection *selection);
+void         glista_note_open_if_visible(GtkTreeIter *iter);
+void         glista_note_close();
 
 // Column names & order ENUM
 typedef enum {
 	GL_COLUMN_DONE,
 	GL_COLUMN_TEXT,
-	GL_COLUMN_CATEGORY
+	GL_COLUMN_CATEGORY,
+	GL_COLUMN_NOTE
 } GlistaColumn;
 
 #define _GLISTA_HEADER
