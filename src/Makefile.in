@@ -159,7 +159,14 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-glista_SOURCES = main.c glista-storage.c
+EXTRA_DIST = glista-ui-callbacks.c \
+             glista-unique.c
+
+glista_SOURCES = main.c \
+                 glista.h \
+                 glista-storage.c \
+                 glista-storage.h
+
 glista_LDADD = $(GTK_LIBS) \
                $(LIBXML_LIBS) \
                $(UNIQUE_LIBS) \

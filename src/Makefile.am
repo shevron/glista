@@ -1,6 +1,12 @@
 bin_PROGRAMS = glista
 
-glista_SOURCES = main.c glista-storage.c
+EXTRA_DIST = glista-ui-callbacks.c \
+             glista-unique.c
+
+glista_SOURCES = main.c \
+                 glista.h \
+                 glista-storage.c \
+                 glista-storage.h
 
 glista_LDADD = $(GTK_LIBS) \
                $(LIBXML_LIBS) \
