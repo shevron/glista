@@ -993,6 +993,11 @@ glista_item_new(const gchar *text, const gchar *parent)
 void 
 glista_item_free(GlistaItem *item)
 {
+	// Free note if set
+	if (item->note != NULL) {
+		g_free(item->note);
+	}
+	
 	g_free(item);
 }
 
@@ -1086,6 +1091,8 @@ glista_item_text_cell_data_func(GtkTreeViewColumn *column,
 	text = glista_item_get_display_text(model, iter);
 	weight = (category ? 800 : 400);
 	g_object_set(cell, "weight", weight, "text", text, NULL);
+	
+	g_free(text);
 }
 
 /**
@@ -1140,6 +1147,8 @@ glista_item_note_cell_data_func(GtkTreeViewColumn *column,
 	} else {
 		g_object_set(cell, "stock-id", NULL, NULL);
 	}
+	
+	g_free(note);
 }
 
 /**
