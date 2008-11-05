@@ -33,6 +33,158 @@
  */
 
 /**
+ * read_next_text_node:
+ * @xml XML reader
+ * 
+ * Read the text value of the next node, assuming that it is a text node. If no
+ * text node value is encountered before the tag ends, will return NULL
+ * 
+ * Returns: text read from node value or NULL if none
+ */
+static gchar*
+read_next_text_node(xmlTextReaderPtr xml)
+{
+	gchar    *text = NULL;
+	gboolean  text_done = FALSE;
+	
+	while ((! text_done) && xmlTextReaderRead(xml) == 1) {
+		switch(xmlTextReaderNodeType(xml)) {
+			case 3: // Text node, read value
+				text = (gchar *) xmlTextReaderValue(xml);
+				g_strstrip(text);
+				text_done = TRUE;
+				break;
+				
+			case 15: // End node - no text
+				text_done = TRUE;
+				break;
+		}
+	}
+	
+	return text;
+}
+
+/**
+ * read_next_item: 
+ * @xml XML reader
+ * 
+ * Read the next item from the XML file and populate it's properties
+ * 
+ * Returns: a newly created GlistaItem or NULL if nothing more to read
+ */
+static GlistaItem*
+read_next_item(xmlTextReaderPtr xml) 
+{
+	gchar      *text, *done, *parent, *note;
+	xmlChar    *node_name;
+	gboolean    item_done;
+	GlistaItem *item;
+	
+	item   = NULL;
+	text   = NULL;
+	done   = NULL;
+	parent = NULL;
+	note   = NULL;
+	
+	item_done = FALSE;
+	
+	while ((! item_done) && xmlTextReaderRead(xml) == 1) {
+		node_name = xmlTextReaderName(xml);
+		
+		if (xmlStrEqual(node_name, BAD_CAST GL_XNODE_ITEM) && 
+		    xmlTextReaderNodeType(xml) == 1) {
+		    
+		    // Create item
+		    item = glista_item_new(NULL, NULL);
+		    
+		    // Read item data
+		    while ((! item_done) && xmlTextReaderRead(xml) == 1) {
+		    	xmlFree(node_name);		    		
+		    	node_name = xmlTextReaderName(xml);
+				
+				// Node text
+				if (xmlStrEqual(node_name, BAD_CAST GL_XNODE_TEXT)) {
+					if (text == NULL) {
+						text = read_next_text_node(xml);
+					}
+					
+				} else 
+				
+				// Node 'done' flag
+				if (xmlStrEqual(node_name, BAD_CAST GL_XNODE_DONE)) {
+					if (done == NULL) {
+						done = read_next_text_node(xml);
+					}
+					
+				} else 
+				
+				// Node parent
+				if (xmlStrEqual(node_name, BAD_CAST GL_XNODE_PRNT)) {
+					if (parent == NULL) {
+						parent = read_next_text_node(xml);
+					}
+					
+				} else 
+				
+				// Node item note
+				if (xmlStrEqual(node_name, BAD_CAST GL_XNODE_NOTE)) {
+					if (note == NULL) {
+						note = read_next_text_node(xml);
+					}
+					
+				} else 
+				
+				if (xmlStrEqual(node_name, BAD_CAST GL_XNODE_ITEM) && 
+				    xmlTextReaderNodeType(xml) == 15) {
+				    	
+				    item_done = TRUE;
+				}
+			}
+			
+			// Check that we have text and set it
+			if (text != NULL) {
+				if (strlen(text) > 0) {
+					item->text = text;
+				} else {
+					 g_free(text);
+				}
+			}
+			
+			// Set "done" flag
+			if (done != NULL) {
+				if (*done == '1') {
+					item->done = TRUE;	
+				}
+				g_free(done);
+			}
+				
+			
+			// Set the parent if any
+			if (parent != NULL) {
+				if (strlen(parent) > 0) {
+					item->parent = parent;
+				} else {
+					 g_free(parent);
+				}
+			}
+			
+			// Set the note if any
+			if (note != NULL) {
+				if (strlen(note) > 0) {
+					item->note = note; 
+				} else {
+					 g_free(note);
+				}
+			}
+		}
+		
+		xmlFree(node_name);
+	}
+
+	return item;
+}
+
+/**
  * glista_storage_get_all_items:
  * @list: Pointer to a GList* to populate with GlistaItem objects
  *
@@ -42,97 +194,41 @@
 void
 glista_storage_load_all_items(GList **list)
 {
-	GlistaItem       *item = NULL;
-	gchar            *storage_file;
-	xmlChar          *text, *done, *parent, *note;
 	xmlTextReaderPtr  xml;
-	int               ret;
-
+	gchar            *storage_file;
+	xmlChar          *node_name;
+	GlistaItem       *item;
+	
 	// Build storage file path
 	storage_file = g_build_filename(gl_globs->configdir, GL_XML_FILENAME, NULL);
 	
+	// Open XML file
 	if ((xml = xmlReaderForFile(storage_file, GL_XML_ENCODING, 0)) != NULL) {
-		// Process the XML
-		// Read the root node
-		ret = xmlTextReaderRead(xml);
-		while (ret == 1) {
-			ret = xmlTextReaderRead(xml);
+		
+		// Read the XML root node
+		if (xmlTextReaderRead(xml) == 1) {
+			node_name = xmlTextReaderName(xml);
 			
-			// Process items
-			while (xmlStrEqual(xmlTextReaderName(xml), BAD_CAST "item")) {
-				item = glista_item_new(NULL, NULL);
+			if (xmlStrEqual(node_name, BAD_CAST GL_XNODE_ROOT)) {
 				
-				// Process item properties
-				while (ret == 1) {
-					ret = xmlTextReaderRead(xml);
-										
-					// Read item text
-					if (xmlStrEqual(xmlTextReaderName(xml), BAD_CAST "text")) {
-						ret = xmlTextReaderRead(xml);
-						if (xmlTextReaderNodeType(xml) == 3) { // Text node
-							// Read the item from XML
-							text = xmlTextReaderValue(xml);
-							if (strlen(g_strstrip((gchar *) text)) > 0) {
-								item->text = (gchar *) text;
-							}
-						}
-						
-					// Read item status (done or not?)
-					} else if (xmlStrEqual(xmlTextReaderName(xml), 
-										   BAD_CAST "done")) {
-											   
-						ret = xmlTextReaderRead(xml);
-						if (xmlTextReaderNodeType(xml) == 3) { // Text node
-							// Read the item from XML
-							done = xmlTextReaderValue(xml);
-							if (xmlStrEqual(BAD_CAST g_strstrip((gchar *) done),
-											BAD_CAST "1")) {
-												
-								item->done = TRUE;
-							}
-							xmlFree(done);
-						}
-					
-					// Read parent category name
-					} else if (xmlStrEqual(xmlTextReaderName(xml), 
-										   BAD_CAST "parent")) {
-						
-						ret = xmlTextReaderRead(xml);
-						if (xmlTextReaderNodeType(xml) == 3) { // Text Node
-							// Read the parent category name
-							parent = xmlTextReaderValue(xml);
-							if (strlen(g_strstrip((gchar *) parent)) > 0) {
-								item->parent = (gchar *) parent;
-							}
-						}
-						
-					// Read parent category name
-					} else if (xmlStrEqual(xmlTextReaderName(xml), 
-										   BAD_CAST "note")) {
-						
-						ret = xmlTextReaderRead(xml);
-						if (xmlTextReaderNodeType(xml) == 3) { // Text Node
-							// Read the parent category name
-							note = xmlTextReaderValue(xml);
-							if (strlen(g_strstrip((gchar *) note)) > 0) {
-								item->note = (gchar *) note;
-							}
-						}
-					
-					} else if (xmlStrEqual(xmlTextReaderName(xml), 
-										   BAD_CAST "item")) {
-						break;
+				// Read all items 
+				while ((item = read_next_item(xml)) != NULL) {
+					if (item->text != NULL) {
+						*list = g_list_append(*list, item);
+					} else {
+						glista_item_free(item);
 					}
 				}
 				
-				if (item->text != NULL) {
-					*list = g_list_append(*list, item);
-				} else {
-					glista_item_free(item);
-				}
-				
-				ret = xmlTextReaderRead(xml);
-			}	
+			} else {
+				g_warning("Invalid XML file: unexpected root element '%s'\n", 
+				           node_name);
+			}
+			
+			xmlFree(node_name);
+			
+		} else {
+			g_warning("Invalid XML file: unable to read root element\n");
 		}
 		
 		xmlFreeTextReader(xml);

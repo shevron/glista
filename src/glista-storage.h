@@ -28,6 +28,14 @@
 #define GL_XML_ENCODING "UTF-8"
 #define GL_XML_FILENAME "itemstore.xml"
 
+// Node names
+#define GL_XNODE_ROOT "glista"
+#define GL_XNODE_ITEM "item"
+#define GL_XNODE_TEXT "text"
+#define GL_XNODE_DONE "done"
+#define GL_XNODE_PRNT "parent"
+#define GL_XNODE_NOTE "note"
+
 // Function prototypes
 void glista_storage_load_all_items(GList **list);
 void glista_storage_save_all_items(GList *all_items);
