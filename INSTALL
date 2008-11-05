@@ -31,5 +31,9 @@ libraries installed:
 - gtk+     >= 2.12
 - libxml   >= 2.6
 
+Optionally, Glista may use the following libraries if they are available:
+- libunique   >= 1.0
+- liggtkspell
+
 You will also need some build tools such as GNU gcc and gtk-builder-convert.
 
