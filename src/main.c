@@ -24,14 +24,11 @@
 #include <gtk/gtkmain.h>
 #include "glista.h"
 #include "glista-storage.h"
+#include "glista-unique.h"
 #include "glista-ui-callbacks.c"
 
 #ifdef HAVE_GTKSPELL
 #include <gtkspell/gtkspell.h>
-#endif
-
-#ifdef HAVE_UNIQUE
-#include "glista-unique.c"
 #endif
 
 static gboolean (*glista_dnd_old_drag_data_received)(

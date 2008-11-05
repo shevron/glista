@@ -20,11 +20,8 @@
 
 #ifdef HAVE_UNIQUE
 
+#include "glista-unique.h"
 #include <unique/unique.h>
-
-#ifndef GLISTA_UNIQUE_ID
-#define GLISTA_UNIQUE_ID "org.prematureoptimization.Glista"
-#endif
 
 static UniqueApp *glista_uapp;
 

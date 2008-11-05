@@ -43,7 +43,8 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_glista_OBJECTS = main.$(OBJEXT) glista-storage.$(OBJEXT)
+am_glista_OBJECTS = main.$(OBJEXT) glista-storage.$(OBJEXT) \
+	glista-unique.$(OBJEXT)
 glista_OBJECTS = $(am_glista_OBJECTS)
 am__DEPENDENCIES_1 =
 glista_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -159,13 +160,13 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-EXTRA_DIST = glista-ui-callbacks.c \
-             glista-unique.c
-
+EXTRA_DIST = glista-ui-callbacks.c
 glista_SOURCES = main.c \
                  glista.h \
                  glista-storage.c \
-                 glista-storage.h
+                 glista-storage.h \
+                 glista-unique.c \
+                 glista-unique.h
 
 glista_LDADD = $(GTK_LIBS) \
                $(LIBXML_LIBS) \
@@ -247,6 +248,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/glista-storage.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/glista-unique.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 
 .c.o:
