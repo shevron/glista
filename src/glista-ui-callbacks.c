@@ -211,12 +211,26 @@ on_glista_item_list_selection_changed(GtkTreeSelection *selection,
  * @user_data: User data passed when the event was connected
  *
  * Called when the system tray status icon is clicked. Simply calls
- * glista_ui_mainwindow_toggle().
+ * glista_ui_mainwindow_toggle(), unless we know the event is a double-click
+ * or triple-click event, in which case we don nothing.
  */
 void 
 on_sysicon_activate(GtkObject *object, GtkWindow *window)
 {
-	glista_ui_mainwindow_toggle();
+	GdkEvent *event;
+	
+	if ((event = gdk_event_get()) != NULL) { 
+		if (event->type != GDK_2BUTTON_PRESS  &&
+	        event->type != GDK_3BUTTON_PRESS) {
+	        	
+	        glista_ui_mainwindow_toggle();
+	    }
+	    
+	    gdk_event_free(event);	
+	     
+	} else {
+		glista_ui_mainwindow_toggle();
+	}
 }
 
 /**
