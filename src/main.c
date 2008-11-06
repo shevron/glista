@@ -147,65 +147,6 @@ glista_ui_mainwindow_toggle()
 }
 
 /**
- * glista_note_open:
- * @iter Iterator pointing to the item to add note to
- * 
- * Open the item note pane, and set a pointer to an iterator pointing to the
- * item who's note is being set
- */
-static void
-glista_note_open(GtkTreeIter *iter)
-{
-	GtkWidget     *note_textview, *note_container;
-	GtkTextBuffer *note_buffer;
-	gchar         *note_text;
-	gboolean       is_cat;
-	
-	// Check that this is not a category
-	gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), iter, 
-	                   GL_COLUMN_NOTE,     &note_text, 
-	                   GL_COLUMN_CATEGORY, &is_cat, -1);
-	                   
-	if (is_cat == FALSE) {
-		// Create new buffer
-		gl_globs->open_note = gtk_tree_iter_copy(iter);
-		note_buffer = gtk_text_buffer_new(NULL);
-		
-		// Set buffer text
-		if (note_text != NULL) {
-			gtk_text_buffer_set_text(note_buffer, note_text, -1);
-		}
-		
-		// Set buffer on view
-		note_textview = GTK_WIDGET(glista_get_widget("note_textview"));
-		gtk_text_view_set_buffer(GTK_TEXT_VIEW(note_textview), note_buffer);
-		
-#ifdef HAVE_GTKSPELL
-		// Attach a GtkSpell object to the note editor if available
-		if (gtkspell_get_from_text_view(GTK_TEXT_VIEW(note_textview)) == NULL) {
-			GError      *gtkspell_err = NULL;
-			if (! gtkspell_new_attach(GTK_TEXT_VIEW(note_textview), NULL, 
-									  &gtkspell_err)) {
-										
-				g_warning("Unable to initialize GtkSpell: [%d] %s\n", 
-						  gtkspell_err->code,
-						  gtkspell_err->message);
-				
-				g_error_free(gtkspell_err);
-			}
-		}
-#endif
-
-		// Show parent container and all it's children
-		note_container = GTK_WIDGET(glista_get_widget("note_container"));
-		gtk_widget_show_all(note_container);
-		
-		// Grab focus
-		gtk_widget_grab_focus(note_textview);
-	}
-}
-
-/**
  * glista_item_get_single_selected:
  * @selection Current tree selection
  * 
@@ -250,28 +191,6 @@ glista_item_get_single_selected(GtkTreeSelection *selection)
 }
 
 /**
- * glista_note_open_if_visible:
- * @iter Iterator pointing to the currently selected item
- *
- * If note pane is already opened, will set the contents of the pane to the
- * newly selected item's note. 
- */
-void
-glista_note_open_if_visible(GtkTreeIter *iter)
-{
-	GtkWidget *note_container;
-	gboolean   visible;
-	
-	note_container = GTK_WIDGET(glista_get_widget("note_container"));
-	g_object_get(note_container, "visible", &visible, NULL);
-	
-	if (visible) {
-		glista_note_close();
-		glista_note_open(iter);
-	}
-}
-
-/**
  * glista_note_store_in_model:
  * 
  * Store the currently open note in the item store model in memory. This
@@ -300,13 +219,94 @@ glista_note_store_in_model()
 			} else {
 				gtk_tree_store_set(gl_globs->itemstore, gl_globs->open_note, 
 								   GL_COLUMN_NOTE, note, -1);
-			}        
-			
-			gtk_tree_iter_free(gl_globs->open_note);
-			gl_globs->open_note = NULL;
+			}
 		}
 		
 		g_free(note);
+	}
+}
+
+/**
+ * glista_note_open:
+ * @iter Iterator pointing to the item to add note to
+ * 
+ * Open the item note pane, and set a pointer to an iterator pointing to the
+ * item who's note is being set
+ */
+static void
+glista_note_open(GtkTreeIter *iter)
+{
+	GtkWidget     *note_textview, *note_container;
+	GtkTextBuffer *note_buffer;
+	gchar         *note_text;
+	gboolean       is_cat;
+	
+	// Check that this is not a category
+	gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), iter, 
+	                   GL_COLUMN_NOTE,     &note_text, 
+	                   GL_COLUMN_CATEGORY, &is_cat, -1);
+	                   
+	if (is_cat == FALSE) {
+		if (gl_globs->open_note != NULL) {
+			gtk_tree_iter_free(gl_globs->open_note);
+		}
+		gl_globs->open_note = gtk_tree_iter_copy(iter);
+		
+		// Get view buffer
+		note_textview = GTK_WIDGET(glista_get_widget("note_textview"));
+		note_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(note_textview));
+		
+		// Set buffer text
+		if (note_text != NULL) {
+			gtk_text_buffer_set_text(note_buffer, note_text, -1);
+		} else {
+			gtk_text_buffer_set_text(note_buffer, "", 0);
+		}
+		
+#ifdef HAVE_GTKSPELL
+		// Attach a GtkSpell object to the note editor if available
+		if (gtkspell_get_from_text_view(GTK_TEXT_VIEW(note_textview)) == NULL) {
+			GError *gtkspell_err = NULL;
+			if (! gtkspell_new_attach(GTK_TEXT_VIEW(note_textview), NULL, 
+									  &gtkspell_err)) {
+										
+				g_warning("Unable to initialize GtkSpell: [%d] %s\n", 
+						  gtkspell_err->code,
+						  gtkspell_err->message);
+				
+				g_error_free(gtkspell_err);
+			}
+		}
+#endif
+
+		// Show parent container and all it's children
+		note_container = GTK_WIDGET(glista_get_widget("note_container"));
+		gtk_widget_show_all(note_container);
+		
+		// Grab focus
+		gtk_widget_grab_focus(note_textview);
+	}
+}
+
+/**
+ * glista_note_open_if_visible:
+ * @iter Iterator pointing to the currently selected item
+ *
+ * If note pane is already opened, will set the contents of the pane to the
+ * newly selected item's note. 
+ */
+void
+glista_note_open_if_visible(GtkTreeIter *iter)
+{
+	GtkWidget *note_container;
+	gboolean   visible;
+	
+	note_container = GTK_WIDGET(glista_get_widget("note_container"));
+	g_object_get(note_container, "visible", &visible, NULL);
+	
+	if (visible) {
+		glista_note_store_in_model();
+		glista_note_open(iter);
 	}
 }
 
@@ -319,20 +319,15 @@ glista_note_store_in_model()
 void
 glista_note_close()
 {
-	GtkWidget     *note_container;
-	
-#ifdef HAVE_GTKSPELL
-	// Detach the GtkSpell object from the note view
-	GtkTextView   *note_view;
-	GtkSpell      *gtkspell;
-	
-	note_view = GTK_TEXT_VIEW(glista_get_widget("note_textview"));
-	if ((gtkspell = gtkspell_get_from_text_view(note_view)) != NULL) {
-		gtkspell_detach(gtkspell);
-	}
-#endif
+	GtkWidget *note_container;
 	
 	glista_note_store_in_model();
+	
+	// Clear the link to the current open iter
+	if (gl_globs->open_note != NULL) {
+		gtk_tree_iter_free(gl_globs->open_note);
+		gl_globs->open_note = NULL;
+	}
 	
 	// Hide the note panel
 	note_container = GTK_WIDGET(glista_get_widget("note_container"));
@@ -1805,8 +1800,8 @@ main(int argc, char *argv[])
 	// Run main loop
 	gtk_main();
 	
-	// Store note if open
-	glista_note_store_in_model();
+	// Close and store note if open
+	glista_note_close();
 	
 	// Save list
 	while (! glista_list_save());
