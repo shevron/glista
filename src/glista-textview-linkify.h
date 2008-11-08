@@ -26,7 +26,7 @@
 
 // regex matches http[s]://<hostname>[extra], or www.[subdomains.]<domain>.<tld>[extra]
 #ifndef GTL_URL_REGEX
-#define GTL_URL_REGEX "\\b(http[s]?://[a-zA-Z0-9]+[^ \t\r\n]*|www[.]+[A-Za-z]+[A-Za-z0-9.-]{2,}[.]+[A-Za-z0-9]{2,}[^ \t\r\n]*)"
+#define GTL_URL_REGEX "\\b((http[s]?://[a-zA-Z0-9]+[a-zA-Z0-9\\.-]*|www[\\.]+([a-zA-Z0-9-]+[\\.])+[a-zA-Z]{2,})([/?#]+[^ \t\r\n]*)*)"
 #endif
 
 gboolean glista_textview_linkify_init(GtkTextView *textview);
