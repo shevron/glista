@@ -41,32 +41,49 @@ static regex_t url_re;
 static gboolean
 glista_open_url(gchar *url)
 {
+	gchar    *e_url, *f_url, *command;
+	gint      i;
+	gboolean  ret = FALSE;
+	
 	/**
-	 * FIXME: Need to add a default 'http://' prefix to URLs starting with
-	 * 'www.' because the system can't open them!
+	 * A NULL-terminated list of possible commands to execute.
+	 * Use '%s' as a placeholder for the URL to open
 	 */
+	static const gchar *commands[] = {
+		"xdg-open %s",
+		"gnome-open %s",
+		"kfmclient exec %s",
+		NULL
+	};
 	
-	// Try opening the URL by calling these programs:
-	const gchar *xdg_open_argv[]   = { "xdg-open", url, NULL };
-	const gchar *gnome_open_argv[] = { "gnome-open", url, NULL };
-	const gchar *kfmclient_argv[]  = { "kfmclient", "exec", url, NULL };
-
-	if (g_spawn_async(NULL, (gchar **)xdg_open_argv, NULL,
-		G_SPAWN_SEARCH_PATH, NULL, NULL, NULL, NULL)) {
-		return TRUE;
+	// Calculate the full URL and escape if for the shell
+	if (g_str_has_prefix(url, "http://") || 
+	    g_str_has_prefix(url, "https://")) {
+	    
+		e_url = g_shell_quote(url);
+		
+	} else {
+		f_url = g_strconcat("http://", url, NULL);
+		e_url = g_shell_quote(f_url);
+		g_free(f_url);
 	}
 	
-	if (g_spawn_async(NULL, (gchar **)gnome_open_argv, NULL,
-		G_SPAWN_SEARCH_PATH, NULL, NULL, NULL, NULL)) {
-		return TRUE;
+	// Iterate over the commands, break when successful 
+	for (i = 0; commands[i] != NULL; i++) {
+		command = g_strdup_printf(commands[i], e_url);
+		
+		// Try to spawn command
+		if (g_spawn_command_line_async(command, NULL)) {
+			ret = TRUE;
+		}
+		
+		g_free(command);
+		if (ret == TRUE) break;
 	}
 	
-	if (g_spawn_async(NULL, (gchar **)kfmclient_argv, NULL,
-		G_SPAWN_SEARCH_PATH, NULL, NULL, NULL, NULL)) {
-		return TRUE;
-	}
-
-	return FALSE;
+	g_free(e_url);
+	
+	return ret;
 }
 
 /**
@@ -147,7 +164,7 @@ on_link_tag_event(GtkTextTag *tag, GObject *object, GdkEvent *event,
 
 		// open in browser
 		if (glista_open_url(url) == FALSE) {
-			g_printerr("Couldn't ask system to handle URL: %s\n", url);
+			g_printerr("Error handling URL: %s\n", url);
 		}
 		
 		g_free(url);
@@ -280,7 +297,7 @@ glista_textview_linkify_init(GtkTextView *textview)
 	
 	// compile the regex for url matching
 	if (regcomp(&url_re, GTL_URL_REGEX, REG_EXTENDED | REG_ICASE) != 0) {
-		g_printerr("linkify: error compiling URL regex\n");
+		g_printerr("Linkify: error compiling URL regex\n");
 		return FALSE;
 	}
 	
