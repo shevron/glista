@@ -1261,8 +1261,10 @@ glista_list_init()
 	done_ren = gtk_cell_renderer_toggle_new();
 	note_ren = gtk_cell_renderer_pixbuf_new();
 	
-	g_object_set(text_ren, "editable", TRUE, NULL);
-		
+	g_object_set(text_ren, "editable", TRUE, 
+	                       "ellipsize", PANGO_ELLIPSIZE_END,
+	                       NULL);
+	
 	// Connect the edited signal of the text column
 	g_signal_connect(text_ren, "edited", G_CALLBACK(on_item_text_edited), NULL);
 	g_signal_connect(text_ren, "editing-started", 

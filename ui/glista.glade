@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Tue Nov  4 16:36:03 2008 -->
+<!--Generated with glade3 3.4.5 on Sat Nov  8 13:48:45 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="glista_main_window">
     <property name="title" translatable="yes">Glista</property>
@@ -166,7 +166,7 @@
                           <widget class="GtkScrolledWindow" id="scrolledwindow2">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
+                            <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                             <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                             <child>
                               <widget class="GtkTextView" id="note_textview">
