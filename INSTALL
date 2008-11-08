@@ -33,7 +33,11 @@ libraries installed:
 
 Optionally, Glista may use the following libraries if they are available:
 - libunique   >= 1.0
-- liggtkspell
+- libgtkspell
+
+In order to handle URL clicks, Glista needs one of the following tools is 
+required: xdg-open, gnome-open, kfmclient. It is very likely that one of these
+tools is available on your system if you use a common desktop environment.
 
 You will also need some build tools such as GNU gcc and gtk-builder-convert.
 
