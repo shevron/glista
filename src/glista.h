@@ -51,18 +51,6 @@
 #deinfe PACKAGE_NAME "glista"
 #endif
 
-// Text colors
-#ifndef GLISTA_COLOR_PENDING
-#define GLISTA_COLOR_PENDING "#000000"
-#endif
-
-#ifndef GLISTA_COLOR_DONE
-#define GLISTA_COLOR_DONE "#a0a0a0"
-#endif
-
-// Some useful macros
-#define glista_get_widget(w) gtk_builder_get_object(gl_globs->uibuilder, w)
-
 // Glista configuration data struct
 typedef struct _glista_config_struct {
 	gint     xpos;
@@ -106,9 +94,6 @@ GtkTreeIter *glista_item_get_single_selected(GtkTreeSelection *selection);
 void         glista_list_save_timeout();
 void         glista_list_delete_done();
 void         glista_list_delete_selected();
-void         glista_ui_mainwindow_show();
-void         glista_ui_mainwindow_hide();
-void         glista_ui_mainwindow_toggle();
 void         glista_note_toggle(GtkTreeIter *iter);
 void         glista_note_toggle_selected(GtkTreeSelection *selection);
 void         glista_note_open_if_visible(GtkTreeIter *iter);

@@ -371,6 +371,8 @@ glista_ui_init()
 	GtkAboutDialog *about;
 	GtkStatusIcon  *sysicon;
 	
+	gl_globs->uibuilder = gtk_builder_new();
+	
 	// Load UI file
 	if (gtk_builder_add_from_file(gl_globs->uibuilder, 
 								  GLISTA_DATA_DIR "/glista.ui", NULL) == 0) {

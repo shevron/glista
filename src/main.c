@@ -1244,8 +1244,8 @@ glista_dnd_drag_data_received(GtkTreeDragDest *drag_dest, GtkTreePath *path,
  *
  * Initialize the list of items and the view layer to display it.
  */
-static 
-void glista_list_init()
+static void 
+glista_list_init()
 {
 	GtkCellRenderer        *text_ren, *done_ren, *note_ren;
 	GtkTreeViewColumn      *text_column, *done_column, *note_column;
@@ -1612,7 +1612,7 @@ main(int argc, char *argv[])
 	
 	// Initialize globals
 	gl_globs = g_malloc(sizeof(GlistaGlobals));
-	gl_globs->uibuilder  = gtk_builder_new();
+	gl_globs->uibuilder  = NULL;
 	gl_globs->config     = NULL;
 	gl_globs->open_note  = NULL;
 	gl_globs->save_tag   = 0;
@@ -1634,10 +1634,11 @@ main(int argc, char *argv[])
 
 	// Initialize item storage model
 	gl_globs->itemstore  = gtk_tree_store_new(4, 
-											  G_TYPE_BOOLEAN, // Done?
-											  G_TYPE_STRING,  // Text
-											  G_TYPE_BOOLEAN, // Category?
-											  G_TYPE_STRING); // Note
+		G_TYPE_BOOLEAN, // Done?
+		G_TYPE_STRING,  // Text
+		G_TYPE_BOOLEAN, // Category?
+		G_TYPE_STRING   // Note
+	);
 	
 	// Set configuration directory name
 	gl_globs->configdir  = g_build_filename(g_get_user_config_dir(),

@@ -20,6 +20,7 @@
 
 #ifdef HAVE_UNIQUE
 
+#include "glista-ui.h"
 #include "glista-unique.h"
 #include <unique/unique.h>
 
