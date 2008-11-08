@@ -43,8 +43,15 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
+am__glista_SOURCES_DIST = main.c glista.h glista-ui.c glista-ui.h \
+	glista-storage.c glista-storage.h glista-unique.c \
+	glista-unique.h glista-textview-linkify.c \
+	glista-textview-linkify.h
+@ENABLE_LINKIFY_TRUE@am__objects_1 =  \
+@ENABLE_LINKIFY_TRUE@	glista-textview-linkify.$(OBJEXT)
 am_glista_OBJECTS = main.$(OBJEXT) glista-ui.$(OBJEXT) \
-	glista-storage.$(OBJEXT) glista-unique.$(OBJEXT)
+	glista-storage.$(OBJEXT) glista-unique.$(OBJEXT) \
+	$(am__objects_1)
 glista_OBJECTS = $(am_glista_OBJECTS)
 am__DEPENDENCIES_1 =
 glista_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -57,7 +64,7 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(glista_SOURCES)
-DIST_SOURCES = $(glista_SOURCES)
+DIST_SOURCES = $(am__glista_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -161,6 +168,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+@ENABLE_LINKIFY_FALSE@OPTIONAL_GLISTA = 
+@ENABLE_LINKIFY_TRUE@OPTIONAL_GLISTA = glista-textview-linkify.c \
+@ENABLE_LINKIFY_TRUE@                  glista-textview-linkify.h
+
 glista_SOURCES = main.c \
                  glista.h \
                  glista-ui.c \
@@ -168,7 +179,8 @@ glista_SOURCES = main.c \
                  glista-storage.c \
                  glista-storage.h \
                  glista-unique.c \
-                 glista-unique.h
+                 glista-unique.h \
+                 $(OPTIONAL_GLISTA)
 
 glista_LDADD = $(GTK_LIBS) \
                $(LIBXML_LIBS) \
@@ -250,6 +262,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/glista-storage.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/glista-textview-linkify.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/glista-ui.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/glista-unique.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@

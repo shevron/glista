@@ -15,7 +15,7 @@ AC_DEFUN([AC_DEFINE_DIR], [
   test "x$prefix" = xNONE && prefix_NONE=yes && prefix=$ac_default_prefix
   test "x$exec_prefix" = xNONE && exec_prefix_NONE=yes && exec_prefix=$prefix
 dnl In Autoconf 2.60, ${datadir} refers to ${datarootdir}, which in turn
-dnl refers to ${prefix}.  Thus we have to use `eval' twice.
+dnl refers to ${prefix}.  Thus we have to use 'eval' twice.
   eval ac_define_dir="\"[$]$2\""
   eval ac_define_dir="\"$ac_define_dir\""
   AC_SUBST($1, "$ac_define_dir")
@@ -143,6 +143,22 @@ AC_ARG_WITH([user-confdir],
   ],[
     AC_MSG_RESULT([default])
   ])
+  
+dnl allow disabling URL linkfication in text view
+enable_linkify="yes"
+AC_ARG_ENABLE([linkify-urls], 
+  [AS_HELP_STRING([--enable-linkify-urls], 
+    [Make URLs in notes clickable  @<:@default=yes@:>@])],
+  [
+    if test "x$enableval" = "xno"; then
+      enable_linkify="no"
+    fi
+  ])
+AM_CONDITIONAL(ENABLE_LINKIFY, test "x$enable_linkify" = "xyes")  
+if test "x$enable_linkify" = "xyes"; then
+  AC_DEFINE_UNQUOTED(ENABLE_LINKIFY, [1], [Whether to linkify URLs in notes])
+fi
+
 
 # Set some paths
 AC_DEFINE_DIR(GLISTA_DATA_DIR, [{datadir}/glista], 

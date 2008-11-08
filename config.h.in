@@ -1,5 +1,8 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Whether to linkify URLs in notes */
+#undef ENABLE_LINKIFY
+
 /* User configuration directory */
 #undef GLISTA_CONFIG_DIR
 

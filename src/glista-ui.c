@@ -21,6 +21,10 @@
 #include "glista-ui.h"
 #include "glista.h"
 
+#ifdef ENABLE_LINKIFY
+#include "glista-textview-linkify.h"
+#endif
+
 /**
  * Glista - GTK UI Functions and event handler callbacks
  *
@@ -385,12 +389,6 @@ glista_ui_init()
 	// Load main window and connect signals
 	window = GTK_WIDGET(glista_get_widget("glista_main_window"));
 	gtk_builder_connect_signals(gl_globs->uibuilder, NULL);
-	
-	// Set the version number and icon in the about dialog
-#ifdef PACKAGE_VERSION
-	about = GTK_ABOUT_DIALOG(glista_get_widget("glista_about_dialog"));
-	gtk_about_dialog_set_version(about, PACKAGE_VERSION);
-#endif
 
 	// Set up the status icon and connect the left-click and right-click signals
 	sysicon = gtk_status_icon_new_from_file(GLISTA_DATA_DIR "/glista-icon.png");
@@ -398,7 +396,19 @@ glista_ui_init()
 					 G_CALLBACK(on_sysicon_activate), window);
 	g_signal_connect(sysicon, "popup-menu", 
 					 G_CALLBACK(on_sysicon_popup_menu), NULL);
-					 
+		
+	// Set the version number and icon in the about dialog
+#ifdef PACKAGE_VERSION
+	about = GTK_ABOUT_DIALOG(glista_get_widget("glista_about_dialog"));
+	gtk_about_dialog_set_version(about, PACKAGE_VERSION);
+#endif
+
+#ifdef ENABLE_LINKIFY
+	// Do we linkify URLs? 
+	GtkTextView *textview = GTK_TEXT_VIEW(glista_get_widget("note_textview"));
+	glista_textview_linkify_init(textview);
+#endif
+				 
 	return TRUE;
 }
 

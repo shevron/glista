@@ -1,5 +1,12 @@
 bin_PROGRAMS = glista
 
+if ENABLE_LINKIFY
+OPTIONAL_GLISTA = glista-textview-linkify.c \
+                  glista-textview-linkify.h
+else 
+OPTIONAL_GLISTA = 
+endif
+
 glista_SOURCES = main.c \
                  glista.h \
                  glista-ui.c \
@@ -7,7 +14,8 @@ glista_SOURCES = main.c \
                  glista-storage.c \
                  glista-storage.h \
                  glista-unique.c \
-                 glista-unique.h
+                 glista-unique.h \
+                 $(OPTIONAL_GLISTA)
 
 glista_LDADD = $(GTK_LIBS) \
                $(LIBXML_LIBS) \
