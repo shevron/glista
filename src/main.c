@@ -1338,6 +1338,9 @@ glista_list_init()
 		glista_item_free(item->data);
 	}
 	g_list_free(all_items);
+	
+	// Expand list
+	gtk_tree_view_expand_all(treeview);
 }
 
 /**
