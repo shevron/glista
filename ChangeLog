@@ -1,10 +1,183 @@
-2008-10-17 18:52  shahar.evron
+2008-11-08  shahar.evron
+
+	* src/glista-textview-linkify.h:
+	  
+	  Modifying URL regex
+
+	* src/glista-textview-linkify.c:
+	  
+	  Improving URL handing function:
+	  - No-scheme URLs (starting with 'www.') can now be opened
+	  - Rewrote the url open functions to allow addition of open
+	  commands in the future
+
+	* src/main.c, ui/glista.glade, ui/glista.ui:
+	  
+	  Small but important UI fixes:
+	  - Setting the item text to ellipsize, avoiding horizontal
+	  scrollbars
+	  - Setting the note textview to allow horizontal scrollbar, if
+	  required
+
+	* src/main.c:
+	  
+	  Expanding entire tree view on startup
+
+	* src/glista-textview-linkify.c, src/glista-textview-linkify.h:
+	  
+	  Merging note URL linkification feature by jcinacio
+
+	* config.h.in, configure, configure.ac, src/Makefile.am,
+	  src/Makefile.in, src/glista-ui.c:
+	  
+	  Merging note URL linkification feature by jcinacio
+
+	* src/glista-ui.c, src/glista-ui.h, src/glista-unique.c,
+	  src/glista.h, src/main.c:
+	  
+	  Moving some more UI releated stuff to glista-ui
+
+	* Makefile.in, aclocal.m4, configure, src/Makefile.am,
+	  src/Makefile.in, src/glista-ui-callbacks.c, src/glista-ui.c,
+	  src/glista-ui.h, src/main.c, ui/Makefile.in, ui/glista.glade,
+	  ui/glista.ui:
+	  
+	  Wrok in progress code cleanup:
+	  Moving all UI related functions and callbacks to a separate
+	  object
+
+2008-11-06  shahar.evron
+
+	* src/glista-ui-callbacks.c:
+	  
+	  Fixing issue #23: Any consecutive clicks beyond the first click
+	  on the system tray icon is now ignored
+
+2008-11-06  shahar.evron
+
+	* src/main.c:
+	  
+	  Performance improvements on note open / close transitions
+
+2008-11-05  shahar.evron
+
+	* src/glista-storage.c, src/glista-storage.h:
+	  
+	  Rewrote the XML loading function:
+	  - Separate into 3 cleaner functions
+	  - Hopefully avoiding more memory leaks
+
+2008-11-05  shahar.evron
+
+	* src/main.c:
+	  
+	  Fixing some memory leaks
+
+	* src/Makefile.am, src/Makefile.in, src/glista-unique.c,
+	  src/glista-unique.h, src/main.c:
+	  
+	  Moving glista-unique to a separate build object, reogranizing
+	  into .h/.c pair
+
+	* src/Makefile.am, src/Makefile.in:
+	  
+	  Fixing issue #22 - adding some source files to EXTRA_DIST to make
+	  sure they are included
+
+	* INSTALL:
+	  
+	  Updating INSTALL instructions with optional libraries
+
+2008-11-04  shahar.evron
+
+	* Makefile.in, config.h.in, configure, configure.ac,
+	  src/Makefile.am, src/Makefile.in, src/glista.h, src/main.c,
+	  ui/Makefile.am, ui/Makefile.in, ui/glista.desktop,
+	  ui/glista.desktop.in:
+	  
+	  Reorganizing UI files, improving build scripts, resolved issue
+	  #20: only installing glista icon to the share/glista dir
+
+2008-11-04  shahar.evron
+
+	* src/glista-storage.h:
+	  
+	  Adding missing glista-storage.h
+
+	* configure, configure.ac:
+	  
+	  Bumping version string to 0.4-dev
+
+	* src/Makefile.am, src/Makefile.in, src/glista-storage.c,
+	  src/glista.h, src/main.c:
+	  
+	  Improving build files, storage module is now built into separate
+	  .o file
+
+	* Makefile.in, aclocal.m4, config.h.in, configure, configure.ac,
+	  src/Makefile.am, src/Makefile.in, src/glista-storage.c,
+	  src/glista-ui-callbacks.c, src/glista.h, src/main.c,
+	  ui/Makefile.in, ui/glista.glade, ui/glista.ui:
+	  
+	  Merging item note feature branch into trunk
+
+2008-10-30  shahar.evron
+
+	* Makefile.in, aclocal.m4, configure, src/Makefile.in,
+	  src/glista-ui-callbacks.c, src/glista.h, src/main.c,
+	  ui/Makefile.in, ui/glista.glade, ui/glista.ui:
+	  
+	  - Fixing issue #13 - window geometry now saved when closing the
+	  window with the "x" button
+	  - Some minor improvements to code organization and build system
+
+2008-10-28  shahar.evron
+
+	* src/glista-storage.c, src/glista-ui-callbacks.c, src/main.c,
+	  src/storage.c, src/ui-callbacks.c:
+	  
+	  Renaming some source files to better fit standard naming
+
+2008-10-28  shahar.evron
+
+	* Makefile.in, config.h.in, configure, configure.ac,
+	  src/Makefile.am, src/Makefile.in, src/glista-unique.c,
+	  src/glista.h, src/main.c, ui/Makefile.in:
+	  
+	  Adding single-instance checking support through libunique
+
+2008-10-27  shahar.evron
+
+	* src/main.c:
+	  
+	  Setting the new item entry to grab focus when window is presented
+
+2008-10-27  shahar.evron
+
+	* src/glista.h, src/main.c:
+	  
+	  Adding g_set_prgname() call
+
+2008-10-19  shahar.evron
+
+	* src/main.c:
+	  
+	  Applying errorno patch by ananasik, fixes issue #11
+
+2008-10-17  shahar.evron
+
+	* ChangeLog, Makefile.in, aclocal.m4, configure, configure.ac,
+	  src/Makefile.in, ui/Makefile.in:
+	  
+	  updating changelog and version for 0.3
+
+2008-10-17  shahar.evron
 
 	* src/main.c:
 	  
 	  Some optimization on the can_drop function
 
-2008-10-17 18:41  shahar.evron
+2008-10-17  shahar.evron
 
 	* Makefile.in, aclocal.m4, configure, configure.ac,
 	  src/Makefile.in, src/main.c, ui/Makefile.in:
@@ -13,46 +186,25 @@
 	  - Sorting after drag and drop working
 	  - Change version to 0.3-dev
 
-2008-10-14 19:51  shahar.evron
+2008-10-14  shahar.evron
 
 	* src/glista.h, src/main.c, src/ui-callbacks.c:
 	  
 	  Forcing redraw of the parent when child has changed
 
-2008-10-13 10:26  shahar.evron
-
-	* src/glista.h, src/main.c, src/ui-callbacks.c:
-	  
-	  Minor: renaming some functions for better organization (still
-	  WIP)
-
-2008-10-13 09:28  shahar.evron
-
-	* src/glista.h, src/main.c, src/ui-callbacks.c:
-	  
-	  Minor: renaming some functions for better organization (still
-	  WIP)
-
-2008-10-13 09:16  shahar.evron
-
-	* src/glista.h, src/main.c, src/ui-callbacks.c:
-	  
-	  Minor: renaming some functions for better organization (still
-	  WIP)
-
-2008-10-13 09:06  shahar.evron
+2008-10-13  shahar.evron
 
 	* src/main.c:
 	  
 	  Implemented category renaming / moving
 
-2008-10-12 20:36  shahar.evron
+2008-10-12  shahar.evron
 
 	* src/storage.c:
 	  
 	  Bug fix: list is not saved if empty
 
-2008-10-12 20:27  shahar.evron
+2008-10-12  shahar.evron
 
 	* src/main.c:
 	  
@@ -60,7 +212,7 @@
 	  baz' go into the same category
 	  - Category hashtable now automatically frees removed items
 
-2008-10-12 18:36  shahar.evron
+2008-10-12  shahar.evron
 
 	* src/glista.h, src/main.c, src/ui-callbacks.c:
 	  
@@ -69,71 +221,64 @@
 	  - Deleting items is now always done through the same function
 	  - Empty categories are now always removed
 
-2008-10-12 17:32  shahar.evron
-
-	* src/glista.h, src/main.c, src/ui-callbacks.c:
-	  
-	  Minor: renamed the glista_clear_done_items() function, added
-	  documentation on the glista_confirm_delete_category() function
-
-2008-10-12 17:21  shahar.evron
+2008-10-12  shahar.evron
 
 	* src/glista.h, src/main.c, ui/glista.glade, ui/glista.ui:
 	  
 	  - Category is expanded when adding a new child item
 	  - Minor view fixes in glade file
 
-2008-10-12 06:53  shahar.evron
+2008-10-12  shahar.evron
 
 	* src/main.c:
 	  
 	  Fixing 'incompatible pointer type' warning in main.c
 
-2008-10-11 20:34  shahar.evron
+2008-10-11  shahar.evron
 
 	* src/main.c:
 	  
 	  Bug fix: crash when clicking 'add' on an empty string
 
-2008-10-11 20:22  shahar.evron
+2008-10-11  shahar.evron
 
 	* src/glista.h, src/main.c, src/ui-callbacks.c:
 	  
 	  moving new item logic to main.c from ui-callbacks.c
 
-2008-10-11 20:15  shahar.evron
+2008-10-11  shahar.evron
 
 	* src/main.c:
 	  
 	  Adding docs and renaming get_category_iter to get_category_path
 
-2008-10-11 20:08  shahar.evron
+2008-10-11  shahar.evron
 
 	* src/main.c:
 	  
 	  Implemented dialog confirmation when deleting non-empty
 	  categories
 
-2008-10-11 17:07  shahar.evron
+2008-10-11  shahar.evron
 
 	* src/ui-callbacks.c:
 	  
 	  Adding comment forgotten from two revisions back
 
-2008-10-11 16:49  shahar.evron
+2008-10-11  shahar.evron
 
 	* src/glista.h, src/main.c, src/ui-callbacks.c:
 	  
 	  'Clear done items' now properly recurses into categories
 
-2008-10-11 15:40  shahar.evron
+2008-10-11  shahar.evron
 
 	* src/main.c, src/ui-callbacks.c:
 	  
 	  Bug fix: can now properly edit category names without adding
 	  grabage
 
-2008-10-10 20:49  shahar.evron
+2008-10-10  shahar.evron
 
 	* src/main.c:
 	  
@@ -141,26 +286,26 @@
 	  - There is a bug in the previous commit when editing category
 	  name
 
-2008-10-10 20:38  shahar.evron
+2008-10-10  shahar.evron
 
 	* src/main.c:
 	  
 	  Category rows now show the pending / total task count inside the
 	  category
 
-2008-10-10 18:28  shahar.evron
+2008-10-10  shahar.evron
 
 	* src/main.c:
 	  
 	  Bugfix: list of items is not properly built when saving
 
-2008-10-10 18:00  shahar.evron
+2008-10-10  shahar.evron
 
 	* src/main.c:
 	  
 	  Bug fix: Category duplicated when creating new categories
 
-2008-10-10 11:12  shahar.evron
+2008-10-10  shahar.evron
 
 	* src/glista.h, src/main.c:
 	  
@@ -169,20 +314,14 @@
 	  - Category items are bold
 	  - Still lots of bugs when adding / reading / saving categories
 
-2008-10-10 10:27  shahar.evron
+2008-10-10  shahar.evron
 
 	* config.h.in, configure, configure.ac:
 	  
 	  Build: added a ./configure option to set the user config
 	  directory (good for dev)
 
-2008-10-10 09:40  shahar.evron
-
-	* INSTALL:
-	  
-	  Minor: Updated the Gtk+ version required in INSTALL
-
-2008-10-10 08:25  shahar.evron
+2008-10-10  shahar.evron
 
 	* src/glista.h, src/main.c, src/storage.c, src/ui-callbacks.c,
 	  ui/glista.glade, ui/glista.ui:
@@ -192,7 +331,7 @@
 	  - Still WIP, has some funny bugs
 	  - Still need to make some visual adjustments
 
-2008-08-29 14:19  shahar.evron
+2008-08-29  shahar.evron
 
 	* src/main.c, src/ui-callbacks.c:
 	  
@@ -200,32 +339,26 @@
 	  now stored only when minimized or at shutdown, and not on
 	  configure-event. Should resolve issue #1 (again ;)
 
-2008-08-29 13:57  shahar.evron
+2008-08-29  shahar.evron
 
 	* .:
 	  
 	  Adding svn:ignore on some build files in root directory
 
-2008-08-29 13:56  shahar.evron
+2008-08-29  shahar.evron
 
 	* autom4te.cache:
 	  
 	  Removing the autom4te cache directory from the source tree
 
-2008-08-29 13:50  shahar.evron
-
-	* src/main.c:
-	  
-	  Minor fix: removing left-over unused variable from last commit
-
-2008-08-28 21:26  shahar.evron
+2008-08-28  shahar.evron
 
 	* src/glista.h, src/main.c, src/ui-callbacks.c:
 	  
 	  Window size and position are now saved in memory on each
 	  modification and saved at shutdown time. Fixes issue #1
 
-2008-08-28 06:17  shahar.evron
+2008-08-28  shahar.evron
 
 	* ChangeLog, Makefile.in, aclocal.m4, autom4te.cache/output.0,
 	  autom4te.cache/output.1, autom4te.cache/requests,
@@ -234,7 +367,7 @@
 	  
 	  Updating version number and ChangeLog for 0.2.1 release
 
-2008-08-27 20:52  shahar.evron
+2008-08-27  shahar.evron
 
 	* Makefile.in, autom4te.cache/output.0, autom4te.cache/output.1,
 	  autom4te.cache/requests, autom4te.cache/traces.0,
@@ -243,7 +376,7 @@
 	  
 	  Cleaning up some build files
 
-2008-08-27 19:34  shahar.evron
+2008-08-27  shahar.evron
 
 	* autom4te.cache/requests, ui/Makefile.am, ui/Makefile.in,
 	  ui/glista.desktop:
@@ -251,7 +384,7 @@
 	  Adding .desktop file contributed by Dmitry "MAD" Artamonow,
 	  fixing issue #8
 
-2008-08-27 19:16  shahar.evron
+2008-08-27  shahar.evron
 
 	* autom4te.cache/output.0, autom4te.cache/output.1,
 	  autom4te.cache/requests, autom4te.cache/traces.0,
@@ -262,20 +395,20 @@
 	  Replacing SVG icon with PNG one to remove librsvg support. Fixes
 	  issue #6. SVG icon is still under ui/ for future use
 
-2008-08-27 19:07  shahar.evron
+2008-08-27  shahar.evron
 
 	* src/main.c:
 	  
 	  About dialog version will now be set from build system
 
-2008-08-27 15:31  shahar.evron
+2008-08-27  shahar.evron
 
 	* src/Makefile.am, src/Makefile.in, ui/Makefile.am, ui/Makefile.in:
 	  
 	  UI directory is now at /usr/share/glista as it should be, fixing
 	  issue #7
 
-2008-08-27 15:27  shahar.evron
+2008-08-27  shahar.evron
 
 	* autom4te.cache/output.0, autom4te.cache/output.1,
 	  autom4te.cache/traces.0, configure, configure.ac:
@@ -283,22 +416,14 @@
 	  Updating minimum gtk+ version required in configure.ac to 2.12,
 	  fix issue #5
 
-2008-08-26 20:11  shahar.evron
+2008-08-26  shahar.evron
 
 	* ui/Makefile.am, ui/Makefile.in, ui/glista.ui:
 	  
 	  Adding glista.ui pre-built to void the need for
 	  gtk-builder-convert
 
-2008-08-26 20:00  shahar.evron
-
-	* autom4te.cache/output.0, autom4te.cache/output.1,
-	  autom4te.cache/requests, autom4te.cache/traces.0,
-	  autom4te.cache/traces.1, config.h.in, configure, configure.ac:
-	  
-	  Minor improvements to build environment
-
-2008-08-26 08:37  shahar.evron
+2008-08-26  shahar.evron
 
 	* build-aux/depcomp, build-aux/install-sh, build-aux/missing:
 	  
@@ -306,20 +431,20 @@
 	  automake-1.10 scripts. Hopefully will remove dependancy of
 	  automake
 
-2008-08-24 20:43  shahar.evron
+2008-08-24  shahar.evron
 
 	* src/main.c:
 	  
 	  Implemented sorting function: Will sort pending items first, then
 	  alphabetically
 
-2008-08-24 20:11  shahar.evron
+2008-08-24  shahar.evron
 
 	* src/glista.h, src/main.c:
 	  
 	  Implemented color change to gray when item is done
 
-2008-08-21 09:16  shahar.evron
+2008-08-21  shahar.evron
 
 	* Makefile.in, autom4te.cache/requests, ui/Makefile.am,
 	  ui/Makefile.in:
@@ -327,7 +452,7 @@
 	  Added *.ui to CLEANFILES in the ui/ dir. Generated ui files will
 	  now be cleaned on 'make clea'
 
-2008-08-21 09:10  shahar.evron
+2008-08-21  shahar.evron
 
 	* COPYING, ChangeLog, INSTALL, Makefile.in, README, aclocal.m4,
 	  autom4te.cache, autom4te.cache/output.0, autom4te.cache/output.1,
@@ -340,7 +465,7 @@
 	  ChangeLog
 	  - Adding GNU autotools generated files, source ready for building
 
-2008-08-21 08:36  shahar.evron
+2008-08-21  shahar.evron
 
 	* Makefile.am, configure.ac, src, src/Makefile.am, src/glista.h,
 	  src/main.c, src/storage.c, src/ui-callbacks.c, ui,
@@ -348,7 +473,7 @@
 	  
 	  Initial code import for 0.1
 
-2008-08-21 08:20  
+2008-08-21  
 
 	* .:
 	  

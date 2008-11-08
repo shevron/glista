@@ -9,9 +9,6 @@
 /* Glista system-wide shared data files */
 #undef GLISTA_DATA_DIR
 
-/* Whether GtkSpell is available */
-#undef HAVE_GTKSPELL
-
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
@@ -38,9 +35,6 @@
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
-
-/* Whether Unique is available */
-#undef HAVE_UNIQUE
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
