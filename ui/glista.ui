@@ -148,7 +148,7 @@
                         <property name="reorderable">True</property>
                         <property name="search_column">1</property>
                         <property name="tooltip_column">1</property>
-                        <signal handler="on_glista_item_list_row_activated" name="row_activated"/>
+                        <signal handler="on_list_row_activated" name="row_activated"/>
                       </object>
                     </child>
                   </object>

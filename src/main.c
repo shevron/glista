@@ -23,9 +23,9 @@
 #include <gtk/gtk.h>
 #include <gtk/gtkmain.h>
 #include "glista.h"
+#include "glista-ui.h"
 #include "glista-storage.h"
 #include "glista-unique.h"
-#include "glista-ui-callbacks.c"
 
 #ifdef HAVE_GTKSPELL
 #include <gtkspell/gtkspell.h>
@@ -38,113 +38,6 @@ static gboolean (*glista_dnd_old_drag_data_received)(
 /**
  * Glista main program functions
  */
-
-/**
- * glista_ui_mainwindow_show:
- *
- * Show the main window, positioning and resizing it according to configuration
- * data
- */
-void 
-glista_ui_mainwindow_show()
-{
-	GtkWindow *window;
-	GtkWidget *entry;
-	
-	window = GTK_WINDOW(glista_get_widget("glista_main_window"));
-	
-	gtk_window_present(window);
-	gl_globs->config->visible = TRUE;
-	
-	/**
-	 * TODO: Check window limits are not exceeded
-	 */
-	if (gl_globs->config->xpos > -1 && gl_globs->config->ypos > -1) {
-		gtk_window_move(window, gl_globs->config->xpos, 
-						gl_globs->config->ypos);
-	}
-	
-	if (gl_globs->config->width > 0 && gl_globs->config->height > 0) {
-		gtk_window_resize(window, gl_globs->config->width, 
-						  gl_globs->config->height);
-	}
-	
-	// Set the focus to the new item GtkEntry
-	entry = GTK_WIDGET(glista_get_widget("add-entry"));
-	gtk_widget_grab_focus (entry);
-}
-
-/**
- * glista_ui_mainwindow_store_geo:
- * @window The main window
- *
- * Save the current geometry (position and size) of the window in memory if the
- * window is visible
- */
-static void
-glista_ui_mainwindow_store_geo(GtkWindow *window)
-{
-	gboolean visible;
-	gint     width, height;
-	gint     xpos,  ypos;
-	
-	// Get current window state
-	g_object_get(window, "visible", &visible, NULL);
-	
-	if (visible) {
-		// Store size
-		gtk_window_get_size(window, &width, &height);
-		gl_globs->config->width  = width;
-		gl_globs->config->height = height;
-		
-		// Store position
-		gtk_window_get_position(window, &xpos, &ypos);
-		gl_globs->config->xpos = xpos;
-		gl_globs->config->ypos = ypos;
-	}
-}
-
-/**
- * glista_ui_mainwindow_hide:
- *
- * Hide the main window. Save the window position and geometry before hiding
- * it.
- */
-void
-glista_ui_mainwindow_hide()
-{
-	GtkWidget *window;
-	
-	window = GTK_WIDGET(glista_get_widget("glista_main_window"));
-	glista_ui_mainwindow_store_geo(GTK_WINDOW(window));
-	gtk_widget_hide(window);
-	gl_globs->config->visible = FALSE;
-}
-
-/**
- * glista_ui_mainwindow_toggle:
- *
- * Toggle the visibility of the main window. This is normally called when the
- * user left-clicks the status icon in the system tray.
- */
-void 
-glista_ui_mainwindow_toggle()
-{
-	gboolean   current;
-	GtkWidget *window;
-	
-	window = GTK_WIDGET(glista_get_widget("glista_main_window"));
-	
-	// Get current window state
-	g_object_get(window, "visible", &current, NULL);
-	
-	// If hidden - show, if visible - hide
-	if (current) {
-		glista_ui_mainwindow_hide();
-	} else {
-		glista_ui_mainwindow_show();
-	}
-}
 
 /**
  * glista_item_get_single_selected:
@@ -1422,7 +1315,7 @@ void glista_list_init()
 	selection = gtk_tree_view_get_selection(treeview);
 	gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);
 	g_signal_connect(selection, "changed", 
-	                 G_CALLBACK(on_glista_item_list_selection_changed), NULL);
+	                 G_CALLBACK(on_list_selection_changed), NULL);
 	
 	// Set drag-and-drop interface functions
 	dnd_siface = GTK_TREE_DRAG_SOURCE_GET_IFACE(GTK_TREE_MODEL(
@@ -1710,11 +1603,7 @@ glista_cfg_save()
  */
 int 
 main(int argc, char *argv[])
-{
-	GtkWidget      *window;
-	GtkAboutDialog *about;
-	GtkStatusIcon  *sysicon;
-		
+{	
 	gtk_init(&argc, &argv);
 
 	g_set_prgname(PACKAGE_NAME);
@@ -1727,16 +1616,13 @@ main(int argc, char *argv[])
 	gl_globs->config     = NULL;
 	gl_globs->open_note  = NULL;
 	gl_globs->save_tag   = 0;
-	
-	// Load UI file
-	if (gtk_builder_add_from_file(gl_globs->uibuilder, 
-								  GLISTA_DATA_DIR "/glista.ui", NULL) == 0) {
-		g_printerr("Unable to read UI file: %s\n", 
-		           GLISTA_DATA_DIR "/glista.ui");
-		           
-		return 1;
-	}
 
+	// Initialize the UI
+	if (glista_ui_init() == FALSE) {
+		g_printerr("Unable to initialize UI.\n");
+		return 1;	
+	}
+	
 #ifdef HAVE_UNIQUE
 	// Are we the single instance?
 	if (! glista_unique_is_single_inst()) {
@@ -1760,26 +1646,9 @@ main(int argc, char *argv[])
 	// Initialize categories hashtable
 	gl_globs->categories = g_hash_table_new_full(g_str_hash, g_str_equal,
 		(GDestroyNotify) g_free, (GDestroyNotify) gtk_tree_row_reference_free);
-	
-	// Load main window and connect signals
-	window = GTK_WIDGET(glista_get_widget("glista_main_window"));
-	gtk_builder_connect_signals(gl_globs->uibuilder, NULL);
-	
-	// Set the version number and icon in the about dialog
-#ifdef PACKAGE_VERSION
-	about = GTK_ABOUT_DIALOG(glista_get_widget("glista_about_dialog"));
-	gtk_about_dialog_set_version(about, PACKAGE_VERSION);
-#endif
 
 	// Initialize the item list
 	glista_list_init();
-	
-	// Set up the status icon and connect the left-click and right-click signals
-	sysicon = gtk_status_icon_new_from_file(GLISTA_DATA_DIR "/glista-icon.png");
-	g_signal_connect(sysicon, "activate", 
-					 G_CALLBACK(on_sysicon_activate), window);
-	g_signal_connect(sysicon, "popup-menu", 
-					 G_CALLBACK(on_sysicon_popup_menu), NULL);
 	
 	// Load configuration
 	glista_cfg_init_load();
@@ -1806,8 +1675,9 @@ main(int argc, char *argv[])
 	// Save list
 	while (! glista_list_save());
 	
+	glista_ui_shutdown();
+	
 	// Save configuration
-	glista_ui_mainwindow_store_geo(GTK_WINDOW(window));
 	glista_cfg_save();
 
 #ifdef HAVE_UNIQUE

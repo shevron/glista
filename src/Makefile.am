@@ -1,9 +1,9 @@
 bin_PROGRAMS = glista
 
-EXTRA_DIST = glista-ui-callbacks.c
-
 glista_SOURCES = main.c \
                  glista.h \
+                 glista-ui.c \
+                 glista-ui.h \
                  glista-storage.c \
                  glista-storage.h \
                  glista-unique.c \
