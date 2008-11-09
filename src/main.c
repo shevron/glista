@@ -1610,9 +1610,12 @@ int
 main(int argc, char *argv[])
 {
 	gboolean     no_tray = FALSE;
+	gboolean     minimized = FALSE;
 	GOptionEntry entries[] = {
 		{ "no-tray", 'T', 0, G_OPTION_ARG_NONE, &no_tray, 
-		  "Do not use the system tray", NULL },
+		  "Do not use the system tray (conflicts with -m)", NULL },
+		{ "minimized", 'm', 0, G_OPTION_ARG_NONE, &minimized, 
+		  "Start up minimized (conflicts with -T)", NULL},
 		{ NULL }
 	};
 
@@ -1678,7 +1681,8 @@ main(int argc, char *argv[])
 		G_CALLBACK(on_itemstore_row_inserted), NULL);
 	
 	// Show the main window if needed
-	if (gl_globs->config->visible || ! gl_globs->trayicon) {
+	if ((! gl_globs->trayicon) || 
+	    (! minimized && gl_globs->config->visible)) {
 		glista_ui_mainwindow_show();
 	}
 		
