@@ -1520,7 +1520,7 @@ glista_cfg_init_load()
 	gl_globs->config->width   = -1;
 	gl_globs->config->height  = -1;
 	gl_globs->config->visible = TRUE;
-	
+
 	cfgfile = g_build_filename(gl_globs->configdir, "glista.conf", NULL);
 	
 	glista_cfg_check_dir();
@@ -1608,8 +1608,13 @@ glista_cfg_save()
  */
 int 
 main(int argc, char *argv[])
-{	
-	gtk_init(&argc, &argv);
+{
+	gboolean     no_tray = FALSE;
+	GOptionEntry entries[] = {
+		{ "no-tray", 'T', 0, G_OPTION_ARG_NONE, &no_tray, 
+		  "Do not use the system tray", NULL },
+		{ NULL }
+	};
 
 	g_set_prgname(PACKAGE_NAME);
 	g_type_init();
@@ -1622,6 +1627,17 @@ main(int argc, char *argv[])
 	gl_globs->config     = NULL;
 	gl_globs->open_note  = NULL;
 	gl_globs->save_tag   = 0;
+
+	// Set configuration directory name
+	gl_globs->configdir  = g_build_filename(g_get_user_config_dir(),
+	                                       GLISTA_CONFIG_DIR,
+	                                       NULL);
+	// Load configuration
+	glista_cfg_init_load();
+	
+	// Parse commandline arguments
+	gtk_init_with_args(&argc, &argv, GLISTA_PARAM_STRING, entries, NULL, NULL);
+	gl_globs->trayicon = (! no_tray);
 
 	// Initialize the UI
 	if (glista_ui_init() == FALSE) {
@@ -1646,19 +1662,12 @@ main(int argc, char *argv[])
 		G_TYPE_STRING   // Note
 	);
 	
-	// Set configuration directory name
-	gl_globs->configdir  = g_build_filename(g_get_user_config_dir(),
-	                                       GLISTA_CONFIG_DIR,
-	                                       NULL);
 	// Initialize categories hashtable
 	gl_globs->categories = g_hash_table_new_full(g_str_hash, g_str_equal,
 		(GDestroyNotify) g_free, (GDestroyNotify) gtk_tree_row_reference_free);
 
 	// Initialize the item list
 	glista_list_init();
-	
-	// Load configuration
-	glista_cfg_init_load();
 	
 	// Hook up model change signals to the data save handler
 	g_signal_connect(gl_globs->itemstore, "row-changed", 
@@ -1669,7 +1678,7 @@ main(int argc, char *argv[])
 		G_CALLBACK(on_itemstore_row_inserted), NULL);
 	
 	// Show the main window if needed
-	if (gl_globs->config->visible) {
+	if (gl_globs->config->visible || ! gl_globs->trayicon) {
 		glista_ui_mainwindow_show();
 	}
 		

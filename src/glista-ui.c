@@ -390,12 +390,14 @@ glista_ui_init()
 	window = GTK_WIDGET(glista_get_widget("glista_main_window"));
 	gtk_builder_connect_signals(gl_globs->uibuilder, NULL);
 
-	// Set up the status icon and connect the left-click and right-click signals
-	sysicon = gtk_status_icon_new_from_file(GLISTA_DATA_DIR "/glista-icon.png");
-	g_signal_connect(sysicon, "activate", 
-					 G_CALLBACK(on_sysicon_activate), window);
-	g_signal_connect(sysicon, "popup-menu", 
-					 G_CALLBACK(on_sysicon_popup_menu), NULL);
+	if (gl_globs->trayicon) {
+		// Set up the status icon and connect the left-click and right-click signals
+		sysicon = gtk_status_icon_new_from_file(GLISTA_DATA_DIR "/glista-icon.png");
+		g_signal_connect(sysicon, "activate", 
+						 G_CALLBACK(on_sysicon_activate), window);
+		g_signal_connect(sysicon, "popup-menu", 
+						 G_CALLBACK(on_sysicon_popup_menu), NULL);
+	}
 		
 	// Set the version number and icon in the about dialog
 #ifdef PACKAGE_VERSION
@@ -460,7 +462,11 @@ gboolean
 on_glista_main_window_delete_event(GtkWidget *widget, GdkEvent *event, 
 								   gpointer user_data)
 {
-	glista_ui_mainwindow_hide();
+	if (gl_globs->trayicon) {
+		glista_ui_mainwindow_hide();
+	} else {
+		gtk_main_quit();
+	}
 	
 	return TRUE;
 }

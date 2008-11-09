@@ -29,7 +29,9 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE
+#endif
 
 #ifndef GLISTA_DATA_DIR 
 #define GLISTA_DATA_DIR "."
@@ -45,6 +47,10 @@
 
 #ifndef GLISTA_CAT_DELIM
 #define GLISTA_CAT_DELIM ":"
+#endif
+
+#ifndef GLISTA_PARAM_STRING
+#define GLISTA_PARAM_STRING "- a super-simple personal to-do list manager"
 #endif
 
 #ifndef PACKAGE_NAME
@@ -63,13 +69,14 @@ typedef struct _glista_config_struct {
 
 // Glista globals container struct
 typedef struct  _glista_globals_struct {
+	GlistaConfig  *config;     // Configuration Data
 	GtkTreeStore  *itemstore;  // Item storage
 	GHashTable    *categories; // HT containing pointers to item categories
 	GtkBuilder    *uibuilder;  // UI Builder
 	gchar         *configdir;  // Configuration directory path
-	GlistaConfig  *config;     // Configuration Data
-	guint          save_tag;   // Data save timeout tag - see g_timeout_add()
 	GtkTreeIter   *open_note;  // Iterator pointing to the current open note
+	guint          save_tag;   // Data save timeout tag - see g_timeout_add()
+	gboolean       trayicon;   // Whether to use system tray icon or not
 } GlistaGlobals;
 
 // Glista item data structure
