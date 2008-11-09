@@ -1613,7 +1613,8 @@ main(int argc, char *argv[])
 
 	g_set_prgname(PACKAGE_NAME);
 	g_type_init();
-	g_thread_init(NULL);
+	if (! g_thread_supported()) 
+		g_thread_init(NULL);
 	
 	// Initialize globals
 	gl_globs = g_malloc(sizeof(GlistaGlobals));
