@@ -1,5 +1,9 @@
 uidir = $(datadir)/glista
-ui_DATA = glista.ui glista-icon.png
+ui_DATA = glista.ui \
+          glista-icons.xml \
+          glista16.png \
+          glista22.png \
+          glista48.png
 
 EXTRA_DIST = \
 	$(ui_DATA) \
@@ -10,11 +14,10 @@ desktop_DATA = glista.desktop
 
 glista.desktop:
 	cat $@.in > $@
-	echo "Icon=$(uidir)/glista-icon.png" >> $@
+	echo "Icon=$(uidir)/glista48.png" >> $@
 	
 %.ui: %.glade 
 	$(GTKBLDRCONV) $< $@
 
 CLEANFILES = \
 	glista.desktop
-	

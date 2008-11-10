@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<interface>
+  <object class="GtkIconFactory" id="glista-iconfactory">
+    <sources>
+      <source stock-id="glista-icon" filename="glista16.png" size="GTK_ICON_SIZE_MENU" />
+      <source stock-id="glista-icon" filename="glista16.png" size="GTK_ICON_SIZE_BUTTON" />
+      <source stock-id="glista-icon" filename="glista16.png" size="GTK_ICON_SIZE_SMALL_TOOLBAR" />
+      <source stock-id="glista-icon" filename="glista22.png" size="GTK_ICON_SIZE_LARGE_TOOLBAR" />
+      <source stock-id="glista-icon" filename="glista48.png" size="GTK_ICON_SIZE_DIALOG" />
+      <source stock-id="glista-icon" filename="glista48.png" />
+    </sources>
+  </object>
+</interface>

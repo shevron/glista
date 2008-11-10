@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Sat Nov  8 13:48:45 2008 -->
+<!--Generated with glade3 3.4.5 on Mon Nov 10 23:11:48 2008 -->
 <interface>
   <object class="GtkUIManager" id="uimanager1">
     <child>
@@ -33,7 +33,8 @@
     <property name="window_position">GTK_WIN_POS_CENTER</property>
     <property name="default_width">250</property>
     <property name="default_height">350</property>
-    <property name="icon">glista-icon.png</property>
+    <property name="icon">glista48.png</property>
+    <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
     <signal handler="on_glista_main_window_delete_event" name="delete_event"/>
     <child>
       <object class="GtkVBox" id="vbox1">
@@ -106,6 +107,7 @@
                     <signal handler="on_about_clicked" name="clicked"/>
                   </object>
                   <packing>
+                    <property name="expand">True</property>
                     <property name="homogeneous">True</property>
                   </packing>
                 </child>
@@ -318,9 +320,10 @@
   </object>
   <object class="GtkAboutDialog" id="glista_about_dialog">
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">About Glade</property>
+    <property name="title" translatable="yes">About Glista</property>
     <property name="resizable">False</property>
     <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
+    <property name="icon">glista48.png</property>
     <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
     <property name="program_name">Glista</property>
     <property name="version">0.1</property>
@@ -952,7 +955,9 @@ an absolute waiver of all civil liability in connection with the
 Program, unless a warranty or assumption of liability accompanies a
 copy of the Program in return for a fee.
 </property>
-    <property name="logo">glista-icon.png</property>
+    <property name="authors">Shahar Evron, http://prematureoptimization.org</property>
+    <property name="artists">Silvestre Herrera, http://www.silvestre.com.ar/</property>
+    <property name="logo">glista48.png</property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox1">
         <property name="visible">True</property>

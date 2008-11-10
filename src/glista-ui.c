@@ -374,12 +374,26 @@ glista_ui_init()
 	GtkWidget      *window;
 	GtkAboutDialog *about;
 	GtkStatusIcon  *sysicon;
+	GtkIconFactory *iconfactory;
 	
 	gl_globs->uibuilder = gtk_builder_new();
 	
+	// Load icons file and initialize icon factory
+	if (gtk_builder_add_from_file(gl_globs->uibuilder, 
+			GLISTA_DATA_DIR "/glista-icons.xml", NULL) == 0) {
+		
+		g_printerr("Unable to read icon data file: %s\n", 
+		           GLISTA_DATA_DIR "/glista-icons.xml");
+		           
+		return FALSE;
+	}
+	iconfactory = (GtkIconFactory *) glista_get_widget("glista-iconfactory");
+	gtk_icon_factory_add_default(iconfactory);
+	
 	// Load UI file
 	if (gtk_builder_add_from_file(gl_globs->uibuilder, 
-								  GLISTA_DATA_DIR "/glista.ui", NULL) == 0) {
+			GLISTA_DATA_DIR "/glista.ui", NULL) == 0) {
+		
 		g_printerr("Unable to read UI file: %s\n", 
 		           GLISTA_DATA_DIR "/glista.ui");
 		           
@@ -392,7 +406,7 @@ glista_ui_init()
 
 	if (gl_globs->trayicon) {
 		// Set up the status icon and connect the left-click and right-click signals
-		sysicon = gtk_status_icon_new_from_file(GLISTA_DATA_DIR "/glista-icon.png");
+		sysicon = gtk_status_icon_new_from_stock("glista-icon");
 		g_signal_connect(sysicon, "activate", 
 						 G_CALLBACK(on_sysicon_activate), window);
 		g_signal_connect(sysicon, "popup-menu", 
