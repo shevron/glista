@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Mon Nov 10 23:11:48 2008 -->
+<!--Generated with glade3 3.4.5 on Mon Nov 10 23:19:10 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="glista_main_window">
     <property name="title" translatable="yes">Glista</property>
@@ -302,7 +302,6 @@
     <property name="icon">glista48.png</property>
     <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
     <property name="program_name">Glista</property>
-    <property name="version">0.1</property>
     <property name="copyright" translatable="yes">Copyright © 2008 Shahar Evron
 
 This program comes with ABSOLUTELY NO WARRANTY;
