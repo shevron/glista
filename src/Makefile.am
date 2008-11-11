@@ -28,4 +28,5 @@ AM_CFLAGS = $(DEPOS_CFLAGS) \
 AM_CPPFLAGS = $(GTK_CFLAGS) \
               $(LIBXML_CFLAGS) \
               $(UNIQUE_CFLAGS) \
-              $(GTKSPELL_CFLAGS)
+              $(GTKSPELL_CFLAGS) \
+              -DLOCALE_DIR=\""$(datadir)/locale"\"

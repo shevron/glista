@@ -56,6 +56,13 @@ PKG_CHECK_MODULES(LIBXML, libxml-2.0 >= 2.6)
 AC_SUBST(LIBXML_CFLAGS)
 AC_SUBST(LIBXML_LIBS)
 
+dnl check for gettext
+ALL_LINGUAS="he"
+AM_GLIB_GNU_GETTEXT
+GETTEXT_PACKAGE=$PACKAGE
+AC_SUBST(GETTEXT_PACKAGE)
+AC_DEFINE_UNQUOTED([GETTEXT_PACKAGE], ["${GETTEXT_PACKAGE}"], [gettext domain])
+
 dnl see if we have Unique available
 AC_ARG_WITH([unique],
   [AS_HELP_STRING([--with-unique=DIR],
@@ -166,7 +173,8 @@ AC_DEFINE_DIR(GLISTA_DATA_DIR, [{datadir}/glista],
 	
 AC_CONFIG_FILES([Makefile 
                  src/Makefile 
-                 ui/Makefile])
+                 ui/Makefile
+                 po/Makefile.in])
 
 AC_CONFIG_COMMANDS([default],[[ echo timestamp > stamp-h ]],[[]])
 

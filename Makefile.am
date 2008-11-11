@@ -1,3 +1,4 @@
 SUBDIRS = src \
-          ui
+          ui \
+          po
 

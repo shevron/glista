@@ -18,6 +18,8 @@
  
 #include <gtk/gtk.h>
 #include <string.h>
+#include <libintl.h>
+#include <locale.h>
 #include "glista-ui.h"
 #include "glista.h"
 
@@ -382,7 +384,7 @@ glista_ui_init()
 	if (gtk_builder_add_from_file(gl_globs->uibuilder, 
 			GLISTA_DATA_DIR "/glista-icons.xml", NULL) == 0) {
 		
-		g_printerr("Unable to read icon data file: %s\n", 
+		g_printerr(_("Unable to read icon data file: %s\n"), 
 		           GLISTA_DATA_DIR "/glista-icons.xml");
 		           
 		return FALSE;
@@ -394,7 +396,7 @@ glista_ui_init()
 	if (gtk_builder_add_from_file(gl_globs->uibuilder, 
 			GLISTA_DATA_DIR "/glista.ui", NULL) == 0) {
 		
-		g_printerr("Unable to read UI file: %s\n", 
+		g_printerr(_("Unable to read UI file: %s\n"), 
 		           GLISTA_DATA_DIR "/glista.ui");
 		           
 		return FALSE;

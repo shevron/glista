@@ -20,6 +20,8 @@
 #include <errno.h>
 #include <glib.h>
 #include <glib-object.h>
+#include <libintl.h>
+#include <locale.h>
 #include <gtk/gtk.h>
 #include <gtk/gtkmain.h>
 #include "glista.h"
@@ -163,7 +165,7 @@ glista_note_open(GtkTreeIter *iter)
 			if (! gtkspell_new_attach(GTK_TEXT_VIEW(note_textview), NULL, 
 									  &gtkspell_err)) {
 										
-				g_warning("Unable to initialize GtkSpell: [%d] %s\n", 
+				g_warning(_("Unable to initialize GtkSpell: [%d] %s\n"), 
 						  gtkspell_err->code,
 						  gtkspell_err->message);
 				
@@ -517,8 +519,8 @@ glista_category_confirm_delete(GtkTreeIter *category)
 			GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
 			GTK_MESSAGE_WARNING,
 			GTK_BUTTONS_OK_CANCEL,
-			"Are you sure you want to delete the category \"%s\" and "
-			"all the items in it?",
+			_("Are you sure you want to delete the category \"%s\" and "
+			  "all the items in it?"),
 			cat_name);
 		
 		response = gtk_dialog_run(GTK_DIALOG(dialog));
@@ -1274,11 +1276,11 @@ glista_list_init()
 	g_signal_connect(done_ren, "toggled", 
 					 G_CALLBACK(on_item_done_toggled), NULL);
 
-	done_column = gtk_tree_view_column_new_with_attributes("Done", done_ren, 
+	done_column = gtk_tree_view_column_new_with_attributes(_("Done"), done_ren, 
 		"active", GL_COLUMN_DONE, NULL);	
-	text_column = gtk_tree_view_column_new_with_attributes("Item", text_ren, 
+	text_column = gtk_tree_view_column_new_with_attributes(_("Item"), text_ren, 
 		"strikethrough", GL_COLUMN_DONE, NULL);
-	note_column = gtk_tree_view_column_new_with_attributes("Note", note_ren, 
+	note_column = gtk_tree_view_column_new_with_attributes(_("Note"), note_ren, 
 		NULL);
 	
 	gtk_tree_view_column_set_cell_data_func(text_column, text_ren, 
@@ -1484,15 +1486,15 @@ glista_cfg_check_dir()
 			// Create the directory
 			if (g_mkdir_with_parents(gl_globs->configdir, 0700) != 0) {
 				// We have an error!
-				g_printerr("Error creating configuration directory: %s\n",
+				g_printerr(_("Error creating configuration directory: %s\n"),
 				            strerror(errno));
 				
 				return FALSE;
 	        }
 	        
         } else { // File exists but it is not a directory
-        	g_printerr("Error: unable to create config directory" 
-        	           " (%s): file exists\n", gl_globs->configdir);
+        	g_printerr(_("Error: unable to create config directory" 
+        	           " (%s): file exists\n"), gl_globs->configdir);
 			
 			return FALSE;
 		}
@@ -1540,8 +1542,8 @@ glista_cfg_init_load()
     	                                      "glistaui", "height", NULL);
 	} else {
 		if (error != NULL) {
-			fprintf(stderr, "Error loading config file: [%d] %s\n"
-			                "Using default configuration.\n", 
+			fprintf(stderr, _("Error loading config file: [%d] %s\n"
+			                  "Using default configuration.\n"), 
 			                error->code, error->message);
 			                
             g_error_free(error);
@@ -1587,7 +1589,7 @@ glista_cfg_save()
 	cfgdata = g_key_file_to_data(keyfile, &cfgdatalen, NULL);
 	if (! g_file_set_contents(cfgfile, cfgdata, cfgdatalen, &error)) {
 		if (error != NULL) {
-			fprintf(stderr, "Error saving configuration file: [%d] %s\n",
+			fprintf(stderr, _("Error saving configuration file: [%d] %s\n"),
 			                error->code, error->message);
 			                
             g_error_free(error);
@@ -1613,11 +1615,18 @@ main(int argc, char *argv[])
 	gboolean     minimized = FALSE;
 	GOptionEntry entries[] = {
 		{ "no-tray", 'T', 0, G_OPTION_ARG_NONE, &no_tray, 
-		  "Do not use the system tray (conflicts with -m)", NULL },
+		  _("Do not use the system tray (conflicts with -m)"), NULL },
 		{ "minimized", 'm', 0, G_OPTION_ARG_NONE, &minimized, 
-		  "Start up minimized (conflicts with -T)", NULL},
+		  _("Start up minimized (conflicts with -T)"), NULL},
 		{ NULL }
 	};
+
+#ifdef ENABLE_NLS
+	setlocale(LC_ALL, "");
+	bindtextdomain(GETTEXT_PACKAGE, LOCALE_DIR);
+	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
+	textdomain(GETTEXT_PACKAGE);
+#endif
 
 	g_set_prgname(PACKAGE_NAME);
 	g_type_init();
@@ -1639,12 +1648,12 @@ main(int argc, char *argv[])
 	glista_cfg_init_load();
 	
 	// Parse commandline arguments
-	gtk_init_with_args(&argc, &argv, GLISTA_PARAM_STRING, entries, NULL, NULL);
+	gtk_init_with_args(&argc, &argv, _(GLISTA_PARAM_STRING), entries, NULL, NULL);
 	gl_globs->trayicon = (! no_tray);
 
 	// Initialize the UI
 	if (glista_ui_init() == FALSE) {
-		g_printerr("Unable to initialize UI.\n");
+		g_printerr(_("Unable to initialize UI.\n"));
 		return 1;	
 	}
 	
@@ -1652,7 +1661,7 @@ main(int argc, char *argv[])
 	// Are we the single instance?
 	if (! glista_unique_is_single_inst()) {
 		// There is a Glista instance already running - shut down
-		g_print("Activating an already-running Glista instance.\n");
+		g_print(_("Activating an already-running Glista instance.\n"));
 		return 0;
 	}
 #endif
