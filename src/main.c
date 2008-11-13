@@ -20,12 +20,11 @@
 #include <errno.h>
 #include <glib.h>
 #include <glib-object.h>
-#include <libintl.h>
-#include <locale.h>
 #include <gtk/gtk.h>
 #include <gtk/gtkmain.h>
 #include "glista.h"
 #include "glista-ui.h"
+#include "glista-i18n.h"
 #include "glista-storage.h"
 #include "glista-unique.h"
 

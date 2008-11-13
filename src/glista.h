@@ -27,8 +27,6 @@
 #endif 
 
 #include <glib.h>
-#include <libintl.h>
-#include <locale.h>
 #include <gtk/gtk.h>
 
 #ifndef _XOPEN_SOURCE
@@ -57,12 +55,6 @@
 
 #ifndef PACKAGE_NAME
 #deinfe PACKAGE_NAME "glista"
-#endif
-
-#ifdef ENABLE_NLS
-#define _(text) gettext(text)
-#else
-#define _(text) text
 #endif
 
 // Glista configuration data struct

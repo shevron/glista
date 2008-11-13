@@ -12,8 +12,7 @@ EXTRA_DIST = \
 desktopdir = $(datadir)/applications
 desktop_DATA = glista.desktop
 
-glista.desktop:
-	cat $@.in > $@
+@INTLTOOL_DESKTOP_RULE@
 	echo "Icon=$(uidir)/glista48.png" >> $@
 	
 %.ui: %.glade 

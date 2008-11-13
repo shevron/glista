@@ -18,10 +18,9 @@
  
 #include <gtk/gtk.h>
 #include <string.h>
-#include <libintl.h>
-#include <locale.h>
-#include "glista-ui.h"
 #include "glista.h"
+#include "glista-ui.h"
+#include "glista-i18n.h"
 
 #ifdef ENABLE_LINKIFY
 #include "glista-textview-linkify.h"

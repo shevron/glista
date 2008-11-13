@@ -27,6 +27,7 @@ dnl refers to ${prefix}.  Thus we have to use 'eval' twice.
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
+AC_PROG_INTLTOOL([0.23])
 
 dnl make sure we have gtk-builder-convert
 AC_CHECK_PROGS([GTKBLDRCONV], [gtk-builder-convert], [:])

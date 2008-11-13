@@ -1,4 +1,5 @@
 # Source files
 src/main.c
 src/glista-ui.c
-
+ui/glista.desktop.in
+ui/glista.glade
