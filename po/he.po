@@ -8,13 +8,18 @@ msgid ""
 msgstr ""
 "Project-Id-Version: glista 0.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-13 22:00+0200\n"
+"POT-Creation-Date: 2008-11-14 10:10+0200\n"
 "PO-Revision-Date: 2008-11-13 22:00+0200\n"
 "Last-Translator: Shahar Evron <shahar@prematureoptimization.org>\n"
 "Language-Team: Hebrew <he@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: ../src/main.c:167
+#, c-format
+msgid "Unable to initialize GtkSpell: [%d] %s\n"
+msgstr ""
 
 #: ../src/main.c:521
 #, c-format
@@ -34,64 +39,62 @@ msgstr "מטלה"
 msgid "Note"
 msgstr "הערה"
 
+#. We have an error!
+#: ../src/main.c:1488
+#, c-format
+msgid "Error creating configuration directory: %s\n"
+msgstr ""
+
+#. File exists but it is not a directory
+#: ../src/main.c:1495
+#, c-format
+msgid "Error: unable to create config directory (%s): file exists\n"
+msgstr ""
+
+#: ../src/main.c:1544
+#, c-format
+msgid ""
+"Error loading config file: [%d] %s\n"
+"Using default configuration.\n"
+msgstr ""
+
+#: ../src/main.c:1591
+#, c-format
+msgid "Error saving configuration file: [%d] %s\n"
+msgstr ""
+
+#: ../src/main.c:1617
+msgid "Do not use the system tray (conflicts with -m)"
+msgstr ""
+
+#: ../src/main.c:1619
+msgid "Start up minimized (conflicts with -T)"
+msgstr ""
+
+#: ../src/main.c:1654
+#, c-format
+msgid "Unable to initialize UI.\n"
+msgstr ""
+
+#. There is a Glista instance already running - shut down
+#: ../src/main.c:1662
+#, c-format
+msgid "Activating an already-running Glista instance.\n"
+msgstr ""
+
+#: ../src/glista-ui.c:386
+#, c-format
+msgid "Unable to read icon data file: %s\n"
+msgstr ""
+
+#: ../src/glista-ui.c:398
+#, c-format
+msgid "Unable to read UI file: %s\n"
+msgstr ""
 
 #: ../ui/glista.desktop.in.h:1
 msgid "A super-simple personal to-do list manager"
 msgstr "מנהל רשימת מטלות אישי פשוט"
-
-#: ../ui/glista.glade.h:621
-msgid "About Glista"
-msgstr "אודות גליסטה"
-
-#: ../ui/glista.glade.h:622
-msgid "Add Note"
-msgstr "הוסף הערה"
-
-#: ../ui/glista.glade.h:623
-msgid "Clear Done Items"
-msgstr "נקה מטלות שבוצעו"
-
-#: ../ui/glista.glade.h:629
-msgid "Delete Item"
-msgstr "מחק מטלה"
-
-#: ../ui/glista.glade.h:630
-msgid "Glista"
-msgstr "גליסטה"
-
-#: ../ui/glista.glade.h:631
-msgid "Glista Website"
-msgstr "אתר גליסטה"
-
-#: ../ui/glista.glade.h:633
-msgid "Save Some Paper"
-msgstr "חסוך בנייר"
-
-#: ../ui/glista.glade.h:634
-msgid "gtk-about"
-msgstr ""
-
-#: ../ui/glista.glade.h:635
-msgid "gtk-quit"
-msgstr ""
-
-#: ../ui/glista.glade.h:636
-msgid "menuitem1"
-msgstr ""
-
-#: ../src/main.c:167
-#, c-format
-msgid "Unable to initialize GtkSpell: [%d] %s\n"
-msgstr ""
-
-#: ../ui/glista.glade.h:624
-msgid ""
-"Copyright © 2008 Shahar Evron\n"
-"\n"
-"This program comes with ABSOLUTELY NO WARRANTY;\n"
-"This is free software, and you are welcome to redistribute it\n"
-"under certain conditions; Click \"License\" for details."
-msgstr ""
 
 #: ../ui/glista.glade.h:1
 msgid ""
@@ -716,55 +719,51 @@ msgid ""
 "copy of the Program in return for a fee.\n"
 msgstr ""
 
-#. We have an error!
-#: ../src/main.c:1488
-#, c-format
-msgid "Error creating configuration directory: %s\n"
-msgstr ""
+#: ../ui/glista.glade.h:621
+msgid "About Glista"
+msgstr "אודות גליסטה"
 
-#. File exists but it is not a directory
-#: ../src/main.c:1495
-#, c-format
-msgid "Error: unable to create config directory (%s): file exists\n"
-msgstr ""
+#: ../ui/glista.glade.h:622
+msgid "Add Note"
+msgstr "הוסף הערה"
 
-#: ../src/main.c:1544
-#, c-format
+#: ../ui/glista.glade.h:623
+msgid "Clear Done Items"
+msgstr "נקה מטלות שבוצעו"
+
+#: ../ui/glista.glade.h:624
 msgid ""
-"Error loading config file: [%d] %s\n"
-"Using default configuration.\n"
+"Copyright © 2008 Shahar Evron\n"
+"\n"
+"This program comes with ABSOLUTELY NO WARRANTY;\n"
+"This is free software, and you are welcome to redistribute it\n"
+"under certain conditions; Click \"License\" for details."
 msgstr ""
 
-#: ../src/main.c:1591
-#, c-format
-msgid "Error saving configuration file: [%d] %s\n"
+#: ../ui/glista.glade.h:629
+msgid "Delete Item"
+msgstr "מחק מטלה"
+
+#: ../ui/glista.glade.h:630
+msgid "Glista"
+msgstr "גליסטה"
+
+#: ../ui/glista.glade.h:631
+msgid "Glista Website"
+msgstr "אתר גליסטה"
+
+#: ../ui/glista.glade.h:633
+msgid "Save Some Paper"
+msgstr "חסוך בנייר"
+
+#: ../ui/glista.glade.h:634
+msgid "gtk-about"
 msgstr ""
 
-#: ../src/main.c:1617
-msgid "Do not use the system tray (conflicts with -m)"
+#: ../ui/glista.glade.h:635
+msgid "gtk-quit"
 msgstr ""
 
-#: ../src/main.c:1619
-msgid "Start up minimized (conflicts with -T)"
-msgstr ""
-
-#: ../src/main.c:1655
-#, c-format
-msgid "Unable to initialize UI.\n"
-msgstr ""
-
-#. There is a Glista instance already running - shut down
-#: ../src/main.c:1663
-#, c-format
-msgid "Activating an already-running Glista instance.\n"
-msgstr ""
-
-#: ../src/glista-ui.c:386
-#, c-format
-msgid "Unable to read icon data file: %s\n"
-msgstr ""
-
-#: ../src/glista-ui.c:398
-#, c-format
-msgid "Unable to read UI file: %s\n"
+#: ../ui/glista.glade.h:636
+msgid "menuitem1"
 msgstr ""

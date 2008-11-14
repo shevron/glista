@@ -16,11 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
  
+#include <glib/gi18n.h>
 #include <gtk/gtk.h>
 #include <string.h>
 #include "glista.h"
 #include "glista-ui.h"
-#include "glista-i18n.h"
 
 #ifdef ENABLE_LINKIFY
 #include "glista-textview-linkify.h"

@@ -82,16 +82,14 @@ AC_ARG_WITH([unique],
   ])
 
 if test -n "$check_unique"; then
-  PKG_CHECK_MODULES([Unique], unique-1.0 >= 1.0, [
-    UNIQUE_CFLAGS=$Unique_CFLAGS
-    UNIQUE_LIBS=$Unique_LIBS
+  PKG_CHECK_MODULES([UNIQUE], unique-1.0 >= 1.0, [
     AC_DEFINE_UNQUOTED(HAVE_UNIQUE, [1], [Whether Unique is available])
   ], [
     AC_MSG_WARN([Single instance detection will be disabled])
   ])
 else
-  AC_MSG_CHECKING([for Unique])
-  AC_MSG_RESULT([no])
+  AC_MSG_CHECKING([for UNIQUE])
+  AC_MSG_RESULT([disabled])
 fi
 
 AC_SUBST(UNIQUE_CFLAGS)
@@ -115,16 +113,14 @@ AC_ARG_WITH([gtkspell],
   ])
 
 if test -n "$check_gtkspell"; then
-  PKG_CHECK_MODULES([GtkSpell], gtkspell-2.0, [
-    GTKSPELL_CFLAGS=$GtkSpell_CFLAGS
-    GTKSPELL_LIBS=$GtkSpell_LIBS
+  PKG_CHECK_MODULES([GTKSPELL], gtkspell-2.0, [
     AC_DEFINE_UNQUOTED(HAVE_GTKSPELL, [1], [Whether GtkSpell is available])
   ], [
     AC_MSG_WARN([Spell checking will be disabled])
   ])
 else
-  AC_MSG_CHECKING([for GtkSpell])
-  AC_MSG_RESULT([no])
+  AC_MSG_CHECKING([for GTKSPELL])
+  AC_MSG_RESULT([disabled])
 fi
 
 AC_SUBST(GTKSPELL_CFLAGS)

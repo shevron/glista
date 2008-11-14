@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-13 22:24+0200\n"
+"POT-Creation-Date: 2008-11-14 10:10+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -71,13 +71,13 @@ msgstr ""
 msgid "Start up minimized (conflicts with -T)"
 msgstr ""
 
-#: ../src/main.c:1655
+#: ../src/main.c:1654
 #, c-format
 msgid "Unable to initialize UI.\n"
 msgstr ""
 
 #. There is a Glista instance already running - shut down
-#: ../src/main.c:1663
+#: ../src/main.c:1662
 #, c-format
 msgid "Activating an already-running Glista instance.\n"
 msgstr ""

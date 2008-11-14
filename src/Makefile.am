@@ -11,7 +11,6 @@ glista_SOURCES = main.c \
                  glista.h \
                  glista-ui.c \
                  glista-ui.h \
-                 glista-i18n.h \
                  glista-storage.c \
                  glista-storage.h \
                  glista-unique.c \

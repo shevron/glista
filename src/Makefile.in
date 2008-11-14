@@ -44,8 +44,8 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am__glista_SOURCES_DIST = main.c glista.h glista-ui.c glista-ui.h \
-	glista-i18n.h glista-storage.c glista-storage.h \
-	glista-unique.c glista-unique.h glista-textview-linkify.c \
+	glista-storage.c glista-storage.h glista-unique.c \
+	glista-unique.h glista-textview-linkify.c \
 	glista-textview-linkify.h
 @ENABLE_LINKIFY_TRUE@am__objects_1 =  \
 @ENABLE_LINKIFY_TRUE@	glista-textview-linkify.$(OBJEXT)
@@ -101,8 +101,6 @@ GTKSPELL_CFLAGS = @GTKSPELL_CFLAGS@
 GTKSPELL_LIBS = @GTKSPELL_LIBS@
 GTK_CFLAGS = @GTK_CFLAGS@
 GTK_LIBS = @GTK_LIBS@
-GtkSpell_CFLAGS = @GtkSpell_CFLAGS@
-GtkSpell_LIBS = @GtkSpell_LIBS@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -164,8 +162,6 @@ STRIP = @STRIP@
 UNIQUE_CFLAGS = @UNIQUE_CFLAGS@
 UNIQUE_LIBS = @UNIQUE_LIBS@
 USE_NLS = @USE_NLS@
-Unique_CFLAGS = @Unique_CFLAGS@
-Unique_LIBS = @Unique_LIBS@
 VERSION = @VERSION@
 XGETTEXT = @XGETTEXT@
 abs_builddir = @abs_builddir@
@@ -207,7 +203,6 @@ sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @ENABLE_LINKIFY_FALSE@OPTIONAL_GLISTA = 
@@ -218,7 +213,6 @@ glista_SOURCES = main.c \
                  glista.h \
                  glista-ui.c \
                  glista-ui.h \
-                 glista-i18n.h \
                  glista-storage.c \
                  glista-storage.h \
                  glista-unique.c \

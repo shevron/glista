@@ -20,11 +20,11 @@
 #include <errno.h>
 #include <glib.h>
 #include <glib-object.h>
+#include <glib/gi18n.h>
 #include <gtk/gtk.h>
 #include <gtk/gtkmain.h>
 #include "glista.h"
 #include "glista-ui.h"
-#include "glista-i18n.h"
 #include "glista-storage.h"
 #include "glista-unique.h"
 
@@ -1614,14 +1614,13 @@ main(int argc, char *argv[])
 	gboolean     minimized = FALSE;
 	GOptionEntry entries[] = {
 		{ "no-tray", 'T', 0, G_OPTION_ARG_NONE, &no_tray, 
-		  _("Do not use the system tray (conflicts with -m)"), NULL },
+		  N_("Do not use the system tray (conflicts with -m)"), NULL },
 		{ "minimized", 'm', 0, G_OPTION_ARG_NONE, &minimized, 
-		  _("Start up minimized (conflicts with -T)"), NULL},
+		  N_("Start up minimized (conflicts with -T)"), NULL},
 		{ NULL }
 	};
 
 #ifdef ENABLE_NLS
-	setlocale(LC_ALL, "");
 	bindtextdomain(GETTEXT_PACKAGE, LOCALE_DIR);
 	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
 	textdomain(GETTEXT_PACKAGE);
