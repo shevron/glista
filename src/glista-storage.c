@@ -22,6 +22,7 @@
 #include <libxml/xmlreader.h>
 #include <libxml/xmlwriter.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "glista.h"
 #include "glista-storage.h"
@@ -190,18 +191,7 @@ read_next_item(xmlTextReaderPtr xml)
 			// Set the reminder time, if set
 			if (remind_at_str != NULL) {
 				if (strlen(remind_at_str) > 0) {
-					struct tm  time_tm; 
-					char      *last;
-					
-					last = strptime(remind_at_str, GLISTA_STORAGE_TIME_FORMAT, 
-					                &time_tm);
-									
-					if (last == remind_at_str + GLISTA_STORAGE_TIME_STRLEN) {
-						item->remind_at = mktime(&time_tm);
-					} else {
-						g_error("Invalid reminder time format: %s", 
-							remind_at_str);
-					}
+					item->remind_at = (time_t) atoi(remind_at_str);
 				}
 				
 				g_free(remind_at_str);
@@ -283,7 +273,7 @@ glista_storage_save_all_items(GList *all_items)
 	gchar             done_str[2];
 	gchar            *remind_at_str;
 	
-	remind_at_str = g_malloc0(sizeof(gchar) * GLISTA_STORAGE_TIME_STRLEN + 1);
+	remind_at_str = g_malloc0(sizeof(gchar) * 20);
 	
 	// Build storage file path
 	storage_file = g_build_filename(gl_globs->configdir, 
@@ -327,14 +317,7 @@ glista_storage_save_all_items(GList *all_items)
 		}
 		
 		if (item->remind_at != -1) {
-			struct tm *time;
-			size_t     time_len;
-			
-			time = localtime(&(item->remind_at));
-			time_len = strftime(remind_at_str, GLISTA_STORAGE_TIME_STRLEN + 1, 
-			                    GLISTA_STORAGE_TIME_FORMAT, time);
-								
-			g_assert(time_len > 0);
+			remind_at_str = g_strdup_printf("%d", (gint) item->remind_at);
 			
 			ret = xmlTextWriterWriteElement(xml, BAD_CAST GL_XNODE_RMDR,
 			                                BAD_CAST remind_at_str);
