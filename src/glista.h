@@ -29,9 +29,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE
-#endif
 
 #ifndef GLISTA_DATA_DIR 
 #define GLISTA_DATA_DIR "."
@@ -56,6 +54,10 @@
 #ifndef PACKAGE_NAME
 #deinfe PACKAGE_NAME "glista"
 #endif
+
+// A couple of convenience macros to access the item store
+#define GL_ITEMSTM GTK_TREE_MODEL(gl_globs->itemstore)
+#define GL_ITEMSTS GTK_TREE_STORE(gl_globs->itemstore)
 
 // Glista configuration data struct
 typedef struct _glista_config_struct {
@@ -85,7 +87,8 @@ typedef struct _glista_data_struct {
 	gchar    *text;
 	gchar    *parent;
 	gchar    *note;
-} GlistaItem;	
+	time_t    remind_at;
+} GlistaItem;
 
 // Globals container
 GlistaGlobals *gl_globs;
@@ -99,19 +102,22 @@ void         glista_item_redraw_parent(GtkTreeIter *child_iter);
 void         glista_item_free(GlistaItem *item);
 GtkTreeIter *glista_item_get_single_selected(GtkTreeSelection *selection);
 void         glista_list_save_timeout();
+GList*       glista_list_get_selected();
 void         glista_list_delete_done();
 void         glista_list_delete_selected();
 void         glista_note_toggle(GtkTreeIter *iter);
 void         glista_note_toggle_selected(GtkTreeSelection *selection);
 void         glista_note_open_if_visible(GtkTreeIter *iter);
 void         glista_note_close();
+void         glista_note_clear_selected();
 
 // Column names & order ENUM
 typedef enum {
 	GL_COLUMN_DONE,
 	GL_COLUMN_TEXT,
 	GL_COLUMN_CATEGORY,
-	GL_COLUMN_NOTE
+	GL_COLUMN_NOTE,
+	GL_COLUMN_REMINDER
 } GlistaColumn;
 
 #define __GLISTA_H

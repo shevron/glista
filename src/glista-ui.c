@@ -15,12 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#define _XOPEN_SOURCE /* glibc2 needs this */
+#include <time.h>
  
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 #include <string.h>
 #include "glista.h"
 #include "glista-ui.h"
+#include "glista-reminder.h"
 
 #ifdef ENABLE_LINKIFY
 #include "glista-textview-linkify.h"
@@ -46,11 +50,12 @@ void
 on_list_selection_changed(GtkTreeSelection *selection, 
                                       gpointer user_data)
 {
-	GtkWidget   *clear_btn, *note_btn;
+	GtkWidget   *clear_btn, *note_btn, *reminder_btn;
 	GtkTreeIter *iter;
 
-	clear_btn = GTK_WIDGET(glista_get_widget("tb_delete"));
-	note_btn = GTK_WIDGET(glista_get_widget("tb_note"));
+	clear_btn    = GTK_WIDGET(glista_get_widget("tb_delete"));
+	note_btn     = GTK_WIDGET(glista_get_widget("tb_note"));
+	reminder_btn = GTK_WIDGET(glista_get_widget("tb_reminder"));
 	
 	if (gtk_tree_selection_count_selected_rows(selection) > 0) {
 		if ((iter = glista_item_get_single_selected(selection)) != NULL) {
@@ -63,9 +68,11 @@ on_list_selection_changed(GtkTreeSelection *selection,
 			glista_note_close();
 		}
 		
+		gtk_widget_set_sensitive(reminder_btn, TRUE);
 		gtk_widget_set_sensitive(clear_btn, TRUE);
 		
 	} else {
+		gtk_widget_set_sensitive(reminder_btn, FALSE);
 		gtk_widget_set_sensitive(clear_btn, FALSE);
 		gtk_widget_set_sensitive(note_btn, FALSE);
 		glista_note_close();
@@ -171,12 +178,8 @@ on_item_text_editing_started(GtkCellRenderer *renderer,
 	if (GTK_IS_ENTRY(editable)) {
 		
 		if (((path = gtk_tree_path_new_from_string(pathstr)) != NULL) &&
-			gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
-									&iter, path)) {
-		
-			gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
-							   GL_COLUMN_TEXT, &text, -1);
-			
+			gtk_tree_model_get_iter(GL_ITEMSTM, &iter, path)) {
+			gtk_tree_model_get(GL_ITEMSTM, &iter, GL_COLUMN_TEXT, &text, -1);
 			gtk_entry_set_text(GTK_ENTRY(editable), text);
 										
 			g_free(text);
@@ -443,6 +446,87 @@ glista_ui_shutdown()
 	glista_ui_mainwindow_store_geo(GTK_WINDOW(window));
 }
 
+/**
+ * glista_ui_remwindow_show:
+ * 
+ * Show the "set reminder" window. Will set the date / time fields to 
+ * show the current time + 1 hour and show the window.
+ */
+static void 
+glista_ui_remwindow_show()
+{
+	GtkWidget     *rem_window;
+	GtkSpinButton *hr_in, *min_in;
+	GtkEntry      *date_in; 
+	GtkCalendar   *cal;
+	time_t         now_t;
+	struct tm      now_tm;
+	char           date_str[64];
+	
+	rem_window = GTK_WIDGET(glista_get_widget("set_reminder_window"));
+	date_in    = GTK_ENTRY(glista_get_widget("reminder_date"));
+	hr_in      = GTK_SPIN_BUTTON(glista_get_widget("reminder_hour"));
+	min_in     = GTK_SPIN_BUTTON(glista_get_widget("reminder_min"));
+	
+	// Get the current time + one hour
+	time(&now_t);
+	now_t = now_t + 3600;
+	localtime_r(&now_t, &now_tm);
+	
+	// Set the date in the calendar (still hidden)
+	cal = GTK_CALENDAR(glista_get_widget("reminder_cal"));
+	gtk_calendar_select_day(cal, (guint) now_tm.tm_mday);
+	gtk_calendar_select_month(cal, (guint) now_tm.tm_mon, 
+	                               (guint) now_tm.tm_year + 1900);
+	
+	// Set the same date / time in the text field
+	strftime(date_str, sizeof(date_str), "%x", &now_tm);
+	gtk_entry_set_text(date_in, (gchar *) &date_str);
+	gtk_spin_button_set_value(hr_in, (gdouble) now_tm.tm_hour);
+	gtk_spin_button_set_value(min_in, (gdouble) now_tm.tm_min);
+	
+	// Show the window
+	gtk_widget_show(rem_window);
+}
+
+/**
+ * glista_ui_remwindow_hide:
+ * 
+ * Hide the "set reminder" window. This does not grab any data from the
+ * window - only hides it. 
+ */
+static void 
+glista_ui_remwindow_hide()
+{
+	GtkWidget       *rem_window;
+	GtkToggleButton *cal_btn;
+	
+	// Hide the calendar
+	cal_btn = GTK_TOGGLE_BUTTON(glista_get_widget("reminder_cal_btn"));
+	gtk_toggle_button_set_active(cal_btn, FALSE);
+	
+	// Hide the window
+	rem_window = GTK_WIDGET(glista_get_widget("set_reminder_window"));
+	gtk_widget_hide(rem_window);
+}
+
+static void
+glista_ui_show_item_menu(GtkTreeView *treeview, GdkEventButton *event)
+{
+	GtkTreeSelection *selection;
+	GtkMenu *menu;
+	
+	selection = gtk_tree_view_get_selection(treeview);
+	if (gtk_tree_selection_count_selected_rows(selection) > 0) {
+		
+		// Show menu
+		menu = GTK_MENU(glista_get_widget("item_cmenu"));
+		gtk_widget_show_all(GTK_WIDGET(menu));
+		gtk_menu_popup(menu, NULL, NULL, NULL, NULL, 
+		               (event != NULL) ? event->button : 0,
+					   gdk_event_get_time((GdkEvent *) event));
+	}				   
+}
 
 /*****************************************************************************
  * Note: the following callback event handlers are connected automatically
@@ -599,9 +683,321 @@ on_list_row_activated(GtkTreeView *view, GtkTreePath *path,
 {
 	GtkTreeIter iter;
 	
-	if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
-	                            &iter, path)) {
-	                            	
+	if (gtk_tree_model_get_iter(GL_ITEMSTM, &iter, path)) {
 		glista_note_toggle(&iter);
 	}
+}
+
+/**
+ * on_list_query_tooltip:
+ * @widget     The widget activating the event
+ * @x          X mouse position
+ * @y          Y mouse position
+ * @keyboard   Was this a keyboard tooltip event?
+ * @tooltip    Tooltip object
+ * @user_data  Data bound at signal connect time
+ * 
+ * Called when it's time to show a tooltip on the item list. Will check on what
+ * column / row the mouse is, and will act accordingly - showing the item text
+ * if we are on the text column, or showing reminder time if we are on the 
+ * reminder indicator column. Will not show tooltips on other columns. 
+ * 
+ * Returns: TRUE if widget is to be displayed, FALSE otherwise. 
+ */
+gboolean 
+on_list_query_tooltip(GtkWidget *widget, gint x, gint y, gboolean keyboard, 
+                      GtkTooltip *tooltip, gpointer user_data)
+{
+	GtkTreePath       *path;
+	GtkTreeViewColumn *column;
+	GtkTreeIter        iter;
+	gint               bin_x, bin_y, cell_x, cell_y, col_id;
+	gboolean           ret = TRUE;
+	gchar             *text;
+	GlistaReminder    *reminder;
+	
+	if (GTK_IS_TREE_VIEW(widget)) {
+		gtk_tree_view_convert_widget_to_bin_window_coords(GTK_TREE_VIEW(widget),
+		                                                  x, y, 
+														  &bin_x, &bin_y);
+		if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bin_x, bin_y, 
+		                                  &path, &column, &cell_x, &cell_y)) {
+			
+			if (column != NULL && path != NULL) {
+				// Find out what column we are over
+				col_id = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), 
+				                                           "col-id"));
+				switch(col_id) {
+					case GL_COLUMN_TEXT: // Tooltip is task text
+						gtk_tree_model_get_iter(
+							GTK_TREE_MODEL(gl_globs->itemstore), &iter, path);	
+						gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore),
+						                   &iter, GL_COLUMN_TEXT, &text, -1);
+						gtk_tooltip_set_text(tooltip, text);
+						gtk_tree_view_set_tooltip_cell(GTK_TREE_VIEW(widget), 
+						                               tooltip, path, column, 
+													   NULL);
+						
+						break;
+						
+					case GL_COLUMN_REMINDER:
+						gtk_tree_model_get_iter(
+							GTK_TREE_MODEL(gl_globs->itemstore), &iter, path);	
+						gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore),
+						                   &iter, GL_COLUMN_REMINDER, 
+										   (gpointer) &reminder, -1);
+										   
+						if (reminder != NULL) {
+							text = glista_reminder_time_as_string(reminder, 
+								"Remind at ");
+								
+							gtk_tooltip_set_text(tooltip, text);
+							gtk_tree_view_set_tooltip_cell(GTK_TREE_VIEW(widget), 
+						                               tooltip, path, column, 
+													   NULL);			   
+							g_free(text);
+							
+						} else {
+							ret = FALSE;
+						}
+						
+						break;
+						
+					default:
+						ret = FALSE;
+				        break;
+				}
+			}
+			
+			if (path != NULL)
+				gtk_tree_path_free(path);
+		}
+	}
+
+	return ret;
+}
+
+/**
+ * on_tb_add_reminder_clicked:
+ * @object    The GtkObject that triggered the event
+ * @user_data Any data bound at signal connect time
+ * 
+ * Handle the clicking of the "Set Reminder" toolbar button. Simply
+ * shows the reminder window.
+ */
+void
+on_tb_add_reminder_clicked(GtkObject *object, gpointer user_data)
+{
+	glista_ui_remwindow_show();
+}
+
+/**
+ * on_reminder_window_closed:
+ * @object    The GtkObject that triggered the event
+ * @user_data Any data bound at signal connect time
+ * 
+ * Handle the closing of the reminder window - this can be done by 
+ * either clicking "Cancel" or the "X" buttons. Will simply hide the 
+ * window without doing anything with the data. 
+ */
+void 
+on_reminder_window_closed(GtkObject *object, gpointer user_data)
+{
+	glista_ui_remwindow_hide();
+}
+
+/**
+ * on_reminder_cal_btn_toggled:
+ * @togglebtn The toggle button clicked 
+ * @user_data Any data bound at signal connect time
+ * 
+ * Handle clicking of the toggle button to show the calendar widget. 
+ * Might either show or hide the calendar. 
+ */
+void
+on_reminder_cal_btn_toggled(GtkToggleButton *togglebtn, 
+                            gpointer user_data)
+{
+	GtkCalendar *cal;
+	
+	cal = GTK_CALENDAR(glista_get_widget("reminder_cal"));
+	
+	if (gtk_toggle_button_get_active(togglebtn)) {
+		// Show calendar
+		gtk_widget_show(GTK_WIDGET(cal));		
+	} else {
+		// Hide calendar
+		gtk_widget_hide(GTK_WIDGET(cal));
+	}
+}
+
+/**
+ * on_reminder_time_output:
+ * @spin_button  The modified GtkSpinButton
+ * @user_data    User data attached at signal connect time
+ * 
+ * Manipulate the display of the minute / hour spin buttons to show
+ * zero-padded hours / minutes.
+ * 
+ * Code copied from the GtkSpinButton docs (see 'output' signal docs)
+ */
+gboolean 
+on_reminder_time_output(GtkSpinButton *spin_button, gpointer user_data)
+{
+	GtkAdjustment *adj;
+	gchar *text;
+	int value;
+	
+	adj = gtk_spin_button_get_adjustment(spin_button);
+	value = (int) gtk_adjustment_get_value(adj);
+	text = g_strdup_printf("%02d", value);
+	gtk_entry_set_text (GTK_ENTRY(spin_button), text);
+	g_free (text);
+	
+	return TRUE;
+}
+
+/**
+ * on_reminder_cal_day_selected:
+ * @cal      The modified GtkCalendar
+ * @gpointer User data attached at signal connect time
+ * 
+ * Handle date selection in the calendar - set the same date in the 
+ * date text entry
+ */
+void
+on_reminder_cal_day_selected(GtkCalendar *cal, gpointer user_data) 
+{
+	guint     year, month, day;
+	GtkEntry *date_entry; 
+	GDate    *date;
+	char      date_str[64];
+	
+	gtk_calendar_get_date(cal, &year, &month, &day);
+	month = month + 1;
+	
+	date = g_date_new_dmy(day, month, year);
+	if (g_date_valid_dmy(day, month, year)) {
+		g_date_strftime(date_str, sizeof(date_str), "%x", date);
+		
+		date_entry = GTK_ENTRY(glista_get_widget("reminder_date"));
+		gtk_entry_set_text(date_entry, (gchar *) &date_str);
+	}
+	
+	g_date_free(date);
+}
+
+/**
+ * on_reminder_add_btn_clicked:
+ * @object    The GtkObject that triggered the event
+ * @user_data Any data bound at signal connect time
+ * 
+ * Handle the reminder window "Add" button clicked. This will add a new
+ * reminder and close the window.
+ */
+void
+on_reminder_add_btn_clicked(GtkObject *object, gpointer user_data)
+{
+	GtkEntry  *date_in, *hour_in, *min_in;
+	gchar     *time_str;
+	struct tm  time_tm;
+	time_t     now, remind_at;
+	
+	date_in = GTK_ENTRY(glista_get_widget("reminder_date"));
+	hour_in = GTK_ENTRY(glista_get_widget("reminder_hour"));
+	min_in  = GTK_ENTRY(glista_get_widget("reminder_min"));
+	
+	time_str = g_malloc0(sizeof(gchar[71]));
+	
+	// Convert the input into timestamp format
+	g_snprintf(time_str, 70, "%s %s:%s:00", 
+		gtk_entry_get_text(date_in), 
+		gtk_entry_get_text(hour_in), 
+		gtk_entry_get_text(min_in));
+	
+	// Init our time structure to current local time
+	time(&now);
+	localtime_r(&now, &time_tm);
+	
+	// Set the values in time struct as specified by user and create timestamp
+	strptime((char *) time_str, "%x %T", &time_tm);
+	remind_at = mktime(&time_tm);
+	g_free(time_str);
+	
+	glista_reminder_set_on_selected(remind_at);
+	
+	glista_ui_remwindow_hide();
+}
+
+/**
+ * on_reminder_date_changed:
+ * @date_in   The modified date GtkEntry
+ * @user_data User data bound at signal connect time
+ * 
+ * Called when the set reminder dialog's date entry is changed
+ */
+void
+on_reminder_date_changed(GtkEntry *date_in, gpointer user_data)
+{
+	struct tm  date;
+	GtkWidget *ok_btn; 
+	
+	const gchar *date_str = gtk_entry_get_text(date_in);
+	
+	ok_btn = GTK_WIDGET(glista_get_widget("reminder_add_btn"));
+	
+	// Validate the date
+	if ((strptime((gchar *) date_str, "%x", &date)) == NULL) {
+		gtk_widget_set_sensitive(ok_btn, FALSE);
+	} else {
+		gtk_widget_set_sensitive(ok_btn, TRUE);
+	}
+}
+
+gboolean
+on_list_button_press(GtkWidget *widget, GdkEventButton *event, 
+                     gpointer user_data)
+{
+	GtkTreeSelection *selection;
+	GtkTreePath      *path;
+	
+	if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
+		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
+		
+		// Select the row under the mouse
+		if (gtk_tree_selection_count_selected_rows(selection) <= 1) {
+			
+			if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), 
+			                                  (gint) event->x, (gint) event->y, 
+					    					  &path, NULL, NULL, NULL)) {
+				gtk_tree_selection_unselect_all(selection);
+				gtk_tree_selection_select_path(selection, path);
+				gtk_tree_path_free(path);
+			}
+		}
+		
+		glista_ui_show_item_menu(GTK_TREE_VIEW(widget), event);
+		return TRUE;
+	}
+	
+	return FALSE;
+}
+
+gboolean 
+on_list_popup_menu(GtkWidget *widget, gpointer user_data)
+{
+	glista_ui_show_item_menu(GTK_TREE_VIEW(widget), NULL);
+	return TRUE;
+}
+
+void
+on_icmenu_note_clear_activate(GtkMenuItem *item, gpointer user_data)
+{
+	glista_note_clear_selected();
+}
+
+void
+on_icmenu_reminder_clear_activate(GtkMenuItem *item, gpointer user_data)
+{
+	glista_reminder_remove_selected();
 }

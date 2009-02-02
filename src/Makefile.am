@@ -1,3 +1,5 @@
+SUBDIRS = modules
+
 bin_PROGRAMS = glista
 
 if ENABLE_LINKIFY
@@ -9,10 +11,12 @@ endif
 
 glista_SOURCES = main.c \
                  glista.h \
-                 glista-ui.c \
-                 glista-ui.h \
+                 glista-reminder.c \
+                 glista-reminder.h \
                  glista-storage.c \
                  glista-storage.h \
+                 glista-ui.c \
+                 glista-ui.h \
                  glista-unique.c \
                  glista-unique.h \
                  $(OPTIONAL_GLISTA)

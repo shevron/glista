@@ -27,6 +27,7 @@
 #include "glista-ui.h"
 #include "glista-storage.h"
 #include "glista-unique.h"
+#include "glista-reminder.h"
 
 #ifdef HAVE_GTKSPELL
 #include <gtkspell/gtkspell.h>
@@ -68,9 +69,9 @@ glista_item_get_single_selected(GtkTreeSelection *selection)
 		list = gtk_tree_selection_get_selected_rows(selection, NULL);
 		g_assert(g_list_length(list) == 1);
 	
-		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
-		                            (GtkTreePath *) list->data)) {
-			gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
+		if (gtk_tree_model_get_iter(GL_ITEMSTM, &iter, 
+		                           (GtkTreePath *) list->data)) {
+			gtk_tree_model_get(GL_ITEMSTM, &iter, 
 			                   GL_COLUMN_CATEGORY, &is_cat, -1);
 			if (! is_cat) {
 				ret = gtk_tree_iter_copy(&iter);
@@ -136,7 +137,7 @@ glista_note_open(GtkTreeIter *iter)
 	gboolean       is_cat;
 	
 	// Check that this is not a category
-	gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), iter, 
+	gtk_tree_model_get(GL_ITEMSTM, iter, 
 	                   GL_COLUMN_NOTE,     &note_text, 
 	                   GL_COLUMN_CATEGORY, &is_cat, -1);
 	                   
@@ -274,9 +275,8 @@ glista_note_toggle_selected(GtkTreeSelection *selection)
 	
 		list = gtk_tree_selection_get_selected_rows(selection, NULL);
 		if (g_list_length(list) == 1) {
-			if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore),
-		    	                        &iter, (GtkTreePath *) list->data)) {
-		
+			if (gtk_tree_model_get_iter(GL_ITEMSTM, &iter, 
+			                           (GtkTreePath *) list->data)) {
 				glista_note_open(&iter);
 			}
 		}
@@ -285,6 +285,41 @@ glista_note_toggle_selected(GtkTreeSelection *selection)
 		g_list_foreach(list, (GFunc) gtk_tree_path_free, NULL);
 		g_list_free (list);
 	}
+}
+
+/**
+ * glista_note_clear_selected:
+ * 
+ * Clear the note from all selected items
+ */
+void
+glista_note_clear_selected()
+{
+	GList   *selected, *node;
+	
+	// Iterate over list of selected rows
+	selected = glista_list_get_selected();	
+	for (node = selected; node != NULL; node = node->next) {
+	    GtkTreePath *path;
+
+        path = gtk_tree_row_reference_get_path(
+			(GtkTreeRowReference *)node->data
+		);
+		
+        if (path) {
+        	GtkTreeIter iter;
+	        if (gtk_tree_model_get_iter(GL_ITEMSTM, &iter, path)) {
+				gtk_tree_store_set(GL_ITEMSTS, &iter, 
+								   GL_COLUMN_NOTE, NULL, -1);
+			}
+
+			gtk_tree_path_free(path);
+        }
+	}
+	
+	// Free the list of selected rows
+	g_list_foreach(selected, (GFunc) gtk_tree_row_reference_free, NULL);
+	g_list_free (selected);
 }
 
 /**
@@ -317,12 +352,8 @@ glista_category_get_path(gchar *key)
 						   -1);
 		
 		// Add row reference to categories hash table
-		path = gtk_tree_model_get_path(GTK_TREE_MODEL(gl_globs->itemstore), 
-									   &iter);
-		
-		rowref = gtk_tree_row_reference_new(GTK_TREE_MODEL(gl_globs->itemstore),
-											path);
-		
+		path = gtk_tree_model_get_path(GL_ITEMSTM, &iter);
+		rowref = gtk_tree_row_reference_new(GL_ITEMSTM, path);
 		g_hash_table_insert(gl_globs->categories, key_c, rowref);
 		
 	} else { // Category already exists
@@ -344,18 +375,16 @@ glista_category_get_path(gchar *key)
 void
 glista_list_add(GlistaItem *item, gboolean expand)
 {
-	GtkTreeIter  iter, parent_iter;
-	GtkTreePath *parent;
+	GtkTreeIter          iter, parent_iter;
+	GtkTreePath         *parent, *path;
+	GtkTreeRowReference *ref;
 	
 	if (item->parent == NULL) {
 		gtk_tree_store_append(gl_globs->itemstore, &iter, NULL);
 		
 	} else {
 		parent = glista_category_get_path(item->parent);		
-		gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
-								&parent_iter,
-								parent);
-		
+		gtk_tree_model_get_iter(GL_ITEMSTM, &parent_iter, parent);
 		gtk_tree_store_append(gl_globs->itemstore, &iter, &parent_iter);
 		
 		// Expand parent so that new child is visible
@@ -363,11 +392,22 @@ glista_list_add(GlistaItem *item, gboolean expand)
 			GTK_TREE_VIEW(glista_get_widget("glista_item_list")), parent, TRUE);
 	}
 	
-	gtk_tree_store_set(gl_globs->itemstore, &iter, 
+	gtk_tree_store_set(GL_ITEMSTS, &iter, 
 	                   GL_COLUMN_DONE, item->done, 
 	                   GL_COLUMN_TEXT, item->text, 
 	                   GL_COLUMN_NOTE, item->note,
 					   -1);
+	
+	// If we have a reminder set
+	if (item->remind_at != -1) {
+		path = gtk_tree_model_get_path(GL_ITEMSTM, &iter);
+		ref = gtk_tree_row_reference_new(GL_ITEMSTM, path);
+		
+		glista_reminder_set(ref, item->remind_at);
+		
+		gtk_tree_path_free(path);
+		gtk_tree_row_reference_free(ref);
+	}
 }
 
 /**
@@ -425,12 +465,8 @@ glista_item_toggle_done(GtkTreePath *path)
 	GtkTreeIter  iter;
 	gboolean     current; 
 
-	if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
-								&iter, path)) {
-									
-		gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
-		                   GL_COLUMN_DONE, &current, -1);
-		                   
+	if (gtk_tree_model_get_iter(GL_ITEMSTM, &iter, path)) {
+		gtk_tree_model_get(GL_ITEMSTM, &iter, GL_COLUMN_DONE, &current, -1);
 		gtk_tree_store_set(gl_globs->itemstore, &iter, GL_COLUMN_DONE, 
 		                   (! current), -1);
 	}
@@ -450,17 +486,14 @@ glista_item_redraw_parent(GtkTreeIter *child_iter)
 	GtkTreePath *parent_path;
 	
 	// Check if item has a parent
-	if (gtk_tree_model_iter_parent(GTK_TREE_MODEL(gl_globs->itemstore), 
-								   &parent_iter, child_iter)) {
+	if (gtk_tree_model_iter_parent(GL_ITEMSTM, &parent_iter, child_iter)) {
 		
-		parent_path = gtk_tree_model_get_path(
-			GTK_TREE_MODEL(gl_globs->itemstore), &parent_iter);
+		parent_path = gtk_tree_model_get_path(GL_ITEMSTM, &parent_iter);
 		
 		// Trigger a "row-changed" signal on tha prent as well
-		gtk_tree_model_row_changed(GTK_TREE_MODEL(gl_globs->itemstore), 
-								   parent_path, &parent_iter);
+		gtk_tree_model_row_changed(GL_ITEMSTM, parent_path, &parent_iter);
 									   
-		gtk_tree_path_free (parent_path);
+		gtk_tree_path_free(parent_path);
 	}
 }
 
@@ -478,8 +511,7 @@ glista_category_delete(GtkTreeIter *category)
 	GtkTreeRowReference *rowref;
 	
 	// Get the name of the category we are deleting
-	gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), category, 
-					   GL_COLUMN_TEXT, &cat_name, -1);
+	gtk_tree_model_get(GL_ITEMSTM, category, GL_COLUMN_TEXT, &cat_name, -1);
 	
 	// Remove category from categories hashtable
 	key = g_utf8_strdown (cat_name, -1);
@@ -506,13 +538,10 @@ glista_category_confirm_delete(GtkTreeIter *category)
 	gint              response;
 	GtkWidget        *dialog;
 	
-	if (gtk_tree_model_iter_n_children(GTK_TREE_MODEL(gl_globs->itemstore), 
-									   category) > 0) {
+	if (gtk_tree_model_iter_n_children(GL_ITEMSTM, category) > 0) {
 										   
 		// If category has children, show confirmation dialog
-		gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), category, 
-						   GL_COLUMN_TEXT, &cat_name, -1);
-		
+		gtk_tree_model_get(GL_ITEMSTM, category, GL_COLUMN_TEXT, &cat_name, -1);
 		dialog = gtk_message_dialog_new(
 			GTK_WINDOW(glista_get_widget("glista_main_window")),
 			GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
@@ -546,19 +575,24 @@ glista_category_confirm_delete(GtkTreeIter *category)
 void
 glista_item_delete(GtkTreeIter *iter)
 {
-	gboolean    has_parent;
-	GtkTreeIter parent;
+	gboolean        has_parent;
+	GtkTreeIter     parent;
+	GlistaReminder *reminder;
 	
 	// Check if this item has a parent category
-	has_parent = gtk_tree_model_iter_parent(
-		GTK_TREE_MODEL(gl_globs->itemstore), &parent, iter);
+	has_parent = gtk_tree_model_iter_parent(GL_ITEMSTM, &parent, iter);
+	
+	// Check if this item has a reminder set - if so remove it
+	gtk_tree_model_get(GL_ITEMSTM, iter, GL_COLUMN_REMINDER, &reminder, -1);
+	if (reminder != NULL) {
+		glista_reminder_remove(reminder);	
+	}
 	
 	// Remove item
 	gtk_tree_store_remove(gl_globs->itemstore, iter);
 	
 	// Check if parent is now empty
-	if (has_parent && gtk_tree_model_iter_n_children(
-		GTK_TREE_MODEL(gl_globs->itemstore), &parent) < 1) {
+	if (has_parent && gtk_tree_model_iter_n_children(GL_ITEMSTM, &parent) < 1) {
 		
 		// Delete parent as well
 		glista_category_delete(&parent);
@@ -592,11 +626,9 @@ glista_list_delete_reflist(GList *ref_list)
         	GtkTreeIter iter;
 			gboolean    is_cat;
 
-	        if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
-										&iter, path)) {
-				
+	        if (gtk_tree_model_get_iter(GL_ITEMSTM, &iter, path)) {
 				// Check if this is a category we are deleting
-				gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
+				gtk_tree_model_get(GL_ITEMSTM, &iter, 
 								   GL_COLUMN_CATEGORY, &is_cat, -1);
 				if (is_cat) {
 					// Show the confirm dialog before deleting any categories
@@ -613,7 +645,7 @@ glista_list_delete_reflist(GList *ref_list)
 }
 
 /**
- * glista_list_get_selected_reflist:
+ * glista_list_get_selected_cb:
  * @model:    Tree model to iterate on
  * @path:     Current path in tree
  * @iter:     Current iter in tree
@@ -627,7 +659,7 @@ glista_list_delete_reflist(GList *ref_list)
  * directly.
  */
 static void 
-glista_list_get_selected_reflist(GtkTreeModel *model, GtkTreePath *path,
+glista_list_get_selected_cb(GtkTreeModel *model, GtkTreePath *path,
 								 GtkTreeIter *iter, GList **ref_list)
 {
 	GtkTreeRowReference *ref;
@@ -638,14 +670,15 @@ glista_list_get_selected_reflist(GtkTreeModel *model, GtkTreePath *path,
 }
 
 /**
- * glista_list_delete_selected:
- *
- * Delete all selected items from the list. Populates a list of all selected
- * items (using glista_list_get_selected_reflist() as a callback function) and
- * passes it on to glista_list_delete_reflist() to do the actual deletion.
+ * glista_list_get_selected:
+ * 
+ * Populate a GList of references to all selected items (or categories) in the 
+ * list. Will use glista_list_get_selected_cb() as a callback function. 
+ * 
+ * Returns a pointer to the first item of the list
  */
-void 
-glista_list_delete_selected()
+GList*
+glista_list_get_selected()
 {
 	GtkTreeView      *treeview;
 	GtkTreeSelection *selection;
@@ -658,9 +691,30 @@ glista_list_delete_selected()
 	ref_list = NULL;
 	gtk_tree_selection_selected_foreach(
 		selection, 
-	    (GtkTreeSelectionForeachFunc) glista_list_get_selected_reflist,
+	    (GtkTreeSelectionForeachFunc) glista_list_get_selected_cb,
 	    &ref_list
     );
+
+	return ref_list;
+}
+
+/**
+ * glista_list_delete_selected:
+ *
+ * Delete all selected items from the list. Populates a list of all selected 
+ * items (using glista_list_get_selected() and passes it on to 
+ * glista_list_delete_reflist() to do the actual deletion.
+ */
+void 
+glista_list_delete_selected()
+{
+	GtkTreeView      *treeview;
+	GList            *ref_list;
+	
+	treeview = GTK_TREE_VIEW(glista_get_widget("glista_item_list"));
+	
+	// Populate list of row references to delete
+	ref_list = glista_list_get_selected();
 	
 	// Delete items
 	glista_list_delete_reflist(ref_list);
@@ -686,8 +740,7 @@ glista_list_get_done_reflist(GList **ref_list, GtkTreeIter *parent)
 	gboolean     status;
 	
 	// Get the iter set for first row
-	status = gtk_tree_model_iter_children(GTK_TREE_MODEL(gl_globs->itemstore), 
-	                                      &iter, parent);
+	status = gtk_tree_model_iter_children(GL_ITEMSTM, &iter, parent);
 
 	// Iterate on all rows
 	while (status) {
@@ -695,7 +748,7 @@ glista_list_get_done_reflist(GList **ref_list, GtkTreeIter *parent)
 		GtkTreePath         *path;
 		gboolean             is_done, is_cat;				 
 		
-		gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
+		gtk_tree_model_get(GL_ITEMSTM, &iter, 
 		                   GL_COLUMN_DONE, &is_done,
 						   GL_COLUMN_CATEGORY, &is_cat, 
 						   -1);
@@ -707,10 +760,8 @@ glista_list_get_done_reflist(GList **ref_list, GtkTreeIter *parent)
 		// If it is done, add it to the list of references
 		} else if (is_done) {
 			// Get a reference to the row
-			path = gtk_tree_model_get_path(GTK_TREE_MODEL(gl_globs->itemstore), 
-										   &iter);
-			rowref = gtk_tree_row_reference_new(
-				GTK_TREE_MODEL(gl_globs->itemstore), path);
+			path = gtk_tree_model_get_path(GL_ITEMSTM, &iter);
+			rowref = gtk_tree_row_reference_new(GL_ITEMSTM, path);
 			
 			// Add reference to the linked list
 			*ref_list = g_list_append(*ref_list, rowref);
@@ -720,8 +771,7 @@ glista_list_get_done_reflist(GList **ref_list, GtkTreeIter *parent)
 		}
 		
 		// Advance to next row
-		status = gtk_tree_model_iter_next(GTK_TREE_MODEL(gl_globs->itemstore), 
-										  &iter);
+		status = gtk_tree_model_iter_next(GL_ITEMSTM, &iter);
 	}
 }
 
@@ -767,24 +817,21 @@ glista_category_rename(GtkTreePath *old_path, GtkTreeIter *old_iter,
 	gchar       *old_name;
 	
 	// First of all make sure that the name is actually changing
-	gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), old_iter, 
-					   GL_COLUMN_TEXT, &old_name, -1);
+	gtk_tree_model_get(GL_ITEMSTM, old_iter, GL_COLUMN_TEXT, &old_name, -1);
 	if (g_strcmp0(old_name, new_name) != 0) {
 		
 		// Create a new category
 		new_cat = glista_category_get_path(new_name);
 		
 		// Move all child elements to the path of this category
-		if (gtk_tree_model_iter_children(GTK_TREE_MODEL(gl_globs->itemstore), 
-										 &child_iter, old_iter)) {
-			
+		if (gtk_tree_model_iter_children(GL_ITEMSTM, &child_iter, old_iter)) {
+
 			do {
 				GlistaItem *item;
 				gchar      *item_text, *item_note;
 				gboolean    item_done;
 				
-				gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), 
-								   &child_iter, 
+				gtk_tree_model_get(GL_ITEMSTM, &child_iter, 
 								   GL_COLUMN_TEXT, &item_text,
 								   GL_COLUMN_NOTE, &item_note,
 								   GL_COLUMN_DONE, &item_done, -1);
@@ -796,8 +843,7 @@ glista_category_rename(GtkTreePath *old_path, GtkTreeIter *old_iter,
 				glista_list_add(item, FALSE);
 				glista_item_free(item);
 
-			} while (gtk_tree_model_iter_next(
-				GTK_TREE_MODEL(gl_globs->itemstore), &child_iter));
+			} while (gtk_tree_model_iter_next(GL_ITEMSTM, &child_iter));
 					
 			// If the old category was expanded, expand the new one
 			if (gtk_tree_view_row_expanded(
@@ -832,11 +878,8 @@ glista_item_change_text(GtkTreePath *path, gchar *text)
 	GtkTreeIter iter;
 	gboolean    is_cat;
 	
-	if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
-								&iter, path)) {
-									
-		gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
-						   GL_COLUMN_CATEGORY, &is_cat, -1);
+	if (gtk_tree_model_get_iter(GL_ITEMSTM, &iter, path)) {
+		gtk_tree_model_get(GL_ITEMSTM, &iter, GL_COLUMN_CATEGORY, &is_cat, -1);
 		
 		if (is_cat) {
 			glista_category_rename (path, &iter, text);
@@ -865,10 +908,11 @@ glista_item_new(const gchar *text, const gchar *parent)
 	item = g_malloc(sizeof(GlistaItem));
 	g_assert(item != NULL);
 	
-	item->done   = FALSE;
-	item->text   = (gchar *) text;
-	item->parent = (gchar *) parent;
-	item->note   = NULL;
+	item->done      = FALSE;
+	item->text      = (gchar *) text;
+	item->parent    = (gchar *) parent;
+	item->note      = NULL;
+	item->remind_at = -1;
 	
 	return item;
 }
@@ -962,11 +1006,12 @@ glista_item_text_cell_data_func(GtkTreeViewColumn *column,
                                 GtkTreeIter *iter, gpointer data)
 {
 	gboolean  done, category;
-	gchar    *text;
+	gchar    *text, *note;
 	gint      weight;
 
 	gtk_tree_model_get(model, iter, GL_COLUMN_DONE, &done, 
 					   				GL_COLUMN_CATEGORY, &category,
+									GL_COLUMN_NOTE, &note,
 					   				-1);
 	
 	// Set color according to done / not done
@@ -974,6 +1019,13 @@ glista_item_text_cell_data_func(GtkTreeViewColumn *column,
 		g_object_set(cell, "foreground", GLISTA_COLOR_DONE, NULL);
 	} else {
 		g_object_set(cell, "foreground", GLISTA_COLOR_PENDING, NULL);
+	}
+	
+	// Set underline if this item has note
+	if (note != NULL) {
+		g_object_set(cell, "underline", PANGO_UNDERLINE_SINGLE, NULL);
+	} else {
+		g_object_set(cell, "underline", PANGO_UNDERLINE_NONE, NULL);
 	}
 	
 	// Set weight and text depending on whether this is a category or not
@@ -1009,7 +1061,7 @@ glista_item_done_cell_data_func(GtkTreeViewColumn *column,
 }
 
 /**
- * glista_item_note_cell_data_func:
+ * glista_item_info_cell_data_func:
  * @column: Column to be rendered
  * @cell:   Cell to be rendered
  * @model:  Related data model
@@ -1022,22 +1074,20 @@ glista_item_done_cell_data_func(GtkTreeViewColumn *column,
  * See gtk_tree_view_column_set_cell_data_func() for more info.
  */
 void
-glista_item_note_cell_data_func(GtkTreeViewColumn *column, 
+glista_item_info_cell_data_func(GtkTreeViewColumn *column, 
                                 GtkCellRenderer *cell, GtkTreeModel *model,
                                 GtkTreeIter *iter, gpointer data)
 {
-	gchar *note;
+	gpointer *reminder;
 	
-	gtk_tree_model_get(model, iter, GL_COLUMN_NOTE, &note, -1);
+	gtk_tree_model_get(model, iter, GL_COLUMN_REMINDER, &reminder, -1);
 	
-	if (note != NULL && strlen(note) > 0) {
-		// has note!
-		g_object_set(cell, "stock-id", GTK_STOCK_PASTE, NULL);
+	if (reminder != NULL) {
+		// has reminder!
+		g_object_set(cell, "stock-id", "glista-reminder", NULL);
 	} else {
 		g_object_set(cell, "stock-id", NULL, NULL);
 	}
-	
-	g_free(note);
 }
 
 /**
@@ -1125,11 +1175,10 @@ glista_dnd_is_draggable(GtkTreeDragSource *drag_source, GtkTreePath *path)
 	GtkTreeIter iter;
 	gboolean    is_cat;
 	
-	if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
-								&iter, path)) {
-		gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter,
-						   GL_COLUMN_CATEGORY, &is_cat, -1);
+	if (gtk_tree_model_get_iter(GL_ITEMSTM, &iter, path)) {
+		gtk_tree_model_get(GL_ITEMSTM, &iter, GL_COLUMN_CATEGORY, &is_cat, -1);
 		return (! is_cat);
+		
 	} else {
 		return FALSE;
 	}
@@ -1170,10 +1219,9 @@ glista_dnd_drop_possible(GtkTreeDragDest *drag_dest, GtkTreePath *path,
 	// If level is 2, we have to check that the parent is a category
 	parent = gtk_tree_path_copy (path);
 	if (gtk_tree_path_up(parent)) {
-		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), 
-									&iter, parent)) {
-			gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter,
-							   GL_COLUMN_CATEGORY, &can_drop, -1);
+		if (gtk_tree_model_get_iter(GL_ITEMSTM, &iter, parent)) {
+			gtk_tree_model_get(GL_ITEMSTM, &iter, 
+			                   GL_COLUMN_CATEGORY, &can_drop, -1);
 		}
 	}
 	gtk_tree_path_free(parent);
@@ -1186,20 +1234,32 @@ glista_dnd_drop_possible(GtkTreeDragDest *drag_dest, GtkTreePath *path,
  * @drag_source: The source of the drag operation
  * @path:        The path to delete
  *
- * Deletes a row after it has been dragged to a new location. Will call 
- * glista_item_delete() to make sure the empty parent category is also deleted. 
+ * Deletes a row after it has been dragged to a new location. Will also check
+ * if parent category is now empty, and if so will delete it.
  *
  * Returns: TRUE if the deletion succeeded, FALSE otherwise. 
  */
 static gboolean
 glista_dnd_delete_row(GtkTreeDragSource *drag_source, GtkTreePath *path)
 {
-	GtkTreeIter iter;
+	GtkTreeIter iter, parent;
+	gboolean    has_parent;
 	
-	if (gtk_tree_model_get_iter(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
-								path)) {
-
-		glista_item_delete(&iter);
+	if (gtk_tree_model_get_iter(GL_ITEMSTM, &iter, path)) {
+		// Check if this item has a parent category
+		has_parent = gtk_tree_model_iter_parent(GL_ITEMSTM, &parent, &iter);
+	
+		// Remove item
+		gtk_tree_store_remove(GL_ITEMSTS, &iter);
+	
+		// Check if parent is now empty
+		if (has_parent && 
+		    gtk_tree_model_iter_n_children(GL_ITEMSTM, &parent) < 1) {
+		
+			// Delete parent as well
+			glista_category_delete(&parent);
+		}
+		
 		return TRUE;
 	
 	} else {
@@ -1220,14 +1280,35 @@ static gboolean
 glista_dnd_drag_data_received(GtkTreeDragDest *drag_dest, GtkTreePath *path,
 							  GtkSelectionData *selection_data)
 {
-	gboolean    res;
+	gboolean      res;
+	GtkTreeModel *model;
+	GtkTreePath  *orig_path;
 
+	// Call origianl drop handler 
 	res = glista_dnd_old_drag_data_received(drag_dest, path, selection_data);
-	if (res) {
+	
+	// If any reminders were set, update the reminder item ref to the new row
+	if (gtk_tree_get_row_drag_data(selection_data, &model, &orig_path)) {
+		GtkTreeIter     iter;
+		GlistaReminder *reminder;
 		
-		// FIXME / HACK: The only way I found to trigger a sort is to change 
-		// the sort column and revert it back.
+		if (gtk_tree_model_get_iter(model, &iter, orig_path)) {
+			gtk_tree_model_get(model, &iter, GL_COLUMN_REMINDER, &reminder, -1);
+			
+			if (reminder != NULL) {
+				// Free reference to old row and set reference to new one
+				gtk_tree_row_reference_free(reminder->item_ref);
+				reminder->item_ref = gtk_tree_row_reference_new(model, path);
+			}
+		}
 		
+		gtk_tree_path_free(orig_path);	
+	}
+		
+	// FIXME / HACK: The only way I found to trigger a sort is to change 
+	// the sort column and revert it back.
+		
+	if (res) {	
 		gtk_tree_sortable_set_sort_column_id(
 			GTK_TREE_SORTABLE(gl_globs->itemstore), GL_COLUMN_CATEGORY, 
 			GTK_SORT_ASCENDING);
@@ -1249,7 +1330,7 @@ static void
 glista_list_init()
 {
 	GtkCellRenderer        *text_ren, *done_ren, *note_ren;
-	GtkTreeViewColumn      *text_column, *done_column, *note_column;
+	GtkTreeViewColumn      *text_column, *done_column, *info_column;
 	GtkTreeView            *treeview;
 	GtkTreeSelection       *selection;
 	GtkTreeDragSourceIface *dnd_siface;
@@ -1275,12 +1356,21 @@ glista_list_init()
 	g_signal_connect(done_ren, "toggled", 
 					 G_CALLBACK(on_item_done_toggled), NULL);
 
+	// Create columns
 	done_column = gtk_tree_view_column_new_with_attributes(_("Done"), done_ren, 
-		"active", GL_COLUMN_DONE, NULL);	
+		"active", GL_COLUMN_DONE, NULL);
 	text_column = gtk_tree_view_column_new_with_attributes(_("Item"), text_ren, 
 		"strikethrough", GL_COLUMN_DONE, NULL);
-	note_column = gtk_tree_view_column_new_with_attributes(_("Note"), note_ren, 
+	info_column = gtk_tree_view_column_new_with_attributes(_("Note"), note_ren, 
 		NULL);
+		
+	// Mark columns with unique IDs for later use
+	g_object_set_data(G_OBJECT(text_column), "col-id", 
+	                  GINT_TO_POINTER(GL_COLUMN_TEXT));
+	g_object_set_data(G_OBJECT(done_column), "col-id", 
+	                  GINT_TO_POINTER(GL_COLUMN_DONE));
+	g_object_set_data(G_OBJECT(info_column), "col-id", 
+	                  GINT_TO_POINTER(GL_COLUMN_REMINDER));
 	
 	gtk_tree_view_column_set_cell_data_func(text_column, text_ren, 
 	                                        glista_item_text_cell_data_func,
@@ -1290,20 +1380,20 @@ glista_list_init()
 	                                        glista_item_done_cell_data_func,
 	                                        NULL, NULL);
 	
-	gtk_tree_view_column_set_cell_data_func(note_column, note_ren, 
-	                                        glista_item_note_cell_data_func,
+	gtk_tree_view_column_set_cell_data_func(info_column, note_ren, 
+	                                        glista_item_info_cell_data_func,
 	                                        NULL, NULL);
 	
 	// Set the text column to expand
 	g_object_set(text_column, "expand", TRUE, NULL);
 	
 	gtk_tree_view_append_column(treeview, text_column);
-	gtk_tree_view_append_column(treeview, note_column);
+	gtk_tree_view_append_column(treeview, info_column);
 	gtk_tree_view_append_column(treeview, done_column);	
 	
 	gtk_tree_view_set_reorderable (treeview, TRUE);
 	
-	gtk_tree_view_set_model(treeview, GTK_TREE_MODEL(gl_globs->itemstore));
+	gtk_tree_view_set_model(treeview, GL_ITEMSTM);
 	
 	
 	// Set sort function and column
@@ -1359,37 +1449,38 @@ glista_list_init()
 static GList*
 glista_list_get_all_items(GList *item_list, GtkTreeIter *parent)
 {
-	GtkTreeIter  iter;
-	GlistaItem  *item;
+	GtkTreeIter     iter;
+	GlistaItem     *item;
+	GlistaReminder *reminder;
 	
-	if (gtk_tree_model_iter_children(GTK_TREE_MODEL(gl_globs->itemstore),
-									 &iter, parent)) {
+	if (gtk_tree_model_iter_children(GL_ITEMSTM, &iter, parent)) {
 										 
 		do {
-			if (gtk_tree_model_iter_has_child(
-					GTK_TREE_MODEL(gl_globs->itemstore), &iter)) {
-						
+			if (gtk_tree_model_iter_has_child(GL_ITEMSTM, &iter)) {
 				item_list = glista_list_get_all_items(item_list, &iter);
 				
 			} else {
 				item = glista_item_new(NULL, NULL);
 				
-				gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), &iter, 
+				gtk_tree_model_get(GL_ITEMSTM, &iter, 
 		                       GL_COLUMN_DONE, &item->done, 
 		                       GL_COLUMN_TEXT, &item->text, 
-		                       GL_COLUMN_NOTE, &item->note, -1);
+		                       GL_COLUMN_NOTE, &item->note, 
+							   GL_COLUMN_REMINDER, &reminder, -1);
 				
 				if (parent != NULL) {
-					gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore), 
-									   parent, 
+					gtk_tree_model_get(GL_ITEMSTM, parent, 
 									   GL_COLUMN_TEXT, &item->parent, -1);
+				}
+				
+				if (reminder != NULL) {
+					item->remind_at = reminder->remind_at;	
 				}
 				
 				item_list = g_list_append(item_list, item);
 			}
 							
-		} while (gtk_tree_model_iter_next(GTK_TREE_MODEL(gl_globs->itemstore), 
-    	                                  &iter));
+		} while (gtk_tree_model_iter_next(GL_ITEMSTM, &iter));
 	}
 	
 	return item_list;
@@ -1665,11 +1756,12 @@ main(int argc, char *argv[])
 #endif
 
 	// Initialize item storage model
-	gl_globs->itemstore  = gtk_tree_store_new(4, 
+	gl_globs->itemstore  = gtk_tree_store_new(5, 
 		G_TYPE_BOOLEAN, // Done?
 		G_TYPE_STRING,  // Text
 		G_TYPE_BOOLEAN, // Category?
-		G_TYPE_STRING   // Note
+		G_TYPE_STRING,  // Note
+		G_TYPE_POINTER  // Reminder
 	);
 	
 	// Initialize categories hashtable
@@ -1703,7 +1795,8 @@ main(int argc, char *argv[])
 	while (! glista_list_save());
 	
 	glista_ui_shutdown();
-	
+	glista_reminder_shutdown();
+
 	// Save configuration
 	glista_cfg_save();
 

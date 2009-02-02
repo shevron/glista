@@ -35,6 +35,10 @@
 #define GL_XNODE_DONE "done"
 #define GL_XNODE_PRNT "parent"
 #define GL_XNODE_NOTE "note"
+#define GL_XNODE_RMDR "reminder"
+
+#define GLISTA_STORAGE_TIME_FORMAT "%Y-%m-%d %R %z"
+#define GLISTA_STORAGE_TIME_STRLEN 22
 
 // Function prototypes
 void glista_storage_load_all_items(GList **list);

@@ -6,27 +6,13 @@ AC_INIT([glista], [0.4], [shahar@prematureoptimization.org])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
-
-# Define some macros
-AC_DEFUN([AC_DEFINE_DIR], [
-  prefix_NONE=
-  exec_prefix_NONE=
-  test "x$prefix" = xNONE && prefix_NONE=yes && prefix=$ac_default_prefix
-  test "x$exec_prefix" = xNONE && exec_prefix_NONE=yes && exec_prefix=$prefix
-dnl In Autoconf 2.60, ${datadir} refers to ${datarootdir}, which in turn
-dnl refers to ${prefix}.  Thus we have to use 'eval' twice.
-  eval ac_define_dir="\"[$]$2\""
-  eval ac_define_dir="\"$ac_define_dir\""
-  AC_SUBST($1, "$ac_define_dir")
-  AC_DEFINE_UNQUOTED($1, "$ac_define_dir", [$3])
-  test "$prefix_NONE" && prefix=NONE
-  test "$exec_prefix_NONE" && exec_prefix=NONE
-])
 
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
+AC_PROG_LIBTOOL
 AC_PROG_INTLTOOL([0.23])
 
 dnl make sure we have gtk-builder-convert
@@ -64,6 +50,7 @@ GETTEXT_PACKAGE=$PACKAGE
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED([GETTEXT_PACKAGE], ["${GETTEXT_PACKAGE}"], [gettext domain])
 
+# --- libunique ---
 dnl see if we have Unique available
 AC_ARG_WITH([unique],
   [AS_HELP_STRING([--with-unique=DIR],
@@ -95,6 +82,7 @@ fi
 AC_SUBST(UNIQUE_CFLAGS)
 AC_SUBST(UNIQUE_LIBS)
 
+# --- gtkspell ---
 dnl Check for GtkSpell
 AC_ARG_WITH([gtkspell],
   [AS_HELP_STRING([--with-gtkspell=DIR],
@@ -125,6 +113,42 @@ fi
 
 AC_SUBST(GTKSPELL_CFLAGS)
 AC_SUBST(GTKSPELL_LIBS)
+
+# --- libnotify ---
+dnl see if we have libnotify available
+AC_ARG_WITH([libnotify],
+  [AS_HELP_STRING([--with-libnotify=DIR],
+    [enable libnotify support @<:@default=yes@:>@])],
+  [
+    if test "x$withval" = "xno"; then
+      check_libnotify=""
+    else
+      check_libnotify=$withval
+      if test "x$withval" != "xyes"; then
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${withval}/lib/pkgconfig"
+      fi
+    fi
+  ],[
+    check_libnotify="yes"
+  ])
+
+if test -n "$check_libnotify"; then
+  PKG_CHECK_MODULES([LIBNOTIFY], libnotify >= 0.4, [
+    AC_DEFINE_UNQUOTED(HAVE_LIBNOTIFY, [1], [Whether libnotify is available])
+    enable_libnotify="yes"
+  ], [
+    enable_libnotify="no"
+  ])
+else
+  AC_MSG_CHECKING([for LIBNOTIFY])
+  AC_MSG_RESULT([disabled])
+  enable_libnotify="no"
+fi
+
+AC_SUBST(LIBNOTIFY_CFLAGS)
+AC_SUBST(LIBNOTIFY_LIBS)
+AM_CONDITIONAL(ENABLE_LIBNOTIFY, test "x$enable_libnotify" = "xyes")  
+
 
 dnl add option to modify the configuration directory. 
 dnl Default is defined in glista.h
@@ -166,10 +190,13 @@ fi
 
 # Set some paths
 AC_DEFINE_DIR(GLISTA_DATA_DIR, [{datadir}/glista], 
-	[Glista system-wide shared data files])
-	
+    [Glista system-wide shared data files])
+AC_DEFINE_DIR(GLISTA_LIB_DIR, [{libdir}/glista], 
+    [Glista dynamically-loadedd libraries and plug-ins])
+
 AC_CONFIG_FILES([Makefile 
-                 src/Makefile 
+                 src/Makefile
+                 src/modules/Makefile
                  ui/Makefile
                  po/Makefile.in])
 

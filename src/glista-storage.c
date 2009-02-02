@@ -16,13 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define _XOPEN_SOURCE /* glibc2 needs this */
+#include <time.h>
 #include <glib.h>
 #include <libxml/xmlreader.h>
 #include <libxml/xmlwriter.h>
 #include <string.h>
 
-#include "glista-storage.h"
 #include "glista.h"
+#include "glista-storage.h"
 
 /**
  * Glista Storage Module
@@ -75,18 +77,18 @@ read_next_text_node(xmlTextReaderPtr xml)
 static GlistaItem*
 read_next_item(xmlTextReaderPtr xml) 
 {
-	gchar      *text, *done, *parent, *note;
+	gchar      *text, *done, *parent, *note, *remind_at_str;
 	xmlChar    *node_name;
 	gboolean    item_done;
 	GlistaItem *item;
 	
-	item   = NULL;
-	text   = NULL;
-	done   = NULL;
-	parent = NULL;
-	note   = NULL;
-	
-	item_done = FALSE;
+	item          = NULL;
+	text          = NULL;
+	done          = NULL;
+	parent        = NULL;
+	note          = NULL;
+	remind_at_str = NULL;
+	item_done     = FALSE;
 	
 	while ((! item_done) && xmlTextReaderRead(xml) == 1) {
 		node_name = xmlTextReaderName(xml);
@@ -134,6 +136,14 @@ read_next_item(xmlTextReaderPtr xml)
 					
 				} else 
 				
+				// Node reminder
+				if (xmlStrEqual(node_name, BAD_CAST GL_XNODE_RMDR)) {
+					if (remind_at_str == NULL) {
+						remind_at_str = read_next_text_node(xml);
+					}
+					
+				} else 
+				
 				if (xmlStrEqual(node_name, BAD_CAST GL_XNODE_ITEM) && 
 				    xmlTextReaderNodeType(xml) == 15) {
 				    	
@@ -175,6 +185,26 @@ read_next_item(xmlTextReaderPtr xml)
 				} else {
 					 g_free(note);
 				}
+			}
+			
+			// Set the reminder time, if set
+			if (remind_at_str != NULL) {
+				if (strlen(remind_at_str) > 0) {
+					struct tm  time_tm; 
+					char      *last;
+					
+					last = strptime(remind_at_str, GLISTA_STORAGE_TIME_FORMAT, 
+					                &time_tm);
+									
+					if (last == remind_at_str + GLISTA_STORAGE_TIME_STRLEN) {
+						item->remind_at = mktime(&time_tm);
+					} else {
+						g_error("Invalid reminder time format: %s", 
+							remind_at_str);
+					}
+				}
+				
+				g_free(remind_at_str);
 			}
 		}
 		
@@ -251,6 +281,9 @@ glista_storage_save_all_items(GList *all_items)
 	int               ret;
 	gchar            *storage_file;
 	gchar             done_str[2];
+	gchar            *remind_at_str;
+	
+	remind_at_str = g_malloc0(sizeof(gchar) * GLISTA_STORAGE_TIME_STRLEN + 1);
 	
 	// Build storage file path
 	storage_file = g_build_filename(gl_globs->configdir, 
@@ -269,7 +302,7 @@ glista_storage_save_all_items(GList *all_items)
 	xmlTextWriterSetIndentString(xml, BAD_CAST "  ");
 	
 	ret = xmlTextWriterStartDocument(xml, NULL, GL_XML_ENCODING, "yes");
-	ret = xmlTextWriterStartElement(xml, BAD_CAST "glista");
+	ret = xmlTextWriterStartElement(xml, BAD_CAST GL_XNODE_ROOT);
 
 	// Iterate over items, writing them to the XML file
 	while (all_items != NULL) {
@@ -277,26 +310,42 @@ glista_storage_save_all_items(GList *all_items)
 		
 		g_snprintf((gchar *) &done_str, 2, "%d", item->done);
 		
-		ret = xmlTextWriterStartElement(xml, BAD_CAST "item");
-		ret = xmlTextWriterWriteElement(xml, BAD_CAST "text", 
+		ret = xmlTextWriterStartElement(xml, BAD_CAST GL_XNODE_ITEM);
+		ret = xmlTextWriterWriteElement(xml, BAD_CAST GL_XNODE_TEXT, 
 										BAD_CAST item->text);
-		ret = xmlTextWriterWriteElement(xml, BAD_CAST "done", 
+		ret = xmlTextWriterWriteElement(xml, BAD_CAST GL_XNODE_DONE, 
 										BAD_CAST &done_str);
 		
 		if (item->parent != NULL) {
-			ret = xmlTextWriterWriteElement(xml, BAD_CAST "parent", 
+			ret = xmlTextWriterWriteElement(xml, BAD_CAST GL_XNODE_PRNT, 
 											BAD_CAST item->parent);
 		}
 		
 		if (item->note != NULL) {
-			ret = xmlTextWriterWriteElement(xml, BAD_CAST "note", 
+			ret = xmlTextWriterWriteElement(xml, BAD_CAST GL_XNODE_NOTE, 
 			                                BAD_CAST item->note);
+		}
+		
+		if (item->remind_at != -1) {
+			struct tm *time;
+			size_t     time_len;
+			
+			time = localtime(&(item->remind_at));
+			time_len = strftime(remind_at_str, GLISTA_STORAGE_TIME_STRLEN + 1, 
+			                    GLISTA_STORAGE_TIME_FORMAT, time);
+								
+			g_assert(time_len > 0);
+			
+			ret = xmlTextWriterWriteElement(xml, BAD_CAST GL_XNODE_RMDR,
+			                                BAD_CAST remind_at_str);
 		}
 		
 		ret = xmlTextWriterEndElement(xml);
 		
 		all_items = all_items->next;
 	}
+	
+	g_free(remind_at_str);
 	
 	// End XML
 	ret = xmlTextWriterEndElement(xml);

@@ -8,6 +8,13 @@
       <source stock-id="glista-icon" filename="glista22.png" size="GTK_ICON_SIZE_LARGE_TOOLBAR" />
       <source stock-id="glista-icon" filename="glista48.png" size="GTK_ICON_SIZE_DIALOG" />
       <source stock-id="glista-icon" filename="glista48.png" />
+	  
+      <source stock-id="glista-reminder" filename="glista-reminder16.png" size="GTK_ICON_SIZE_MENU" />
+      <source stock-id="glista-reminder" filename="glista-reminder16.png" size="GTK_ICON_SIZE_BUTTON" />
+      <source stock-id="glista-reminder" filename="glista-reminder16.png" size="GTK_ICON_SIZE_SMALL_TOOLBAR" />
+      <source stock-id="glista-reminder" filename="glista-reminder22.png" size="GTK_ICON_SIZE_LARGE_TOOLBAR" />
+      <source stock-id="glista-reminder" filename="glista-reminder48.png" size="GTK_ICON_SIZE_DIALOG" />
+      <source stock-id="glista-reminder" filename="glista-reminder48.png" />
     </sources>
   </object>
 </interface>

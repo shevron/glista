@@ -1,6 +1,22 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Sat Nov 15 20:46:20 2008 -->
+<!--Generated with glade3 3.4.5 on Mon Feb  2 09:55:48 2009 -->
 <interface>
+  <object class="GtkAdjustment" id="adjustment1">
+    <property name="upper">23</property>
+    <property name="lower">0</property>
+    <property name="page_increment">12</property>
+    <property name="step_increment">1</property>
+    <property name="page_size">0</property>
+    <property name="value">0</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment2">
+    <property name="upper">59</property>
+    <property name="lower">0</property>
+    <property name="page_increment">10</property>
+    <property name="step_increment">1</property>
+    <property name="page_size">0</property>
+    <property name="value">0</property>
+  </object>
   <object class="GtkUIManager" id="uimanager1">
     <child>
       <object class="GtkActionGroup" id="actiongroup1">
@@ -28,6 +44,60 @@
       </popup>
     </ui>
   </object>
+  <object class="GtkUIManager" id="uimanager2">
+    <child>
+      <object class="GtkActionGroup" id="actiongroup2">
+        <child>
+          <object class="GtkAction" id="item_cmenu_reminder_set">
+            <property name="stock_id">glista-reminder</property>
+            <property name="name">item_cmenu_reminder_set</property>
+            <property name="label" translatable="yes">Set Reminder</property>
+            <signal handler="on_tb_add_reminder_clicked" name="activate"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="item_cmenu_reminder_clear">
+            <property name="name">item_cmenu_reminder_clear</property>
+            <property name="label" translatable="yes">Clear Reminder</property>
+            <signal handler="on_icmenu_reminder_clear_activate" name="activate"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="item_cmenu_note_edit">
+            <property name="stock_id">gtk-paste</property>
+            <property name="name">item_cmenu_note_edit</property>
+            <property name="label" translatable="yes">Edit Note</property>
+            <signal handler="on_tb_note_clicked" name="activate"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="item_cmenu_note_clear">
+            <property name="name">item_cmenu_note_clear</property>
+            <property name="label" translatable="yes">Clear Note</property>
+            <signal handler="on_icmenu_note_clear_activate" name="activate"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="item_cmenu_delete">
+            <property name="stock_id" translatable="yes">gtk-delete</property>
+            <property name="name">item_cmenu_delete</property>
+            <signal handler="on_tb_delete_clicked" name="activate"/>
+          </object>
+        </child>
+      </object>
+    </child>
+    <ui>
+      <popup name="item_cmenu">
+        <menuitem action="item_cmenu_reminder_set"/>
+        <menuitem action="item_cmenu_reminder_clear"/>
+        <separator/>
+        <menuitem action="item_cmenu_note_edit"/>
+        <menuitem action="item_cmenu_note_clear"/>
+        <separator/>
+        <menuitem action="item_cmenu_delete"/>
+      </popup>
+    </ui>
+  </object>
   <object class="GtkWindow" id="glista_main_window">
     <property name="title" translatable="yes">Glista</property>
     <property name="window_position">GTK_WIN_POS_CENTER</property>
@@ -47,14 +117,27 @@
                 <property name="visible">True</property>
                 <property name="toolbar_style">GTK_TOOLBAR_ICONS</property>
                 <property name="icon_size">GTK_ICON_SIZE_MENU</property>
+                <property name="icon_size_set">True</property>
                 <child>
                   <object class="GtkToolButton" id="tb_note">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="tooltip-text" translatable="yes">Add Note</property>
-                    <property name="label" translatable="yes">Note</property>
+                    <property name="label" translatable="yes">Add Note</property>
                     <property name="stock_id">gtk-paste</property>
                     <signal handler="on_tb_note_clicked" name="clicked"/>
+                  </object>
+                  <packing>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToolButton" id="tb_reminder">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="label" translatable="yes">Set Reminder</property>
+                    <property name="stock_id">glista-reminder</property>
+                    <signal handler="on_tb_add_reminder_clicked" name="clicked"/>
                   </object>
                   <packing>
                     <property name="homogeneous">True</property>
@@ -65,6 +148,7 @@
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="tooltip-text" translatable="yes">Delete Item</property>
+                    <property name="label" translatable="yes">Delete</property>
                     <property name="stock_id">gtk-delete</property>
                     <signal handler="on_tb_delete_clicked" name="clicked"/>
                   </object>
@@ -145,11 +229,14 @@
                         <property name="can_default">True</property>
                         <property name="has_default">True</property>
                         <property name="receives_default">True</property>
+                        <property name="has_tooltip">True</property>
                         <property name="border_width">1</property>
                         <property name="headers_visible">False</property>
                         <property name="reorderable">True</property>
                         <property name="search_column">1</property>
-                        <property name="tooltip_column">1</property>
+                        <signal handler="on_list_popup_menu" name="popup_menu"/>
+                        <signal handler="on_list_button_press" name="button_press_event"/>
+                        <signal handler="on_list_query_tooltip" name="query_tooltip"/>
                         <signal handler="on_list_row_activated" name="row_activated"/>
                       </object>
                     </child>
@@ -338,6 +425,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</property>
     <property name="authors">Shahar Evron, http://prematureoptimization.org</property>
+    <property name="translator_credits" translatable="yes">Shahar Evron</property>
     <property name="artists">Silvestre Herrera, http://www.silvestre.com.ar/</property>
     <property name="logo">glista48.png</property>
     <property name="wrap_license">True</property>
@@ -362,6 +450,220 @@ You should have received a copy of the GNU General Public License along with thi
     </child>
   </object>
   <object class="GtkMenu" constructor="uimanager1" id="sysicon_menu">
+    <property name="visible">True</property>
+  </object>
+  <object class="GtkWindow" id="set_reminder_window">
+    <property name="title" translatable="yes">Add Reminder</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
+    <signal handler="on_reminder_window_closed" name="delete_event"/>
+    <child>
+      <object class="GtkVBox" id="vbox4">
+        <property name="visible">True</property>
+        <child>
+          <object class="GtkAlignment" id="alignment2">
+            <property name="visible">True</property>
+            <property name="xalign">0</property>
+            <property name="xscale">0</property>
+            <property name="left_padding">3</property>
+            <property name="right_padding">3</property>
+            <child>
+              <object class="GtkLabel" id="reminder_label">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Set reminder for</property>
+                <property name="justify">GTK_JUSTIFY_CENTER</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="padding">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkAlignment" id="alignment3">
+            <property name="visible">True</property>
+            <property name="top_padding">5</property>
+            <property name="bottom_padding">5</property>
+            <property name="left_padding">5</property>
+            <property name="right_padding">5</property>
+            <child>
+              <object class="GtkVBox" id="vbox5">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkHBox" id="hbox4">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkEntry" id="reminder_date">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">10</property>
+                        <property name="truncate_multiline">True</property>
+                        <signal handler="on_reminder_date_changed" name="changed"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="reminder_cal_btn">
+                        <property name="visible">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="relief">GTK_RELIEF_HALF</property>
+                        <property name="draw_indicator">True</property>
+                        <signal handler="on_reminder_cal_btn_toggled" name="toggled"/>
+                        <child>
+                          <object class="GtkArrow" id="arrow1">
+                            <property name="visible">True</property>
+                            <property name="arrow_type">GTK_ARROW_DOWN</property>
+                            <property name="shadow_type">GTK_SHADOW_NONE</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="padding">2</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkAlignment" id="alignment5">
+                        <property name="visible">True</property>
+                        <property name="left_padding">20</property>
+                        <child>
+                          <object class="GtkHBox" id="hbox5">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkSpinButton" id="reminder_hour">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="max_length">2</property>
+                                <property name="width_chars">2</property>
+                                <property name="adjustment">adjustment1</property>
+                                <property name="climb_rate">1</property>
+                                <property name="snap_to_ticks">True</property>
+                                <property name="numeric">True</property>
+                                <property name="update_policy">GTK_UPDATE_IF_VALID</property>
+                                <signal handler="on_reminder_time_output" name="output"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label1">
+                                <property name="visible">True</property>
+                                <property name="label">:</property>
+                                <property name="width_chars">1</property>
+                                <property name="single_line_mode">True</property>
+                                <property name="max_width_chars">1</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton" id="reminder_min">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="max_length">2</property>
+                                <property name="width_chars">2</property>
+                                <property name="adjustment">adjustment2</property>
+                                <property name="climb_rate">1</property>
+                                <property name="snap_to_ticks">True</property>
+                                <property name="numeric">True</property>
+                                <property name="update_policy">GTK_UPDATE_IF_VALID</property>
+                                <signal handler="on_reminder_time_output" name="output"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="pack_type">GTK_PACK_END</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCalendar" id="reminder_cal">
+                    <property name="can_focus">True</property>
+                    <signal handler="on_reminder_cal_day_selected" name="day_selected"/>
+                  </object>
+                  <packing>
+                    <property name="padding">3</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="padding">3</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkAlignment" id="alignment4">
+            <property name="visible">True</property>
+            <property name="xalign">1</property>
+            <property name="xscale">0</property>
+            <child>
+              <object class="GtkHBox" id="hbox3">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkButton" id="reminder_cancel_btn">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="label" translatable="yes">gtk-cancel</property>
+                    <property name="use_stock">True</property>
+                    <signal handler="on_reminder_window_closed" name="clicked"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="padding">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="reminder_add_btn">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="label" translatable="yes">gtk-ok</property>
+                    <property name="use_stock">True</property>
+                    <signal handler="on_reminder_add_btn_clicked" name="clicked"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="padding">5</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkMenu" constructor="uimanager2" id="item_cmenu">
     <property name="visible">True</property>
   </object>
 </interface>
