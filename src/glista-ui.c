@@ -533,7 +533,6 @@ glista_ui_show_item_menu(GtkTreeView *treeview, GdkEventButton *event)
  * through the UI file, and cannot be declared static.
  *****************************************************************************/
 
-
 /**
  * on_sysicon_quit_activate:
  * @menuitem  Activating menu item
@@ -712,66 +711,65 @@ on_list_query_tooltip(GtkWidget *widget, gint x, gint y, gboolean keyboard,
 	GtkTreeViewColumn *column;
 	GtkTreeIter        iter;
 	gint               bin_x, bin_y, cell_x, cell_y, col_id;
-	gboolean           ret = TRUE;
+	gboolean           ret = FALSE;
 	gchar             *text;
 	GlistaReminder    *reminder;
 	
-	if (GTK_IS_TREE_VIEW(widget)) {
-		gtk_tree_view_convert_widget_to_bin_window_coords(GTK_TREE_VIEW(widget),
-		                                                  x, y, 
-														  &bin_x, &bin_y);
-		if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bin_x, bin_y, 
-		                                  &path, &column, &cell_x, &cell_y)) {
-			
-			if (column != NULL && path != NULL) {
-				// Find out what column we are over
-				col_id = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), 
-				                                           "col-id"));
-				switch(col_id) {
-					case GL_COLUMN_TEXT: // Tooltip is task text
-						gtk_tree_model_get_iter(
-							GTK_TREE_MODEL(gl_globs->itemstore), &iter, path);	
-						gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore),
-						                   &iter, GL_COLUMN_TEXT, &text, -1);
+	if (! GTK_IS_TREE_VIEW(widget)) {
+		return FALSE;
+	}
+	
+	gtk_tree_view_convert_widget_to_bin_window_coords(GTK_TREE_VIEW(widget),
+													  x, y, &bin_x, &bin_y);
+	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bin_x, bin_y, 
+									  &path, &column, &cell_x, &cell_y)) {
+		
+		if (column != NULL && path != NULL) {
+			// Find out what column we are over
+			col_id = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), 
+													   "col-id"));
+			switch(col_id) {
+				case GL_COLUMN_TEXT: // Tooltip is task text
+					gtk_tree_model_get_iter(
+						GTK_TREE_MODEL(gl_globs->itemstore), &iter, path);	
+					gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore),
+									   &iter, GL_COLUMN_TEXT, &text, -1);
+									   
+					if (text != NULL) {
 						gtk_tooltip_set_text(tooltip, text);
 						gtk_tree_view_set_tooltip_cell(GTK_TREE_VIEW(widget), 
-						                               tooltip, path, column, 
-													   NULL);
-						
-						break;
-						
-					case GL_COLUMN_REMINDER:
-						gtk_tree_model_get_iter(
-							GTK_TREE_MODEL(gl_globs->itemstore), &iter, path);	
-						gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore),
-						                   &iter, GL_COLUMN_REMINDER, 
-										   (gpointer) &reminder, -1);
-										   
-						if (reminder != NULL) {
-							text = glista_reminder_time_as_string(reminder, 
-								"Remind at ");
-								
-							gtk_tooltip_set_text(tooltip, text);
-							gtk_tree_view_set_tooltip_cell(GTK_TREE_VIEW(widget), 
-						                               tooltip, path, column, 
-													   NULL);			   
-							g_free(text);
+						                               tooltip, path, 
+													   column, NULL);
+						ret = TRUE;
+					}
+					
+					break;
+					
+				case GL_COLUMN_REMINDER: // Tooltip is reminder time
+					gtk_tree_model_get_iter(
+						GTK_TREE_MODEL(gl_globs->itemstore), &iter, path);	
+					gtk_tree_model_get(GTK_TREE_MODEL(gl_globs->itemstore),
+									   &iter, GL_COLUMN_REMINDER, 
+									   (gpointer) &reminder, -1);
+									   
+					if (reminder != NULL) {
+						text = glista_reminder_time_as_string(reminder, 
+							"Remind at ");
 							
-						} else {
-							ret = FALSE;
-						}
-						
-						break;
-						
-					default:
-						ret = FALSE;
-				        break;
-				}
+						gtk_tooltip_set_text(tooltip, text);
+						gtk_tree_view_set_tooltip_cell(GTK_TREE_VIEW(widget), 
+												   tooltip, path, column, 
+												   NULL);			   
+						g_free(text);
+						ret = TRUE;
+					}
+					
+					break;
 			}
-			
-			if (path != NULL)
-				gtk_tree_path_free(path);
 		}
+		
+		if (path != NULL)
+			gtk_tree_path_free(path);
 	}
 
 	return ret;
