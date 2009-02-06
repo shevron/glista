@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Thu Feb  5 21:21:25 2009 -->
+<!--Generated with glade3 3.4.5 on Fri Feb  6 11:57:52 2009 -->
 <interface>
   <object class="GtkAdjustment" id="adjustment1">
     <property name="upper">23</property>
@@ -21,6 +21,13 @@
     <child>
       <object class="GtkActionGroup" id="actiongroup1">
         <child>
+          <object class="GtkAction" id="sysicon_pref">
+            <property name="stock_id" translatable="yes">gtk-preferences</property>
+            <property name="name">sysicon_pref</property>
+            <signal handler="on_tb_prefs_clicked" name="activate"/>
+          </object>
+        </child>
+        <child>
           <object class="GtkAction" id="sysicon_about">
             <property name="stock_id" translatable="yes">gtk-about</property>
             <property name="name">sysicon_about</property>
@@ -38,6 +45,7 @@
     </child>
     <ui>
       <popup name="sysicon_menu">
+        <menuitem action="sysicon_pref"/>
         <menuitem action="sysicon_about"/>
         <separator/>
         <menuitem action="sysicon_quit"/>

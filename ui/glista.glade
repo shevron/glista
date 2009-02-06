@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Thu Feb  5 21:21:25 2009 -->
+<!--Generated with glade3 3.4.5 on Fri Feb  6 11:57:52 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="glista_main_window">
     <property name="title" translatable="yes">Glista</property>
@@ -377,6 +377,15 @@ You should have received a copy of the GNU General Public License along with thi
   </widget>
   <widget class="GtkMenu" id="sysicon_menu">
     <property name="visible">True</property>
+    <child>
+      <widget class="GtkImageMenuItem" id="sysicon_pref">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">gtk-preferences</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_tb_prefs_clicked"/>
+      </widget>
+    </child>
     <child>
       <widget class="GtkImageMenuItem" id="sysicon_about">
         <property name="visible">True</property>
