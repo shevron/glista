@@ -19,6 +19,8 @@ glista_SOURCES = main.c \
                  glista-ui.h \
                  glista-unique.c \
                  glista-unique.h \
+				 glista-plugin.c \
+				 glista-plugin.h \
                  $(OPTIONAL_GLISTA)
 
 glista_LDADD = $(GTK_LIBS) \

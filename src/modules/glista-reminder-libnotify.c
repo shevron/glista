@@ -24,6 +24,7 @@
 #include <libnotify/notify.h>
 
 #include "../glista.h"
+#include "../glista-plugin.h"
 #include "../glista-reminder.h"
 
 /**
@@ -41,6 +42,13 @@
 
 static void on_notification_close_clicked(NotifyNotification *nfication, 
                                           gchar *action, gpointer data);
+
+// Declare this plugin
+GLISTA_DECLARE_PLUGIN(
+	GLISTA_PLUGIN_REMINDER, 
+	"reminder-libnotify", 
+	"libnotify popup"
+);
 
 /**
  * glista_remindhandler_init:

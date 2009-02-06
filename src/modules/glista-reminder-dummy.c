@@ -23,6 +23,7 @@
 #include <gtk/gtk.h>
 
 #include "../glista.h"
+#include "../glista-plugin.h"
 #include "../glista-reminder.h"
 
 /**
@@ -31,6 +32,12 @@
  * This module is here as an example. As a real reminder module it's pretty
  * poor - it just prints out a messages to STDOUT.
  */
+
+GLISTA_DECLARE_PLUGIN(
+	GLISTA_PLUGIN_REMINDER, 
+	"reminder-dummy", 
+	"Dummy - print to stdout"
+);
 
 /**
  * glista_remindhandler_init:

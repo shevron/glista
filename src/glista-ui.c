@@ -25,10 +25,20 @@
 #include "glista.h"
 #include "glista-ui.h"
 #include "glista-reminder.h"
+#include "glista-plugin.h"
 
 #ifdef ENABLE_LINKIFY
 #include "glista-textview-linkify.h"
 #endif
+
+/**
+ * Columns enum for plugin dropdown GtkListStore
+ */
+enum {
+	GL_PL_COL_NAME,
+	GL_PL_COL_PATH,
+	GL_PL_NUM_COLS
+};
 
 /**
  * Glista - GTK UI Functions and event handler callbacks
@@ -510,6 +520,14 @@ glista_ui_remwindow_hide()
 	gtk_widget_hide(rem_window);
 }
 
+/**
+ * glista_ui_show_item_menu:
+ * @treeview The GtkTreeView containing the items
+ * @event    Event information
+ * 
+ * Will display the item context menu - hooked to the right-click event on an
+ * item. 
+ */
 static void
 glista_ui_show_item_menu(GtkTreeView *treeview, GdkEventButton *event)
 {
@@ -526,6 +544,97 @@ glista_ui_show_item_menu(GtkTreeView *treeview, GdkEventButton *event)
 		               (event != NULL) ? event->button : 0,
 					   gdk_event_get_time((GdkEvent *) event));
 	}				   
+}
+
+/**
+ * glista_ui_prefswindow_load_pluginlist:
+ * @combo   The target GtkComboBox
+ * @plugins Linked list of plugins
+ * 
+ * Load a list of plugins into a combo box, optionally initializing the combo
+ * box model and cell renderer. 
+ * 
+ * Will free each plugin in the list that was moved into the model. Will not 
+ * free the list itself (even if empty).
+ */
+static void
+glista_ui_prefswindow_load_pluginlist(GtkComboBox *combo, GList *plugins)
+{
+	GList        *node;
+	GlistaPlugin *plugin;
+	GtkListStore *pluginstore;
+	GtkTreeIter   iter;
+	
+	// Do we already have a GtkListStore attached to this box?
+	pluginstore = GTK_LIST_STORE(gtk_combo_box_get_model(combo));
+	if (pluginstore == NULL) {
+		GtkCellRenderer *cell;
+		
+		// Load all plugins into a GtkListStore
+		pluginstore = gtk_list_store_new(GL_PL_NUM_COLS, 
+	                                     G_TYPE_STRING,  // Display Name 
+	                                     G_TYPE_STRING); // Plugin path
+
+		// Set up the combobox cell renderrer
+		cell = gtk_cell_renderer_text_new();
+		gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo), cell, TRUE);
+		gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), cell, 
+		                               "text", 0, 
+									   NULL);
+		
+		// Attach the model to the ComboBox
+		gtk_combo_box_set_model(combo, GTK_TREE_MODEL(pluginstore));
+		
+	} else {
+		// Clear out current list
+		gtk_list_store_clear(pluginstore);
+	}
+	
+	// Load current plugin list into the combo box model
+	for (node = plugins; node != NULL; node = node->next) {
+		plugin = (GlistaPlugin *) node->data;
+		gtk_list_store_append(pluginstore, &iter);
+		gtk_list_store_set(pluginstore, &iter, 
+	    	               GL_PL_COL_NAME, plugin->display_name,
+						   GL_PL_COL_PATH, plugin->module_path,
+						   -1);
+
+		glista_plugin_free(node->data);
+	}
+}
+
+static void
+glista_ui_prefswindow_show()
+{
+	GList        *plugins;
+	GtkWidget    *prefs_win;
+	GtkComboBox  *rem_plugins_box;
+	
+	prefs_win = GTK_WIDGET(glista_get_widget("glista_prefs_window"));
+	plugins = glista_plugin_query_plugins(GLISTA_PLUGIN_ALL);
+	
+	// Load the plugin list into the reminder plugin combobox
+	rem_plugins_box = GTK_COMBO_BOX(glista_get_widget("reminder_plugin_combo"));
+	glista_ui_prefswindow_load_pluginlist(rem_plugins_box, plugins);
+	g_list_free(plugins);
+	
+	gtk_widget_show_all(prefs_win);
+}
+
+/**
+ * glista_ui_prefswindow_hide:
+ * 
+ * Hide the "preferences" window. This does not grab any data from the
+ * window - only hides it. 
+ */
+static void
+glista_ui_prefswindow_hide()
+{
+	GtkWidget *window;
+	
+	// Hide the window
+	window = GTK_WIDGET(glista_get_widget("glista_prefs_window"));
+	gtk_widget_hide(window);
 }
 
 /*****************************************************************************
@@ -652,6 +761,20 @@ on_tb_note_clicked(GtkObject *object, gpointer user_data)
 		GTK_TREE_VIEW(glista_get_widget("glista_item_list")));
 		
 	glista_note_toggle_selected(selection);
+}
+
+/**
+ * on_tb_prefs_clicked:
+ * @object:    The object that triggered the event
+ * @user_data: User data passed when the event was connected
+ *
+ * Called when the "Preferences" button in the toolbar is clicked. Will open
+ * the preferences window.
+ */
+void
+on_tb_prefs_clicked(GtkObject *object, gpointer user_data)
+{
+	glista_ui_prefswindow_show();
 }
 
 /**
@@ -952,6 +1075,17 @@ on_reminder_date_changed(GtkEntry *date_in, gpointer user_data)
 	}
 }
 
+/**
+ * on_list_button_press:
+ * @widget    The widget that triggered the event
+ * @event     The event information 
+ * @user_data Any user data bound at signal connect time
+ * 
+ * Called on any mouse button press on the item list. Currently, will only
+ * handle right-mouse button clicks by opening the context menu (if applicable). 
+ * Other clicks are not captured and events passed further to other possibly 
+ * connected signal handlers.
+ */
 gboolean
 on_list_button_press(GtkWidget *widget, GdkEventButton *event, 
                      gpointer user_data)
@@ -981,6 +1115,16 @@ on_list_button_press(GtkWidget *widget, GdkEventButton *event,
 	return FALSE;
 }
 
+/**
+ * on_list_popup_menu:
+ * @widget     The widget triggering the event
+ * @user_data  Any data bound at signal connect time
+ * 
+ * Handle the popup-menu signal on the item list. This signal is usually 
+ * triggered when the user used the keyboard to open the popup menu (e.g. using
+ * Shift + F12). It is treated similarily to the button-press event when the 
+ * right mouse button was pressed. 
+ */
 gboolean 
 on_list_popup_menu(GtkWidget *widget, gpointer user_data)
 {
@@ -988,14 +1132,43 @@ on_list_popup_menu(GtkWidget *widget, gpointer user_data)
 	return TRUE;
 }
 
+/**
+ * on_icmenu_note_clear_activate:
+ * @item       The selected item
+ * @user_data  Any data bound at signal connect time
+ * 
+ * Handle the "Clear Note" item context menu option
+ */
 void
 on_icmenu_note_clear_activate(GtkMenuItem *item, gpointer user_data)
 {
 	glista_note_clear_selected();
 }
 
+/**
+ * on_icmenu_reminder_clear_activate:
+ * @item       The selected item
+ * @user_data  Any data bound at signal connect time
+ * 
+ * Handle the "Clear Reminder" item context menu option
+ */
 void
 on_icmenu_reminder_clear_activate(GtkMenuItem *item, gpointer user_data)
 {
 	glista_reminder_remove_selected();
+}
+
+/**
+ * on_prefs_window_close:
+ * @object    The GtkObject that triggered the event
+ * @user_data Any data bound at signal connect time
+ * 
+ * Handle the closing of the preferences window - this can be done by 
+ * either clicking "Close" or the "X" buttons. Will simply hide the 
+ * window without doing anything with the data. 
+ */
+void 
+on_prefs_window_closed(GtkObject *object, gpointer user_data)
+{
+	glista_ui_prefswindow_hide();
 }

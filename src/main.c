@@ -28,6 +28,7 @@
 #include "glista-storage.h"
 #include "glista-unique.h"
 #include "glista-reminder.h"
+#include "glista-plugin.h"
 
 #ifdef HAVE_GTKSPELL
 #include <gtkspell/gtkspell.h>
