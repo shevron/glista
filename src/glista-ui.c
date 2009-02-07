@@ -379,15 +379,15 @@ glista_ui_mainwindow_toggle()
 
 /**
  * glista_ui_init:
+ * @use_trayicon Whether we are using a tray icon or not
  * 
  * Initialize the Gtk+ UI. Called by main() at program startup.
  */
 gboolean
-glista_ui_init()
+glista_ui_init(gboolean use_trayicon)
 {
 	GtkWidget      *window;
 	GtkAboutDialog *about;
-	GtkStatusIcon  *sysicon;
 	GtkIconFactory *iconfactory;
 	
 	gl_globs->uibuilder = gtk_builder_new();
@@ -418,12 +418,12 @@ glista_ui_init()
 	window = GTK_WIDGET(glista_get_widget("glista_main_window"));
 	gtk_builder_connect_signals(gl_globs->uibuilder, NULL);
 
-	if (gl_globs->trayicon) {
+	if (use_trayicon) {
 		// Set up the status icon and connect the left-click and right-click signals
-		sysicon = gtk_status_icon_new_from_stock("glista-icon");
-		g_signal_connect(sysicon, "activate", 
+		gl_globs->trayicon = gtk_status_icon_new_from_stock("glista-icon");
+		g_signal_connect(gl_globs->trayicon, "activate", 
 						 G_CALLBACK(on_sysicon_activate), window);
-		g_signal_connect(sysicon, "popup-menu", 
+		g_signal_connect(gl_globs->trayicon, "popup-menu", 
 						 G_CALLBACK(on_sysicon_popup_menu), NULL);
 	}
 		
@@ -669,7 +669,7 @@ gboolean
 on_glista_main_window_delete_event(GtkWidget *widget, GdkEvent *event, 
 								   gpointer user_data)
 {
-	if (gl_globs->trayicon) {
+	if (gl_globs->trayicon != NULL) {
 		glista_ui_mainwindow_hide();
 	} else {
 		gtk_main_quit();

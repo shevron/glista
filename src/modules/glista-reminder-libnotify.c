@@ -140,6 +140,12 @@ glista_remindhandler_remind(GlistaReminder *reminder,
         notify_notification_set_icon_from_pixbuf(nfication, icon_pb);
     }
     
+    // Attach to tray icon, if we have one
+    if (gl_globs->trayicon != NULL) {
+    	notify_notification_attach_to_status_icon(nfication, 
+    		gl_globs->trayicon);
+	}
+    
     // Show notification
     if (! notify_notification_show(nfication, &notify_error)) {
         g_set_error(error, GLISTA_REMINDER_ERROR_QUARK, 

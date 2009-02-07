@@ -34,7 +34,7 @@
 // Macro to fetch UI components from GtkBuilder
 #define glista_get_widget(w) gtk_builder_get_object(gl_globs->uibuilder, w)
 
-gboolean glista_ui_init();
+gboolean glista_ui_init(gboolean use_trayicon);
 
 void glista_ui_shutdown();
 

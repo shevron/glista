@@ -1702,9 +1702,10 @@ glista_cfg_save()
 int 
 main(int argc, char *argv[])
 {
-	gboolean     no_tray = FALSE;
-	gboolean     minimized = FALSE;
-	GOptionEntry entries[] = {
+	gboolean      no_tray = FALSE;
+	gboolean      minimized = FALSE;
+	GError       *error;
+	GOptionEntry  entries[] = {
 		{ "no-tray", 'T', 0, G_OPTION_ARG_NONE, &no_tray, 
 		  N_("Do not use the system tray (conflicts with -m)"), NULL },
 		{ "minimized", 'm', 0, G_OPTION_ARG_NONE, &minimized, 
@@ -1728,6 +1729,7 @@ main(int argc, char *argv[])
 	gl_globs->uibuilder  = NULL;
 	gl_globs->config     = NULL;
 	gl_globs->open_note  = NULL;
+	gl_globs->trayicon   = NULL;
 	gl_globs->save_tag   = 0;
 
 	// Set configuration directory name
@@ -1738,11 +1740,16 @@ main(int argc, char *argv[])
 	glista_cfg_init_load();
 	
 	// Parse commandline arguments
-	gtk_init_with_args(&argc, &argv, _(GLISTA_PARAM_STRING), entries, NULL, NULL);
-	gl_globs->trayicon = (! no_tray);
+	if (! gtk_init_with_args(&argc, &argv, _(GLISTA_PARAM_STRING), entries, 
+	                         NULL, &error)) {
+		g_printerr(_("Error parsing command line arguments: %s\n"), 
+			error->message);
+		
+		return 1;
+	}
 
 	// Initialize the UI
-	if (glista_ui_init() == FALSE) {
+	if (glista_ui_init(! no_tray) == FALSE) {
 		g_printerr(_("Unable to initialize UI.\n"));
 		return 1;	
 	}

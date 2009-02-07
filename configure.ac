@@ -133,7 +133,7 @@ AC_ARG_WITH([libnotify],
   ])
 
 if test -n "$check_libnotify"; then
-  PKG_CHECK_MODULES([LIBNOTIFY], libnotify >= 0.4, [
+  PKG_CHECK_MODULES([LIBNOTIFY], libnotify >= 0.4.1, [
     AC_DEFINE_UNQUOTED(HAVE_LIBNOTIFY, [1], [Whether libnotify is available])
     enable_libnotify="yes"
   ], [

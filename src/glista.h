@@ -80,7 +80,7 @@ typedef struct  _glista_globals_struct {
 	gchar         *configdir;  // Configuration directory path
 	GtkTreeIter   *open_note;  // Iterator pointing to the current open note
 	guint          save_tag;   // Data save timeout tag - see g_timeout_add()
-	gboolean       trayicon;   // Whether to use system tray icon or not
+	GtkStatusIcon *trayicon;   // System tray icon (NULL if not used)
 } GlistaGlobals;
 
 // Glista item data structure
