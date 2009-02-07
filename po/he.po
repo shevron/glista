@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: glista 0.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-15 21:01+0200\n"
+"POT-Creation-Date: 2009-02-07 14:50+0200\n"
 "PO-Revision-Date: 2008-11-13 22:00+0200\n"
 "Last-Translator: Shahar Evron <shahar@prematureoptimization.org>\n"
 "Language-Team: Hebrew <he@li.org>\n"
@@ -16,78 +16,84 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/main.c:167
+#: ../src/main.c:169
 #, c-format
 msgid "Unable to initialize GtkSpell: [%d] %s\n"
 msgstr ""
 
-#: ../src/main.c:521
+#: ../src/main.c:551
 #, c-format
 msgid ""
 "Are you sure you want to delete the category \"%s\" and all the items in it?"
 msgstr "האם אתה בטוח שברצונך למחוק את הקטגוריה \"%s\" ואת כל המטלות שבה?"
 
-#: ../src/main.c:1278
+#. Create columns
+#: ../src/main.c:1361
 msgid "Done"
 msgstr "בוצע"
 
-#: ../src/main.c:1280
+#: ../src/main.c:1363
 msgid "Item"
 msgstr "מטלה"
 
-#: ../src/main.c:1282 ../ui/glista.glade.h:13
+#: ../src/main.c:1365
 msgid "Note"
 msgstr "הערה"
 
 #. We have an error!
-#: ../src/main.c:1488
+#: ../src/main.c:1580
 #, c-format
 msgid "Error creating configuration directory: %s\n"
 msgstr ""
 
 #. File exists but it is not a directory
-#: ../src/main.c:1495
+#: ../src/main.c:1587
 #, c-format
 msgid "Error: unable to create config directory (%s): file exists\n"
 msgstr ""
 
-#: ../src/main.c:1544
+#: ../src/main.c:1636
 #, c-format
 msgid ""
 "Error loading config file: [%d] %s\n"
 "Using default configuration.\n"
 msgstr ""
 
-#: ../src/main.c:1591
+#: ../src/main.c:1683
 #, c-format
 msgid "Error saving configuration file: [%d] %s\n"
 msgstr ""
 
-#: ../src/main.c:1617
+#: ../src/main.c:1710
 msgid "Do not use the system tray (conflicts with -m)"
 msgstr ""
 
-#: ../src/main.c:1619
+#: ../src/main.c:1712
 msgid "Start up minimized (conflicts with -T)"
 msgstr ""
 
-#: ../src/main.c:1654
+#: ../src/main.c:1745
+#, c-format
+msgid "Error parsing command line arguments: %s\n"
+msgstr ""
+
+#: ../src/main.c:1753
 #, c-format
 msgid "Unable to initialize UI.\n"
 msgstr ""
 
 #. There is a Glista instance already running - shut down
-#: ../src/main.c:1662
+#: ../src/main.c:1761
 #, c-format
 msgid "Activating an already-running Glista instance.\n"
 msgstr ""
 
-#: ../src/glista-ui.c:386
+#: ../src/glista-ui.c:399
 #, c-format
 msgid "Unable to read icon data file: %s\n"
 msgstr ""
 
-#: ../src/glista-ui.c:398
+#: ../src/glista-ui.c:411
 #, c-format
 msgid "Unable to read UI file: %s\n"
 msgstr ""
@@ -105,27 +111,54 @@ msgid "Add Note"
 msgstr "הוסף הערה"
 
 #: ../ui/glista.glade.h:3
+msgid "Add Reminder"
+msgstr "הןסף תזכורת"
+
+#: ../ui/glista.glade.h:4
 msgid "Clear Done Items"
 msgstr "נקה מטלות שבוצעו"
 
-#: ../ui/glista.glade.h:4
-msgid "Copyright © 2008 Shahar Evron"
-msgstr ""
-
 #: ../ui/glista.glade.h:5
+msgid "Clear Note"
+msgstr "הסר הערה"
+
+#: ../ui/glista.glade.h:6
+msgid "Clear Reminder"
+msgstr "בטל תזכורת"
+
+#: ../ui/glista.glade.h:7
+msgid "Copyright © 2008 Shahar Evron"
+msgstr "כל הזכויות שמורות © שחר עברון"
+
+#: ../ui/glista.glade.h:8
+msgid "Delete"
+msgstr "מחק"
+
+#: ../ui/glista.glade.h:9
 msgid "Delete Item"
 msgstr "מחק מטלה"
 
-#: ../ui/glista.glade.h:6
+#: ../ui/glista.glade.h:10
+msgid "Edit Note"
+msgstr "ערוך הערה"
+
+#: ../ui/glista.glade.h:11
+msgid "General"
+msgstr "כללי"
+
+#: ../ui/glista.glade.h:12
 msgid "Glista"
 msgstr "גליסטה"
 
-#: ../ui/glista.glade.h:7
-#, fuzzy
+#: ../ui/glista.glade.h:13
+msgid "Glista Preferences"
+msgstr "הגדרות גליסטה"
+
+#: ../ui/glista.glade.h:14
 msgid "Glista Web Site"
 msgstr "אתר גליסטה"
 
-#: ../ui/glista.glade.h:8
+#: ../ui/glista.glade.h:15
 msgid ""
 "Glista is free software: you can redistribute it and/or modify it under the "
 "terms of the GNU General Public License as published by the Free Software "
@@ -141,7 +174,15 @@ msgid ""
 "this program.  If not, see <http://www.gnu.org/licenses/>."
 msgstr ""
 
-#: ../ui/glista.glade.h:14
+#: ../ui/glista.glade.h:20
+msgid "Reminder Plugin:"
+msgstr "תוסף תזכורת"
+
+#: ../ui/glista.glade.h:21
+msgid "Reminders"
+msgstr "תזכורת"
+
+#: ../ui/glista.glade.h:22
 msgid ""
 "Save Some Paper\n"
 "\n"
@@ -149,15 +190,47 @@ msgid ""
 "and does not get in your way"
 msgstr ""
 
-#: ../ui/glista.glade.h:17
+#: ../ui/glista.glade.h:25
+msgid "Set Reminder"
+msgstr "קבע תזכורת"
+
+#: ../ui/glista.glade.h:26
+msgid "Set reminder for"
+msgstr "קבע תזכורת ל"
+
+#: ../ui/glista.glade.h:27
+msgid "Shahar Evron"
+msgstr "שחר עברון"
+
+#: ../ui/glista.glade.h:28
 msgid "gtk-about"
 msgstr ""
 
-#: ../ui/glista.glade.h:18
+#: ../ui/glista.glade.h:29
+msgid "gtk-cancel"
+msgstr ""
+
+#: ../ui/glista.glade.h:30
+msgid "gtk-close"
+msgstr ""
+
+#: ../ui/glista.glade.h:31
+msgid "gtk-delete"
+msgstr ""
+
+#: ../ui/glista.glade.h:32
+msgid "gtk-ok"
+msgstr ""
+
+#: ../ui/glista.glade.h:33
+msgid "gtk-preferences"
+msgstr ""
+
+#: ../ui/glista.glade.h:34
 msgid "gtk-quit"
 msgstr ""
 
-#: ../ui/glista.glade.h:19
+#: ../ui/glista.glade.h:35
 msgid "menuitem1"
 msgstr ""
 

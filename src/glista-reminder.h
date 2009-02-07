@@ -93,7 +93,7 @@ enum {
 	GLISTA_REMINDER_ERROR_OTHER
 };
 
-#define GLISTA_RH_MODULE "libnotify"
+#define GLISTA_RH_MODULE "default"
 
 #define _GLISTA_REMINDER_H
 #endif

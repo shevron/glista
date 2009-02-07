@@ -58,6 +58,14 @@ am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(pkglibdir)"
 pkglibLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
+glistareminder_default_la_LIBADD =
+am_glistareminder_default_la_OBJECTS = glista-reminder-default.lo
+glistareminder_default_la_OBJECTS =  \
+	$(am_glistareminder_default_la_OBJECTS)
+glistareminder_default_la_LINK = $(LIBTOOL) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(glistareminder_default_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
 glistareminder_dummy_la_LIBADD =
 am_glistareminder_dummy_la_OBJECTS = glista-reminder-dummy.lo
 glistareminder_dummy_la_OBJECTS =  \
@@ -87,9 +95,11 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(glistareminder_dummy_la_SOURCES) \
+SOURCES = $(glistareminder_default_la_SOURCES) \
+	$(glistareminder_dummy_la_SOURCES) \
 	$(glistareminder_libnotify_la_SOURCES)
-DIST_SOURCES = $(glistareminder_dummy_la_SOURCES) \
+DIST_SOURCES = $(glistareminder_default_la_SOURCES) \
+	$(glistareminder_dummy_la_SOURCES) \
 	$(glistareminder_libnotify_la_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -261,9 +271,12 @@ top_srcdir = @top_srcdir@
 GLISTA_MOD_LDFLAGS = -module -avoid-version $(GTK_LIBS)
 
 # dummy remind handler module - always built (until we remove it)
-pkglib_LTLIBRARIES = glistareminder-dummy.la $(am__append_1)
+pkglib_LTLIBRARIES = glistareminder-dummy.la glistareminder-default.la \
+	$(am__append_1)
 glistareminder_dummy_la_SOURCES = glista-reminder-dummy.c
 glistareminder_dummy_la_LDFLAGS = $(GLISTA_MOD_LDFLAGS)
+glistareminder_default_la_SOURCES = glista-reminder-default.c
+glistareminder_default_la_LDFLAGS = $(GLISTA_MOD_LDFLAGS)
 glistareminder_libnotify_la_SOURCES = glista-reminder-libnotify.c
 glistareminder_libnotify_la_LDFLAGS = $(GLISTA_MOD_LDFLAGS) \
                                       $(LIBNOTIFY_LIBS)
@@ -333,6 +346,8 @@ clean-pkglibLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
+glistareminder-default.la: $(glistareminder_default_la_OBJECTS) $(glistareminder_default_la_DEPENDENCIES) 
+	$(glistareminder_default_la_LINK) -rpath $(pkglibdir) $(glistareminder_default_la_OBJECTS) $(glistareminder_default_la_LIBADD) $(LIBS)
 glistareminder-dummy.la: $(glistareminder_dummy_la_OBJECTS) $(glistareminder_dummy_la_DEPENDENCIES) 
 	$(glistareminder_dummy_la_LINK) -rpath $(pkglibdir) $(glistareminder_dummy_la_OBJECTS) $(glistareminder_dummy_la_LIBADD) $(LIBS)
 glistareminder-libnotify.la: $(glistareminder_libnotify_la_OBJECTS) $(glistareminder_libnotify_la_DEPENDENCIES) 
@@ -344,6 +359,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/glista-reminder-default.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/glista-reminder-dummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/glista-reminder-libnotify.Plo@am__quote@
 
