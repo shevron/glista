@@ -1704,7 +1704,7 @@ main(int argc, char *argv[])
 {
 	gboolean      no_tray = FALSE;
 	gboolean      minimized = FALSE;
-	GError       *error;
+	GError       *error = NULL;
 	GOptionEntry  entries[] = {
 		{ "no-tray", 'T', 0, G_OPTION_ARG_NONE, &no_tray, 
 		  N_("Do not use the system tray (conflicts with -m)"), NULL },

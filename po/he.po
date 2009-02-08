@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: glista 0.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-07 14:50+0200\n"
-"PO-Revision-Date: 2008-11-13 22:00+0200\n"
-"Last-Translator: Shahar Evron <shahar@prematureoptimization.org>\n"
+"POT-Creation-Date: 2009-02-08 23:09+0200\n"
+"PO-Revision-Date: 2009-02-08 22:54+0200\n"
+"Last-Translator: Shahar Evron <shahar.evron@gmail.com>\n"
 "Language-Team: Hebrew <he@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -173,6 +173,16 @@ msgid ""
 "You should have received a copy of the GNU General Public License along with "
 "this program.  If not, see <http://www.gnu.org/licenses/>."
 msgstr ""
+"גליסטה היא תוכנה חופשית: אתה יכול להפיצה ו/או לשנותה על פי תנאי הרישיון "
+"הציבורי הכללי של גנו כפי שהם מפורסמים על-ידי קרן התוכנה החופשית, בין אם גרסה "
+"3 של הרישיון או (לבחירתך) כל גרסה מאוחרת יותר.\n"
+"\n"
+"תוכנית זו מופצת בתקווה שתהיה שימושית אבל בלא כל אחריות; בלא אפילו אחריות "
+"משתמעת למסחריות או התאמה לשימוש מסוים. ראה את הרישיון הציבורי הכללי של גנו "
+"לפרטים נוספים.\n"
+"\n"
+"אמור היית לקבל עותק של הרישיון הציבורי הכללי של גנו ביחד עם תוכנית זו. אם "
+"לא, ראה את <http://www.gnu.org/licenses/>"
 
 #: ../ui/glista.glade.h:20
 msgid "Reminder Plugin:"
@@ -199,40 +209,40 @@ msgid "Set reminder for"
 msgstr "קבע תזכורת ל"
 
 #: ../ui/glista.glade.h:27
-msgid "Shahar Evron"
-msgstr "שחר עברון"
-
-#: ../ui/glista.glade.h:28
 msgid "gtk-about"
 msgstr ""
 
-#: ../ui/glista.glade.h:29
+#: ../ui/glista.glade.h:28
 msgid "gtk-cancel"
 msgstr ""
 
-#: ../ui/glista.glade.h:30
+#: ../ui/glista.glade.h:29
 msgid "gtk-close"
 msgstr ""
 
-#: ../ui/glista.glade.h:31
+#: ../ui/glista.glade.h:30
 msgid "gtk-delete"
 msgstr ""
 
-#: ../ui/glista.glade.h:32
+#: ../ui/glista.glade.h:31
 msgid "gtk-ok"
 msgstr ""
 
-#: ../ui/glista.glade.h:33
+#: ../ui/glista.glade.h:32
 msgid "gtk-preferences"
 msgstr ""
 
-#: ../ui/glista.glade.h:34
+#: ../ui/glista.glade.h:33
 msgid "gtk-quit"
 msgstr ""
 
-#: ../ui/glista.glade.h:35
+#: ../ui/glista.glade.h:34
 msgid "menuitem1"
 msgstr ""
 
-#~ msgid "Save Some Paper"
-#~ msgstr "חסוך בנייר"
+msgid "Shahar Evron"
+msgstr "שחר עברון"
+
+msgid "Save Some Paper"
+msgstr "חסוך בנייר"
+

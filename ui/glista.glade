@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Fri Feb  6 11:57:52 2009 -->
+<!--Generated with glade3 3.4.5 on Sun Feb  8 23:09:09 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="glista_main_window">
     <property name="title" translatable="yes">Glista</property>
@@ -351,7 +351,9 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</property>
     <property name="authors">Shahar Evron, http://prematureoptimization.org</property>
-    <property name="translator_credits" translatable="yes">Shahar Evron</property>
+    <property name="translator_credits">Hebrew - שחר עברון &lt;shahar@prematureoptimization.org&gt;
+Russian - Виктор Ананьевский &lt;ananasik@gmail.com&gt;
+Swedish - Niklas Grahn &lt;terra.unknown@yahoo.com&gt;</property>
     <property name="artists">Silvestre Herrera, http://www.silvestre.com.ar/</property>
     <property name="logo">glista48.png</property>
     <property name="wrap_license">True</property>

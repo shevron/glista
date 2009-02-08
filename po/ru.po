@@ -1,58 +1,56 @@
-# SOME DESCRIPTIVE TITLE.
+# Russian translation for glista
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# This file is distributed under the same license as the glista package.
+# Victor Ananjevsky <ananasik@gmail.com>, 2009
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: glista svn rev 121\n"
+"Project-Id-Version: glista\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-02-08 23:09+0200\n"
-"PO-Revision-Date: 2009-01-30 01:33+0100\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2009-02-08 15:07+0200\n"
+"Last-Translator: Victor Ananjevsky <ananasik@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-Language: Swedish\n"
-"X-Poedit-Country: SWEDEN\n"
+"X-Poedit-Language: Russian\n"
 
 #: ../src/main.c:169
 #, c-format
 msgid "Unable to initialize GtkSpell: [%d] %s\n"
-msgstr "Kunde inte initiera GtkSpell: [%d] %s\n"
+msgstr "Не могу инициализировать GtkSpell: [%d] %s\n"
 
 #: ../src/main.c:551
 #, c-format
 msgid ""
 "Are you sure you want to delete the category \"%s\" and all the items in it?"
-msgstr ""
-"Är du säker på att du vill ta bort katalogen \"%s\" och alla objekt i den?"
+msgstr "Вы уверены, что хотите удалить категорию \"%s\" и все ее элементы?"
 
 #. Create columns
 #: ../src/main.c:1361
 msgid "Done"
-msgstr "Färdig"
+msgstr "Готово"
 
 #: ../src/main.c:1363
 msgid "Item"
-msgstr "Objekt"
+msgstr "Элемент"
 
 #: ../src/main.c:1365
 msgid "Note"
-msgstr "Anteckning"
+msgstr "Заметка"
 
 #. We have an error!
 #: ../src/main.c:1580
 #, c-format
 msgid "Error creating configuration directory: %s\n"
-msgstr "Fel inträffade vid skapande av konfigurationskatalog: %s\n"
+msgstr "Ошибка создания конфигурационной директории: %s\n"
 
 #. File exists but it is not a directory
 #: ../src/main.c:1587
 #, c-format
 msgid "Error: unable to create config directory (%s): file exists\n"
-msgstr "Fel: kunde inte skapa konfigurationskatalog (%s): filen finns redan\n"
+msgstr "Ошибка: не могу создать директорию (%s): файл существует\n"
 
 #: ../src/main.c:1636
 #, c-format
@@ -60,76 +58,76 @@ msgid ""
 "Error loading config file: [%d] %s\n"
 "Using default configuration.\n"
 msgstr ""
-"Fel inträffade vid inläsning av konfigurationsfil: [%d] %s\n"
-"Använder standardkonfiguration.\n"
+"Ошибка при загрузке конфигурационного файла: [%d] %s\n"
+"Используется конфигурация по-умолчанию.\n"
 
 #: ../src/main.c:1683
 #, c-format
 msgid "Error saving configuration file: [%d] %s\n"
-msgstr "Fel inträffade vid sparande av konfigurationsfil: [%d] %s\n"
+msgstr "Ошибка сохранения конфигурационного файла: [%d] %s\n"
 
 #: ../src/main.c:1710
 msgid "Do not use the system tray (conflicts with -m)"
-msgstr "Använd inte aktivitetsfältet (krockar med -m)"
+msgstr "Не использовать системный трей (конфликтует с -m)"
 
 #: ../src/main.c:1712
 msgid "Start up minimized (conflicts with -T)"
-msgstr "Starta upp minimerat (krockar med -T)"
+msgstr "Запускать свернутым (конфликтует с -T)"
 
 #: ../src/main.c:1745
 #, c-format
 msgid "Error parsing command line arguments: %s\n"
-msgstr ""
+msgstr "Ошибка при разборе командной строки: %s\n"
 
 #: ../src/main.c:1753
 #, c-format
 msgid "Unable to initialize UI.\n"
-msgstr "Kunde inte initiera användargränssnittet.\n"
+msgstr "Не могуинициализировать интерфейс.\n"
 
 #. There is a Glista instance already running - shut down
 #: ../src/main.c:1761
 #, c-format
 msgid "Activating an already-running Glista instance.\n"
-msgstr "Aktiverar en redan körande kopia av Glista.\n"
+msgstr "Запускается существующий экземпляр программы.\n"
 
 #: ../src/glista-ui.c:399
 #, c-format
 msgid "Unable to read icon data file: %s\n"
-msgstr "Kunde inte läsa in ikondatafil: %s\n"
+msgstr "Не могу прочитать файл с иконкой: %s\n"
 
 #: ../src/glista-ui.c:411
 #, c-format
 msgid "Unable to read UI file: %s\n"
-msgstr "Kunde inte läsa in filen för användargränssnitt: %s\n"
+msgstr "Не могу прочитать файл описания интерфейса: %s\n"
 
 #: ../ui/glista.desktop.in.h:1
 msgid "A super-simple personal to-do list manager"
-msgstr "En supersimpel personlig att-göra-listehanterare"
+msgstr "Простейший менеджер задач"
 
 #: ../ui/glista.glade.h:1
 msgid "About Glista"
-msgstr "Om Glista"
+msgstr "О программе"
 
 #: ../ui/glista.glade.h:2
 msgid "Add Note"
-msgstr "Lägg till anteckning"
+msgstr "Добавить заметку"
 
 #: ../ui/glista.glade.h:3
 msgid "Add Reminder"
-msgstr ""
+msgstr "Добавить напоминание"
 
 #: ../ui/glista.glade.h:4
 msgid "Clear Done Items"
-msgstr "Rensa färdiga objekt"
+msgstr "Удалить завершенные элементы"
 
 #: ../ui/glista.glade.h:5
 #, fuzzy
 msgid "Clear Note"
-msgstr "Rensa färdiga objekt"
+msgstr "Удалить завершенные элементы"
 
 #: ../ui/glista.glade.h:6
 msgid "Clear Reminder"
-msgstr ""
+msgstr "Удалить напоминание"
 
 #: ../ui/glista.glade.h:7
 msgid "Copyright © 2008 Shahar Evron"
@@ -138,32 +136,31 @@ msgstr "Copyright © 2008 Shahar Evron"
 #: ../ui/glista.glade.h:8
 #, fuzzy
 msgid "Delete"
-msgstr "Ta bort objekt"
+msgstr "Удалить элемент"
 
 #: ../ui/glista.glade.h:9
 msgid "Delete Item"
-msgstr "Ta bort objekt"
+msgstr "Удалить элемент"
 
 #: ../ui/glista.glade.h:10
-#, fuzzy
 msgid "Edit Note"
-msgstr "Lägg till anteckning"
+msgstr ""
 
 #: ../ui/glista.glade.h:11
 msgid "General"
-msgstr ""
+msgstr "Основные"
 
 #: ../ui/glista.glade.h:12
 msgid "Glista"
-msgstr "Glista"
+msgstr ""
 
 #: ../ui/glista.glade.h:13
 msgid "Glista Preferences"
-msgstr ""
+msgstr "Настройки Glista"
 
 #: ../ui/glista.glade.h:14
 msgid "Glista Web Site"
-msgstr "Glistas webbsida"
+msgstr "Веб-сайт программы"
 
 #: ../ui/glista.glade.h:15
 msgid ""
@@ -180,26 +177,26 @@ msgid ""
 "You should have received a copy of the GNU General Public License along with "
 "this program.  If not, see <http://www.gnu.org/licenses/>."
 msgstr ""
-"Glista is free software: you can redistribute it and/or modify it under the "
-"terms of the GNU General Public License as published by the Free Software "
-"Foundation, either version 3 of the License, or (at your option) any later "
-"version.\n"
+"Glista - свободное программное обеспечение; вы можете распространять его и/"
+"или модифицировать на условиях Универсальной общественной лицензии GNU "
+"версии 3 либо любой более поздней версии.\n"
 "\n"
-"This program is distributed in the hope that it will be useful, but WITHOUT "
-"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
-"FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for "
-"more details.\n"
+"Эта программа распространяется в надежде, что она может быть полезна, но БЕЗ "
+"КАКОГО-ЛИБО ВИДА ГАРАНТИЙ, ВЫРАЖЕННЫХ ЯВНО ИЛИ ПОДРАЗУМЕВАЕМЫХ, ВКЛЮЧАЯ, НО "
+"НЕ ОГРАНИЧИВАЯСЬ ПОДРАЗУМЕВАЕМЫМИ ГАРАНТИЯМИ КОММЕРЧЕСКОЙ ЦЕННОСТИ И "
+"ПРИГОДНОСТИ ДЛЯ КОНКРЕТНОЙ ЦЕЛИ. Для получения дополнительных сведений "
+"обратитесь к Универсальной Общественной Лицензии GNU.\n"
 "\n"
-"You should have received a copy of the GNU General Public License along with "
-"this program.  If not, see <http://www.gnu.org/licenses/>."
+"Вы должны получить копию лицензии GNU c этой программой. Если лицензия не "
+"была получена, смотрите <http://www.gnu.org/licenses/>."
 
 #: ../ui/glista.glade.h:20
 msgid "Reminder Plugin:"
-msgstr ""
+msgstr "Модуль напоминаний:"
 
 #: ../ui/glista.glade.h:21
 msgid "Reminders"
-msgstr ""
+msgstr "Напоминания"
 
 #: ../ui/glista.glade.h:22
 msgid ""
@@ -208,22 +205,21 @@ msgid ""
 "Glista is a simplistic to-do list manager that does what it's supposed to do "
 "and does not get in your way"
 msgstr ""
-"Spara några papper\n"
+"Сохрани бумагу\n"
 "\n"
-"Glista är en simpel att-göra-listehanterare som gör vad det ska göra och "
-"hamnar inte i vägen för dig "
+"Glista - просто менеджер задач. Ничего более."
 
 #: ../ui/glista.glade.h:25
 msgid "Set Reminder"
-msgstr ""
+msgstr "Напоминание"
 
 #: ../ui/glista.glade.h:26
 msgid "Set reminder for"
-msgstr ""
+msgstr "Включить напоминание в"
 
 #: ../ui/glista.glade.h:27
 msgid "gtk-about"
-msgstr "gtk-om"
+msgstr ""
 
 #: ../ui/glista.glade.h:28
 msgid "gtk-cancel"
@@ -238,9 +234,8 @@ msgid "gtk-delete"
 msgstr ""
 
 #: ../ui/glista.glade.h:31
-#, fuzzy
 msgid "gtk-ok"
-msgstr "gtk-om"
+msgstr ""
 
 #: ../ui/glista.glade.h:32
 msgid "gtk-preferences"
@@ -248,8 +243,11 @@ msgstr ""
 
 #: ../ui/glista.glade.h:33
 msgid "gtk-quit"
-msgstr "gtk-avsluta"
+msgstr ""
 
 #: ../ui/glista.glade.h:34
 msgid "menuitem1"
-msgstr "menyobjekt1"
+msgstr ""
+
+#~ msgid "Shahar Evron"
+#~ msgstr "Виктор Ананьевский <ananasik@gmail.com>"
