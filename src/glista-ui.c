@@ -389,19 +389,22 @@ glista_ui_init(gboolean use_trayicon)
 	GtkWidget      *window;
 	GtkAboutDialog *about;
 	GtkIconFactory *iconfactory;
+	GError         *error = NULL;
 	
 	gl_globs->uibuilder = gtk_builder_new();
-	g_assert(GTK_IS_BUILDABLE(gl_globs->uibuilder);
 
 	// Load icons file and initialize icon factory
 	if (gtk_builder_add_from_file(gl_globs->uibuilder, 
-			GLISTA_DATA_DIR "/glista-icons.xml", NULL) == 0) {
+			GLISTA_DATA_DIR "/glista-icons.xml", &error) == 0) {
 		
-		g_printerr(_("Unable to read icon data file: %s\n"), 
-		           GLISTA_DATA_DIR "/glista-icons.xml");
-		           
+		g_printerr(_("Unable to read icon data file %s: %s\n"), 
+		           GLISTA_DATA_DIR "/glista-icons.xml",
+				   error->message);
+		
+		g_error_free(error);
 		return FALSE;
 	}
+	
 	iconfactory = (GtkIconFactory *) glista_get_widget("glista-iconfactory");
 	gtk_icon_factory_add_default(iconfactory);
 	
