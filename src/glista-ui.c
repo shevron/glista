@@ -391,7 +391,8 @@ glista_ui_init(gboolean use_trayicon)
 	GtkIconFactory *iconfactory;
 	
 	gl_globs->uibuilder = gtk_builder_new();
-	
+	g_assert(GTK_IS_BUILDABLE(gl_globs->uibuilder);
+
 	// Load icons file and initialize icon factory
 	if (gtk_builder_add_from_file(gl_globs->uibuilder, 
 			GLISTA_DATA_DIR "/glista-icons.xml", NULL) == 0) {
