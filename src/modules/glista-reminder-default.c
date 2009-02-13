@@ -21,7 +21,6 @@
 #include <glib/gi18n.h>
 #include <gmodule.h>
 #include <gtk/gtk.h>
-#include <libnotify/notify.h>
 
 #include "../glista.h"
 #include "../glista-ui.h"
