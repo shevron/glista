@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: glista svn rev 121\n"
+"Project-Id-Version: glista svn rev 143\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-02-08 23:09+0200\n"
-"PO-Revision-Date: 2009-01-30 01:33+0100\n"
+"PO-Revision-Date: 2009-02-23 01:21+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -24,10 +24,8 @@ msgstr "Kunde inte initiera GtkSpell: [%d] %s\n"
 
 #: ../src/main.c:551
 #, c-format
-msgid ""
-"Are you sure you want to delete the category \"%s\" and all the items in it?"
-msgstr ""
-"Är du säker på att du vill ta bort katalogen \"%s\" och alla objekt i den?"
+msgid "Are you sure you want to delete the category \"%s\" and all the items in it?"
+msgstr "Är du säker på att du vill ta bort katalogen \"%s\" och alla objekt i den?"
 
 #. Create columns
 #: ../src/main.c:1361
@@ -79,7 +77,7 @@ msgstr "Starta upp minimerat (krockar med -T)"
 #: ../src/main.c:1745
 #, c-format
 msgid "Error parsing command line arguments: %s\n"
-msgstr ""
+msgstr "Fel inträffade vid tolkning av kommandoradsargument: %s\n"
 
 #: ../src/main.c:1753
 #, c-format
@@ -95,7 +93,7 @@ msgstr "Aktiverar en redan körande kopia av Glista.\n"
 #: ../src/glista-ui.c:399
 #, c-format
 msgid "Unable to read icon data file: %s\n"
-msgstr "Kunde inte läsa in ikondatafil: %s\n"
+msgstr "Kunde inte läsa in datafil för ikon: %s\n"
 
 #: ../src/glista-ui.c:411
 #, c-format
@@ -116,42 +114,39 @@ msgstr "Lägg till anteckning"
 
 #: ../ui/glista.glade.h:3
 msgid "Add Reminder"
-msgstr ""
+msgstr "Lägg till påminnelse"
 
 #: ../ui/glista.glade.h:4
 msgid "Clear Done Items"
 msgstr "Rensa färdiga objekt"
 
 #: ../ui/glista.glade.h:5
-#, fuzzy
 msgid "Clear Note"
-msgstr "Rensa färdiga objekt"
+msgstr "Rensa anteckning"
 
 #: ../ui/glista.glade.h:6
 msgid "Clear Reminder"
-msgstr ""
+msgstr "Rensa påminnelse"
 
 #: ../ui/glista.glade.h:7
 msgid "Copyright © 2008 Shahar Evron"
 msgstr "Copyright © 2008 Shahar Evron"
 
 #: ../ui/glista.glade.h:8
-#, fuzzy
 msgid "Delete"
-msgstr "Ta bort objekt"
+msgstr "Ta bort"
 
 #: ../ui/glista.glade.h:9
 msgid "Delete Item"
 msgstr "Ta bort objekt"
 
 #: ../ui/glista.glade.h:10
-#, fuzzy
 msgid "Edit Note"
-msgstr "Lägg till anteckning"
+msgstr "Redigera anteckning"
 
 #: ../ui/glista.glade.h:11
 msgid "General"
-msgstr ""
+msgstr "Allmänt"
 
 #: ../ui/glista.glade.h:12
 msgid "Glista"
@@ -159,7 +154,7 @@ msgstr "Glista"
 
 #: ../ui/glista.glade.h:13
 msgid "Glista Preferences"
-msgstr ""
+msgstr "Inställningar för Glista"
 
 #: ../ui/glista.glade.h:14
 msgid "Glista Web Site"
@@ -167,59 +162,43 @@ msgstr "Glistas webbsida"
 
 #: ../ui/glista.glade.h:15
 msgid ""
-"Glista is free software: you can redistribute it and/or modify it under the "
-"terms of the GNU General Public License as published by the Free Software "
-"Foundation, either version 3 of the License, or (at your option) any later "
-"version.\n"
+"Glista is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n"
 "\n"
-"This program is distributed in the hope that it will be useful, but WITHOUT "
-"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
-"FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for "
-"more details.\n"
+"This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.\n"
 "\n"
-"You should have received a copy of the GNU General Public License along with "
-"this program.  If not, see <http://www.gnu.org/licenses/>."
+"You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>."
 msgstr ""
-"Glista is free software: you can redistribute it and/or modify it under the "
-"terms of the GNU General Public License as published by the Free Software "
-"Foundation, either version 3 of the License, or (at your option) any later "
-"version.\n"
+"Glista is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n"
 "\n"
-"This program is distributed in the hope that it will be useful, but WITHOUT "
-"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
-"FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for "
-"more details.\n"
+"This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.\n"
 "\n"
-"You should have received a copy of the GNU General Public License along with "
-"this program.  If not, see <http://www.gnu.org/licenses/>."
+"You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>."
 
 #: ../ui/glista.glade.h:20
 msgid "Reminder Plugin:"
-msgstr ""
+msgstr "Insticksmodul för påminnelse:"
 
 #: ../ui/glista.glade.h:21
 msgid "Reminders"
-msgstr ""
+msgstr "Påminnelser"
 
 #: ../ui/glista.glade.h:22
 msgid ""
 "Save Some Paper\n"
 "\n"
-"Glista is a simplistic to-do list manager that does what it's supposed to do "
-"and does not get in your way"
+"Glista is a simplistic to-do list manager that does what it's supposed to do and does not get in your way"
 msgstr ""
 "Spara några papper\n"
 "\n"
-"Glista är en simpel att-göra-listehanterare som gör vad det ska göra och "
-"hamnar inte i vägen för dig "
+"Glista är en simpel att-göra-listehanterare som gör vad det ska göra och hamnar inte i vägen för dig "
 
 #: ../ui/glista.glade.h:25
 msgid "Set Reminder"
-msgstr ""
+msgstr "Ställ in påminnelse"
 
 #: ../ui/glista.glade.h:26
 msgid "Set reminder for"
-msgstr ""
+msgstr "Ställ in påminnelse för"
 
 #: ../ui/glista.glade.h:27
 msgid "gtk-about"
@@ -227,24 +206,23 @@ msgstr "gtk-om"
 
 #: ../ui/glista.glade.h:28
 msgid "gtk-cancel"
-msgstr ""
+msgstr "gtk-avbryt"
 
 #: ../ui/glista.glade.h:29
 msgid "gtk-close"
-msgstr ""
+msgstr "gtk-stäng"
 
 #: ../ui/glista.glade.h:30
 msgid "gtk-delete"
-msgstr ""
+msgstr "gtk-ta bort"
 
 #: ../ui/glista.glade.h:31
-#, fuzzy
 msgid "gtk-ok"
-msgstr "gtk-om"
+msgstr "gtk-ok"
 
 #: ../ui/glista.glade.h:32
 msgid "gtk-preferences"
-msgstr ""
+msgstr "gtk-inställningar"
 
 #: ../ui/glista.glade.h:33
 msgid "gtk-quit"
@@ -253,3 +231,4 @@ msgstr "gtk-avsluta"
 #: ../ui/glista.glade.h:34
 msgid "menuitem1"
 msgstr "menyobjekt1"
+
