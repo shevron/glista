@@ -39,6 +39,7 @@
                   <widget class="GtkToolButton" id="tb_reminder">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
+                    <property name="tooltip" translatable="yes">Set Reminder</property>
                     <property name="label" translatable="yes">Set Reminder</property>
                     <property name="stock_id">glista-reminder</property>
                     <signal name="clicked" handler="on_tb_add_reminder_clicked"/>
@@ -91,6 +92,7 @@
                 <child>
                   <widget class="GtkToolButton" id="tb_prefs">
                     <property name="visible">True</property>
+                    <property name="tooltip" translatable="yes">Preferences</property>
                     <property name="stock_id">gtk-preferences</property>
                     <signal name="clicked" handler="on_tb_prefs_clicked"/>
                   </widget>
@@ -339,7 +341,7 @@
     <property name="icon">glista48.png</property>
     <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
     <property name="program_name">Glista</property>
-    <property name="copyright" translatable="yes">Copyright © 2008 Shahar Evron</property>
+    <property name="copyright" translatable="yes">Copyright © 2009 Shahar Evron</property>
     <property name="comments" translatable="yes">Save Some Paper
 
 Glista is a simplistic to-do list manager that does what it's supposed to do and does not get in your way</property>

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: glista\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-08 23:09+0200\n"
-"PO-Revision-Date: 2009-02-08 15:07+0200\n"
+"POT-Creation-Date: 2009-02-20 17:07+0200\n"
+"PO-Revision-Date: 2009-02-19 15:07+0200\n"
 "Last-Translator: Victor Ananjevsky <ananasik@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -74,28 +74,32 @@ msgstr "Не использовать системный трей (конфли�
 msgid "Start up minimized (conflicts with -T)"
 msgstr "Запускать свернутым (конфликтует с -T)"
 
-#: ../src/main.c:1745
+#: ../src/main.c:1744
+msgid "- a super-simple personal to-do list manager"
+msgstr "- очень простой менеджер задач"
+
+#: ../src/main.c:1746
 #, c-format
 msgid "Error parsing command line arguments: %s\n"
 msgstr "Ошибка при разборе командной строки: %s\n"
 
-#: ../src/main.c:1753
+#: ../src/main.c:1754
 #, c-format
 msgid "Unable to initialize UI.\n"
 msgstr "Не могуинициализировать интерфейс.\n"
 
 #. There is a Glista instance already running - shut down
-#: ../src/main.c:1761
+#: ../src/main.c:1762
 #, c-format
 msgid "Activating an already-running Glista instance.\n"
 msgstr "Запускается существующий экземпляр программы.\n"
 
 #: ../src/glista-ui.c:399
 #, c-format
-msgid "Unable to read icon data file: %s\n"
+msgid "Unable to read icon data file %s: %s\n"
 msgstr "Не могу прочитать файл с иконкой: %s\n"
 
-#: ../src/glista-ui.c:411
+#: ../src/glista-ui.c:414
 #, c-format
 msgid "Unable to read UI file: %s\n"
 msgstr "Не могу прочитать файл описания интерфейса: %s\n"
@@ -121,9 +125,8 @@ msgid "Clear Done Items"
 msgstr "Удалить завершенные элементы"
 
 #: ../ui/glista.glade.h:5
-#, fuzzy
 msgid "Clear Note"
-msgstr "Удалить завершенные элементы"
+msgstr "Удалить заметку"
 
 #: ../ui/glista.glade.h:6
 msgid "Clear Reminder"
@@ -134,9 +137,8 @@ msgid "Copyright © 2008 Shahar Evron"
 msgstr "Copyright © 2008 Shahar Evron"
 
 #: ../ui/glista.glade.h:8
-#, fuzzy
 msgid "Delete"
-msgstr "Удалить элемент"
+msgstr "Удалить"
 
 #: ../ui/glista.glade.h:9
 msgid "Delete Item"
@@ -144,7 +146,7 @@ msgstr "Удалить элемент"
 
 #: ../ui/glista.glade.h:10
 msgid "Edit Note"
-msgstr ""
+msgstr "Редактировать заметку"
 
 #: ../ui/glista.glade.h:11
 msgid "General"
@@ -191,14 +193,18 @@ msgstr ""
 "была получена, смотрите <http://www.gnu.org/licenses/>."
 
 #: ../ui/glista.glade.h:20
+msgid "Preferences"
+msgstr "Настройки"
+
+#: ../ui/glista.glade.h:21
 msgid "Reminder Plugin:"
 msgstr "Модуль напоминаний:"
 
-#: ../ui/glista.glade.h:21
+#: ../ui/glista.glade.h:22
 msgid "Reminders"
 msgstr "Напоминания"
 
-#: ../ui/glista.glade.h:22
+#: ../ui/glista.glade.h:23
 msgid ""
 "Save Some Paper\n"
 "\n"
@@ -209,45 +215,42 @@ msgstr ""
 "\n"
 "Glista - просто менеджер задач. Ничего более."
 
-#: ../ui/glista.glade.h:25
-msgid "Set Reminder"
-msgstr "Напоминание"
-
 #: ../ui/glista.glade.h:26
+msgid "Set Reminder"
+msgstr "Установить напоминание"
+
+#: ../ui/glista.glade.h:27
 msgid "Set reminder for"
 msgstr "Включить напоминание в"
 
-#: ../ui/glista.glade.h:27
+#: ../ui/glista.glade.h:28
 msgid "gtk-about"
 msgstr ""
 
-#: ../ui/glista.glade.h:28
+#: ../ui/glista.glade.h:29
 msgid "gtk-cancel"
 msgstr ""
 
-#: ../ui/glista.glade.h:29
+#: ../ui/glista.glade.h:30
 msgid "gtk-close"
 msgstr ""
 
-#: ../ui/glista.glade.h:30
+#: ../ui/glista.glade.h:31
 msgid "gtk-delete"
 msgstr ""
 
-#: ../ui/glista.glade.h:31
+#: ../ui/glista.glade.h:32
 msgid "gtk-ok"
 msgstr ""
 
-#: ../ui/glista.glade.h:32
+#: ../ui/glista.glade.h:33
 msgid "gtk-preferences"
 msgstr ""
 
-#: ../ui/glista.glade.h:33
+#: ../ui/glista.glade.h:34
 msgid "gtk-quit"
 msgstr ""
 
-#: ../ui/glista.glade.h:34
+#: ../ui/glista.glade.h:35
 msgid "menuitem1"
 msgstr ""
-
-#~ msgid "Shahar Evron"
-#~ msgstr "Виктор Ананьевский <ananasik@gmail.com>"

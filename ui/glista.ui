@@ -143,6 +143,7 @@
                   <object class="GtkToolButton" id="tb_reminder">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
+                    <property name="tooltip-text" translatable="yes">Set Reminder</property>
                     <property name="label" translatable="yes">Set Reminder</property>
                     <property name="stock_id">glista-reminder</property>
                     <signal handler="on_tb_add_reminder_clicked" name="clicked"/>
@@ -195,6 +196,7 @@
                 <child>
                   <object class="GtkToolButton" id="tb_prefs">
                     <property name="visible">True</property>
+                    <property name="tooltip-text" translatable="yes">Preferences</property>
                     <property name="stock_id">gtk-preferences</property>
                     <signal handler="on_tb_prefs_clicked" name="clicked"/>
                   </object>

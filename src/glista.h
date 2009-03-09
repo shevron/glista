@@ -49,10 +49,6 @@
 #define GLISTA_CAT_DELIM ":"
 #endif
 
-#ifndef GLISTA_PARAM_STRING
-#define GLISTA_PARAM_STRING "- a super-simple personal to-do list manager"
-#endif
-
 #ifndef PACKAGE_NAME
 #deinfe PACKAGE_NAME "glista"
 #endif

@@ -1740,8 +1740,9 @@ main(int argc, char *argv[])
 	glista_cfg_init_load();
 	
 	// Parse commandline arguments
-	if (! gtk_init_with_args(&argc, &argv, _(GLISTA_PARAM_STRING), entries, 
-	                         NULL, &error)) {
+	if (! gtk_init_with_args(&argc, &argv, 
+                             _("- a super-simple personal to-do list manager"), 
+                             entries, GETTEXT_PACKAGE, &error)) {
 		g_printerr(_("Error parsing command line arguments: %s\n"), 
 			error->message);
 		
